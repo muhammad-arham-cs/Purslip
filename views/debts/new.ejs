@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page"><section class="card" style="max-width:560px">
+    <h1>Add debt</h1>
+    <%- include('../partials/form-errors', { errors }) %>
+    <form method="POST" action="/debts">
+      <div class="form-field"><label for="personName">Person name</label><input id="personName" name="personName" value="<%= values.personName || '' %>" required></div>
+      <div class="form-field"><label for="direction">Direction</label><select id="direction" name="direction"><option value="lent" <%= values.direction === 'lent' ? 'selected' : '' %>>Someone owes me</option><option value="borrowed" <%= values.direction === 'borrowed' ? 'selected' : '' %>>I owe someone</option></select></div>
+      <div class="form-field"><label for="amount">Amount</label><input id="amount" name="amount" type="number" step="0.01" min="0.01" value="<%= values.amount || '' %>" required></div>
+      <div class="form-field"><label for="currency">Debt currency</label><input id="currency" name="currency" value="<%= values.currency || 'PKR' %>" maxlength="3" required></div>
+      <div class="form-field"><label><input type="checkbox" name="recordMovement" <%= values.recordMovement === 'on' ? 'checked' : '' %>> Record account movement</label><small>Leave unchecked to record only the debt. Check it only when this debt payment should reduce the selected account balance.</small></div>
+      <div class="form-field"><label for="accountId">Account (optional unless movement is recorded)</label><select id="accountId" name="accountId"><option value="">No account movement</option><% accounts.forEach((a) => { %><option value="<%= a.id %>" <%= String(values.accountId) === String(a.id) ? 'selected' : '' %>><%= a.account_title || a.name %> (<%= a.bank_name || '—' %>)</option><% }) %></select></div>
+      <div class="form-field"><label for="date">Date</label><input id="date" name="date" type="date" value="<%= values.date %>" required></div>
+      <div class="form-field"><label for="note">Note</label><textarea id="note" name="note"><%= values.note || '' %></textarea></div>
+      <button class="button button--primary" type="submit">Save debt</button>
+    </form>
+  </section></main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

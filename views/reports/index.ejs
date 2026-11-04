@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page">
+    <h1>Reports</h1>
+
+    <!-- ---- Date Range Picker ---- -->
+    <section class="card" style="margin-bottom: var(--spacing-3);">
+      <form method="GET" action="/reports" class="report-range-form">
+        <div class="form-field" style="margin-bottom:0;">
+          <label for="startDate">From</label>
+          <input type="date" id="startDate" name="startDate" value="<%= range.startDate %>">
+        </div>
+        <div class="form-field" style="margin-bottom:0;">
+          <label for="endDate">To</label>
+          <input type="date" id="endDate" name="endDate" value="<%= range.endDate %>">
+        </div>
+        <button type="submit" class="button button--primary">Apply</button>
+        <a href="/reports/export?startDate=<%= range.startDate %>&endDate=<%= range.endDate %>" class="button">Export CSV</a>
+      </form>
+    </section>
+
+    <section class="dashboard-section">
+      <h2>Outstanding debts</h2>
+      <div class="grid grid--2">
+        <div class="card summary-card"><span class="summary-card__label">Money lent</span><span class="summary-card__amount"><%= formatCurrency(debtSummary.lent, displayCurrency) %></span></div>
+        <div class="card summary-card"><span class="summary-card__label">Money borrowed</span><span class="summary-card__amount"><%= formatCurrency(debtSummary.borrowed, displayCurrency) %></span></div>
+      </div>
+    </section>
+
+    <!-- ---- Income vs Expenses Summary ---- -->
+    <section class="dashboard-section">
+      <h2>Summary (<%= range.startDate %> to <%= range.endDate %>)</h2>
+      <div class="grid grid--3">
+        <div class="card summary-card summary-card--income">
+          <span class="summary-card__label">Income</span>
+          <span class="summary-card__amount"><%= formatCurrency(incomeExpense.income, displayCurrency) %></span>
+        </div>
+        <div class="card summary-card summary-card--expense">
+          <span class="summary-card__label">Expenses</span>
+          <span class="summary-card__amount"><%= formatCurrency(incomeExpense.expenses, displayCurrency) %></span>
+        </div>
+        <div class="card summary-card">
+          <span class="summary-card__label">Net</span>
+          <% const netIncome = incomeExpense.income - incomeExpense.expenses; %>
+          <span class="summary-card__amount <%= netIncome >= 0 ? 'amount-positive' : 'amount-negative' %>">
+            <%= formatCurrency(Math.abs(netIncome), displayCurrency) %>
+            <%= netIncome < 0 ? '(deficit)' : '' %>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- Spending by Category ---- -->
+    <section class="dashboard-section">
+      <h2>Spending by Category</h2>
+      <div class="grid grid--2">
+        <div class="card">
+          <canvas id="spendingPie" height="280"></canvas>
+        </div>
+        <div class="card">
+          <% if (spending.length) { %>
+            <div class="table-wrap" style="border:none;">
+              <table>
+                <thead><tr><th>Category</th><th style="text-align:right">Amount</th></tr></thead>
+                <tbody>
+                  <% spending.forEach(function(s) { %>
+                    <tr>
+                      <td><%= s.parent_name ? s.parent_name + ' › ' : '' %><%= s.category_name || 'Uncategorized' %></td>
+                      <td style="text-align:right"><%= formatCurrency(s.total, displayCurrency) %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          <% } else { %>
+            <p style="color: var(--color-text-muted);">No expenses in this date range.</p>
+          <% } %>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- Income by Category ---- -->
+    <% if (income.length) { %>
+    <section class="dashboard-section">
+      <h2>Income by Category</h2>
+      <div class="card">
+        <div class="table-wrap" style="border:none;">
+          <table>
+            <thead><tr><th>Category</th><th style="text-align:right">Amount</th></tr></thead>
+            <tbody>
+              <% income.forEach(function(s) { %>
+                <tr>
+                  <td><%= s.parent_name ? s.parent_name + ' › ' : '' %><%= s.category_name || 'Uncategorized' %></td>
+                  <td style="text-align:right"><%= formatCurrency(s.total, displayCurrency) %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    <% } %>
+
+    <!-- ---- Monthly Trends (last 12 months) ---- -->
+    <section class="dashboard-section">
+      <h2>Monthly Trends (last 12 months)</h2>
+      <div class="card">
+        <canvas id="trendsChart" height="300"></canvas>
+      </div>
+    </section>
+
+    <!-- ---- Category Trends ---- -->
+    <section class="dashboard-section">
+      <h2>Spending by Category Over Time</h2>
+      <div class="card">
+        <canvas id="categoryTrendsChart" height="300"></canvas>
+      </div>
+    </section>
+
+    <!-- ---- Net Worth Over Time ---- -->
+    <section class="dashboard-section">
+      <h2>Net Worth Over Time</h2>
+      <div class="grid grid--2">
+        <div class="card">
+          <canvas id="netWorthChart" height="280"></canvas>
+        </div>
+        <div class="card summary-card">
+          <span class="summary-card__label">Current Net Worth</span>
+          <span class="summary-card__amount <%= currentNW >= 0 ? 'amount-positive' : 'amount-negative' %>">
+            <%= formatCurrency(currentNW, displayCurrency) %>
+          </span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <%- include('../partials/footer') %>
+  <script src="/js/chart.umd.js"></script>
+  <script src="/js/reports.js"></script>
+  <script>
+    window.__SPENDING_DATA__ = <%- JSON.stringify(spending) %>;
+    window.__TRENDS_DATA__ = <%- trends %>;
+    window.__CATEGORY_TRENDS_DATA__ = <%- categoryTrends %>;
+    window.__NET_WORTH_DATA__ = <%- netWorth %>;
+  </script>
+</body>
+</html>

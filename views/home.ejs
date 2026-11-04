@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('partials/head') %>
+</head>
+<body>
+  <%- include('partials/header') %>
+  <main class="page page--centered">
+    <section class="card">
+      <h1>Purslip</h1>
+      <p>Personal finance, under construction.</p>
+      <% if (!locals.currentUser) { %>
+        <div class="button-row">
+          <a class="button button--primary" href="/auth/login">Log in</a>
+          <a class="button" href="/auth/signup">Sign up</a>
+        </div>
+      <% } else { %>
+        <a class="button button--primary" href="/dashboard">Go to dashboard</a>
+      <% } %>
+    </section>
+  </main>
+  <%- include('partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap: 8px; margin-bottom: 16px;">
+      <h1 style="margin:0;">Transactions</h1>
+      <div class="button-row" style="margin:0;">
+        <a class="button" href="/transactions/export<%= Object.keys(filters).filter(k => filters[k] && k !== 'page').length ? '?' + Object.keys(filters).filter(k => filters[k] && k !== 'page').map(k => (k === 'accountId' ? 'account' : k === 'categoryId' ? 'category' : k) + '=' + encodeURIComponent(filters[k])).join('&') : '' %>">Export CSV</a>
+        <a class="button" href="/transactions/transfer/new">Add transfer</a>
+        <a class="button button--primary" href="/transactions/new">Add transaction</a>
+      </div>
+    </div>
+
+    <!-- Search & Filter -->
+    <details class="card filter-panel" <% if (filters.search || filters.startDate || filters.endDate || filters.categoryId || filters.minAmount || filters.maxAmount) { %>open<% } %>>
+      <summary style="cursor:pointer; font-weight:600;">Search & Filter</summary>
+      <form method="GET" action="/transactions" class="filter-form" style="margin-top: var(--spacing-3);">
+        <div class="filter-form__row">
+          <div class="form-field" style="margin-bottom:0; flex: 2 1 200px;">
+            <label for="search">Search payee/notes</label>
+            <input type="text" id="search" name="search" value="<%= filters.search || '' %>" placeholder="Search...">
+          </div>
+          <div class="form-field" style="margin-bottom:0; flex: 1 1 140px;">
+            <label for="account">Account</label>
+            <select id="account" name="account">
+              <option value="">All accounts</option>
+              <% accounts.forEach(function(a) { %>
+                <option value="<%= a.id %>" <%= String(selectedAccountId) === String(a.id) ? 'selected' : '' %>><%= a.account_title || a.name %> (<%= a.bank_name || '—' %>)</option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="form-field" style="margin-bottom:0; flex: 1 1 140px;">
+            <label for="category">Category</label>
+            <select id="category" name="category">
+              <option value="">All categories</option>
+              <% categories.forEach(function(c) { %>
+                <option value="<%= c.id %>" <%= String(filters.categoryId) === String(c.id) ? 'selected' : '' %>><%= c.parent_id ? '  ↳ ' : '' %><%= c.name %></option>
+              <% }) %>
+            </select>
+          </div>
+        </div>
+        <div class="filter-form__row">
+          <div class="form-field" style="margin-bottom:0; flex: 1 1 130px;">
+            <label for="startDate">From</label>
+            <input type="date" id="startDate" name="startDate" value="<%= filters.startDate || '' %>">
+          </div>
+          <div class="form-field" style="margin-bottom:0; flex: 1 1 130px;">
+            <label for="endDate">To</label>
+            <input type="date" id="endDate" name="endDate" value="<%= filters.endDate || '' %>">
+          </div>
+          <div class="form-field" style="margin-bottom:0; flex: 1 1 100px;">
+            <label for="minAmount">Min $</label>
+            <input type="number" id="minAmount" name="minAmount" step="0.01" min="0" value="<%= filters.minAmount || '' %>">
+          </div>
+          <div class="form-field" style="margin-bottom:0; flex: 1 1 100px;">
+            <label for="maxAmount">Max $</label>
+            <input type="number" id="maxAmount" name="maxAmount" step="0.01" min="0" value="<%= filters.maxAmount || '' %>">
+          </div>
+          <button type="submit" class="button button--primary" style="align-self:flex-end;">Apply</button>
+          <a href="/transactions" class="button" style="align-self:flex-end;">Clear</a>
+        </div>
+      </form>
+    </details>
+
+    <% if (total > 0) { %>
+      <p style="color: var(--color-text-muted); margin: var(--spacing-2) 0;"><%= total %> transaction<%= total !== 1 ? 's' : '' %> found</p>
+    <% } %>
+
+    <% if (!transactions.length) { %>
+      <div class="card"><p>No transactions found.</p></div>
+    <% } else { %>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Account</th>
+              <th>Payee</th>
+              <th>Category</th>
+              <th>Amount</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% transactions.forEach(function(t) { %>
+              <tr>
+                <td><%= t.date %></td>
+                <td><%= t.account_name %> <small><%= t.bank_name || '' %></small></td>
+                <td>
+                  <% if (t.is_transfer) { %>
+                    <span class="transfer-payee">Self</span>
+                    <small class="transfer-direction"><%= Number(t.amount) < 0 ? 'outgoing' : 'incoming' %></small>
+                  <% } else { %>
+                    <%= t.payee || '&mdash;' %>
+                  <% } %>
+                </td>
+                <td>
+                  <% if (t.is_transfer) { %>
+                    &mdash;
+                  <% } else if (t.splits && t.splits.length > 1) { %>
+                    Split (<%= t.splits.length %>)
+                  <% } else if (t.splits && t.splits[0] && t.splits[0].category_name) { %>
+                    <%= t.splits[0].category_name %>
+                  <% } else { %>
+                    Uncategorized
+                  <% } %>
+                </td>
+                <td style="color: <%= Number(t.amount) < 0 ? 'var(--color-danger)' : 'var(--color-success)' %>;">
+                  <%= Number(t.amount).toLocaleString(undefined, { style: 'currency', currency: t.account_currency || 'PKR' }) %>
+                </td>
+                <td>
+                  <a href="/transactions/<%= t.id %>/edit">Edit</a>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <%
+        // Build query string preserving all current filters for pagination links
+        const qs = Object.keys(filters).filter(k => filters[k] && k !== 'page').map(k => {
+          const name = k === 'accountId' ? 'account' : k === 'categoryId' ? 'category' : k;
+          return name + '=' + encodeURIComponent(filters[k]);
+        }).join('&');
+        const qsPrefix = qs ? '&' + qs : '';
+      %>
+      <div class="button-row" style="justify-content: space-between;">
+        <% if (page > 1) { %>
+          <a class="button" href="/transactions?page=<%= page - 1 %><%= qsPrefix %>">&larr; Previous</a>
+        <% } else { %><span></span><% } %>
+        <span style="color: var(--color-text-muted);">Page <%= page %> of <%= totalPages %></span>
+        <% if (page < totalPages) { %>
+          <a class="button" href="/transactions?page=<%= page + 1 %><%= qsPrefix %>">Next &rarr;</a>
+        <% } else { %><span></span><% } %>
+      </div>
+    <% } %>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

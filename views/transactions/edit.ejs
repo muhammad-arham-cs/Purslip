@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page">
+    <section class="card" style="max-width: 560px;">
+      <h1>Edit transaction</h1>
+      <%- include('../partials/form-errors') %>
+      <form method="POST" action="/transactions/<%= transaction.id %>?_method=PUT" novalidate>
+        <%- include('_transaction-form-body', { accounts, categories, values }) %>
+        <button class="button button--primary" type="submit">Save changes</button>
+      </form>
+      <form method="POST" action="/transactions/<%= transaction.id %>?_method=DELETE" onsubmit="return confirm('Delete this transaction?');" style="margin-top:8px;">
+        <button class="button button--danger" type="submit">Delete transaction</button>
+      </form>
+    </section>
+  </main>
+  <%- include('../partials/footer') %>
+  <script src="/js/transaction-form.js"></script>
+</body>
+</html>

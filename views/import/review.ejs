@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page">
+    <section class="card">
+      <h1>Review import &mdash; <%= account.account_title || account.name %> (<%= account.bank_name || '—' %>)</h1>
+      <p>
+        <%= rows.length %> row(s) found.
+        <% if (duplicateCount) { %>
+          <%= duplicateCount %> look like duplicates of transactions already in this account and are unchecked by default &mdash; check them if you want to import anyway.
+        <% } %>
+      </p>
+
+      <form method="POST" action="/import/confirm">
+        <div class="table-wrap" style="margin-bottom: 16px;">
+          <table>
+            <thead>
+              <tr><th></th><th>Row</th><th>Date</th><th>Payee</th><th>Note</th><th>Amount</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <% rows.forEach(function(row, i) { %>
+                <tr>
+                  <td><input type="checkbox" name="selectedRows" value="<%= i %>" <%= row.isDuplicate ? '' : 'checked' %>></td>
+                  <td><%= row.rowNumber %></td>
+                  <td><%= row.date %></td>
+                  <td><%= row.payee %></td>
+                  <td><%= row.note || '' %></td>
+                  <td style="color: <%= row.amount < 0 ? 'var(--color-danger)' : 'var(--color-success)' %>;">
+                    <%= Number(row.amount).toFixed(2) %>
+                  </td>
+                  <td><%= row.isDuplicate ? 'Possible duplicate' : 'New' %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+        <div class="button-row" style="justify-content: flex-start;">
+          <button class="button button--primary" type="submit">Import selected rows</button>
+          <a class="button" href="/import">Cancel</a>
+        </div>
+      </form>
+    </section>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

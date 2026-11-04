@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page">
+    <div class="section-header"><h1>Debts</h1><a class="button button--primary" href="/debts/new">Add debt</a></div>
+    <% if (!debts.length) { %>
+      <div class="card"><p>No debts recorded yet.</p></div>
+    <% } else { %>
+      <div class="grid grid--3">
+        <% debts.forEach((debt) => { %>
+          <div class="card">
+            <span class="account-card__type"><%= debt.direction === 'lent' ? 'Someone owes me' : 'I owe someone' %></span>
+            <h2><%= debt.person_name %></h2>
+            <p><%= displayAmount(Number(debt.remaining), debt.currency) %> remaining of <%= displayAmount(Number(debt.principal), debt.currency) %></p>
+            <p><%= debt.is_settled ? 'Settled' : 'Open' %></p>
+            <a class="button" href="/debts/<%= debt.id %>">View details</a>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

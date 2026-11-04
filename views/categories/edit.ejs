@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page page--centered">
+    <section class="card" style="max-width: 420px; width: 100%; text-align: left;">
+      <h1>Edit category</h1>
+      <%- include('../partials/form-errors') %>
+      <form method="POST" action="/categories/<%= category.id %>?_method=PUT" novalidate>
+        <div class="form-field">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" value="<%= values.name %>" required autofocus>
+        </div>
+        <div class="form-field">
+          <label for="parentId">Parent category (optional)</label>
+          <select id="parentId" name="parentId">
+            <option value="">None (top-level category)</option>
+            <% parents.forEach(function(p) { %>
+              <option value="<%= p.id %>" <%= String(values.parentId) === String(p.id) ? 'selected' : '' %>><%= p.name %> (<%= p.kind %>)</option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="kind">Kind</label>
+          <select id="kind" name="kind" required <%= category.parent_id ? 'disabled' : '' %>>
+            <option value="expense" <%= values.kind === 'expense' ? 'selected' : '' %>>Expense</option>
+            <option value="income" <%= values.kind === 'income' ? 'selected' : '' %>>Income</option>
+          </select>
+          <% if (category.parent_id) { %>
+            <input type="hidden" name="kind" value="<%= values.kind %>">
+            <small style="color: var(--color-text-muted);">Subcategories inherit their parent's kind.</small>
+          <% } %>
+        </div>
+        <div class="form-field">
+          <label>
+            <input type="checkbox" name="rollover" <%= values.rollover ? 'checked' : '' %>>
+            Roll over unused budget to next month
+          </label>
+        </div>
+        <button class="button button--primary" type="submit" style="width:100%;">Save changes</button>
+      </form>
+      <div class="button-row" style="justify-content:flex-start; margin-top: 16px;">
+        <% if (category.is_archived) { %>
+          <form action="/categories/<%= category.id %>/unarchive" method="POST">
+            <button class="button" type="submit">Reactivate</button>
+          </form>
+        <% } else { %>
+          <form action="/categories/<%= category.id %>/archive" method="POST">
+            <button class="button" type="submit">Archive</button>
+          </form>
+        <% } %>
+        <a class="button button--danger" href="/categories/<%= category.id %>/delete">Delete&hellip;</a>
+      </div>
+    </section>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

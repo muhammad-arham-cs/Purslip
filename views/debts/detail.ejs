@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page"><section class="card">
+    <div class="section-header"><h1><%= debt.person_name %></h1><a class="button" href="/debts/<%= debt.id %>/edit">Edit</a></div>
+    <p><%= debt.direction === 'lent' ? 'Someone owes me' : 'I owe someone' %></p>
+    <p>Remaining: <strong><%= displayAmount(Number(debt.remaining), debt.currency) %></strong> of <%= displayAmount(Number(debt.principal), debt.currency) %></p>
+    <p>Status: <%= debt.is_settled ? 'Settled' : 'Open' %></p>
+    <% if (!debt.is_settled) { %>
+      <h2>Record repayment</h2>
+      <%- include('../partials/form-errors', { errors: typeof errors !== 'undefined' ? errors : [] }) %>
+      <form method="POST" action="/debts/<%= debt.id %>/repay">
+        <div class="form-field"><label for="repayAmount">Amount</label><input id="repayAmount" name="amount" type="number" step="0.01" min="0.01" max="<%= debt.remaining %>" required></div>
+        <div class="form-field"><label><input type="checkbox" name="recordMovement"> Record account movement</label><small>Leave unchecked if the money movement was already recorded separately.</small></div>
+        <div class="form-field"><label for="accountId">Account (optional unless movement is recorded)</label><select id="accountId" name="accountId"><option value="">No account movement</option><% (accounts || []).forEach((a) => { %><option value="<%= a.id %>"><%= a.account_title || a.name %> (<%= a.bank_name || '—' %>)</option><% }) %></select></div>
+        <div class="form-field"><label for="date">Date</label><input id="date" name="date" type="date" value="<%= new Date().toISOString().slice(0, 10) %>" required></div>
+        <button class="button button--primary" type="submit">Record repayment</button>
+      </form>
+    <% } %>
+  </section></main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

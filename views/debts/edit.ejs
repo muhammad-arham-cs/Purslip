@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head') %></head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page"><section class="card" style="max-width:560px">
+    <h1>Edit debt</h1>
+    <%- include('../partials/form-errors', { errors }) %>
+    <form method="POST" action="/debts/<%= debt.id %>?_method=PUT">
+      <div class="form-field"><label for="personName">Person name</label><input id="personName" name="personName" value="<%= values.person_name || values.personName %>" required></div>
+      <div class="form-field"><label for="note">Note</label><textarea id="note" name="note"><%= values.note || '' %></textarea></div>
+      <button class="button button--primary" type="submit">Save changes</button>
+    </form>
+  </section></main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap: 8px; margin-bottom: 16px;">
+      <h1 style="margin:0;">Categories</h1>
+      <a class="button button--primary" href="/categories/new">Add category</a>
+    </div>
+
+    <% if (!categories.length) { %>
+      <div class="card">
+        <p>No <%= includeArchived ? 'archived ' : '' %>categories yet.</p>
+      </div>
+    <% } else { %>
+      <div class="grid grid--2">
+        <% categories.forEach(function(cat) { %>
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:start;">
+              <div>
+                <h2 style="margin-bottom:4px;"><%= cat.name %></h2>
+                <p style="color: var(--color-text-muted); margin: 0;">
+                  <%= cat.kind %><% if (cat.rollover) { %> &middot; rollover on<% } %><% if (cat.is_archived) { %> &middot; archived<% } %>
+                </p>
+              </div>
+              <div class="button-row" style="margin:0;">
+                <a class="button" href="/categories/<%= cat.id %>/edit">Edit</a>
+              </div>
+            </div>
+
+            <% if (cat.children && cat.children.length) { %>
+              <ul style="margin: 12px 0 0; padding-left: 1.2em;">
+                <% cat.children.forEach(function(child) { %>
+                  <li style="margin-bottom:4px;">
+                    <%= child.name %>
+                    <% if (child.rollover) { %><span style="color: var(--color-text-muted);"> &middot; rollover on</span><% } %>
+                    <% if (child.is_archived) { %><span style="color: var(--color-text-muted);"> &middot; archived</span><% } %>
+                    &mdash; <a href="/categories/<%= child.id %>/edit">edit</a>
+                  </li>
+                <% }) %>
+              </ul>
+            <% } %>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <p style="margin-top:16px;">
+      <% if (includeArchived) { %>
+        <a href="/categories">Hide archived categories</a>
+      <% } else { %>
+        <a href="/categories?archived=1">Show archived categories</a>
+      <% } %>
+    </p>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

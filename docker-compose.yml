@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: purslip-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: purslip
+      POSTGRES_PASSWORD: purslip
+      POSTGRES_DB: purslip
+    ports:
+      # Host port 5433 -> avoids clashing with any other local Postgres on 5432.
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - purslip-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  purslip-postgres-data:

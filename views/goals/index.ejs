@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page">
+    <div class="section-header">
+      <h1>Savings Goals</h1>
+      <a href="/goals/new" class="button button--primary">+ New Goal</a>
+    </div>
+
+    <% if (!goals.length) { %>
+      <div class="card"><p>No goals yet. <a href="/goals/new">Create one</a> to start tracking your savings.</p></div>
+    <% } else { %>
+      <div class="grid grid--2">
+        <% goals.forEach(function(g) { %>
+          <div class="card goal-card <%= g.is_achieved ? 'goal-card--achieved' : '' %>">
+            <% if (g.is_achieved) { %>
+              <span class="goal-card__badge">✓ Achieved</span>
+            <% } %>
+            <h2 class="goal-card__name"><%= g.name %></h2>
+            <p class="goal-card__account"><%= g.account_name %></p>
+
+            <div class="goal-card__amounts">
+              <span><%= displayAmount(g.saved, g.account_currency) %> saved</span>
+              <span>of <%= displayAmount(Number(g.target_amount), g.account_currency) %></span>
+            </div>
+
+            <div class="progress-bar" style="height: 14px; margin: 8px 0;">
+              <div class="progress-bar__fill <%= g.percentComplete >= 100 ? 'goal-complete' : '' %>" style="width: <%= Math.min(100, g.percentComplete) %>%;"></div>
+            </div>
+
+            <div class="goal-card__meta">
+              <span><%= g.percentComplete.toFixed(0) %>%</span>
+              <% if (g.remaining > 0) { %>
+                <span><%= displayAmount(g.remaining, g.account_currency) %> to go</span>
+              <% } %>
+              <% if (g.daysRemaining !== null) { %>
+                <span><%= g.daysRemaining %> days left</span>
+              <% } %>
+            </div>
+
+            <div class="button-row" style="justify-content: flex-start; margin-top: 12px;">
+              <a href="/goals/<%= g.id %>/edit" class="button">Edit</a>
+              <% if (!g.is_achieved) { %>
+                <form action="/goals/<%= g.id %>/achieve" method="POST" style="display:inline;">
+                  <button type="submit" class="button button--primary">Mark achieved</button>
+                </form>
+              <% } else { %>
+                <form action="/goals/<%= g.id %>/reopen" method="POST" style="display:inline;">
+                  <button type="submit" class="button">Reopen</button>
+                </form>
+              <% } %>
+              <form action="/goals/<%= g.id %>?_method=DELETE" method="POST" style="display:inline;" onsubmit="return confirm('Delete this goal?');">
+                <button type="submit" class="button button--danger">Delete</button>
+              </form>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

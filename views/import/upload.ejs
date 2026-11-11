@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page">
+    <section class="card" style="max-width: 520px;">
+      <h1>Import CSV</h1>
+      <%- include('../partials/form-errors') %>
+      <form method="POST" action="/import/upload" enctype="multipart/form-data" novalidate>
+        <div class="form-field">
+          <label for="accountId">Import into account</label>
+          <select id="accountId" name="accountId" required>
+            <% accounts.forEach(function(a) { %>
+              <option value="<%= a.id %>"><%= a.account_title || a.name %> (<%= a.bank_name || '—' %>)</option>
+            <% }) %>
+          </select>
+        </div>
+
+        <% if (mappings.length) { %>
+          <div class="form-field">
+            <label for="mappingId">Reuse a saved mapping (optional)</label>
+            <select id="mappingId" name="mappingId">
+              <option value="">None &mdash; set up a new one</option>
+              <% mappings.forEach(function(m) { %>
+                <option value="<%= m.id %>"><%= m.source_name %></option>
+              <% }) %>
+            </select>
+          </div>
+        <% } %>
+
+        <div class="form-field">
+          <label for="sourceName">Source name (e.g. your bank's name)</label>
+          <input type="text" id="sourceName" name="sourceName" placeholder="Chase Checking">
+          <small style="color: var(--color-text-muted);">Used to save this column mapping for next time. Ignored if reusing a saved mapping above.</small>
+        </div>
+
+        <div class="form-field">
+          <label for="file">CSV file</label>
+          <input type="file" id="file" name="file" accept=".csv" required>
+        </div>
+
+        <button class="button button--primary" type="submit">Continue</button>
+      </form>
+    </section>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

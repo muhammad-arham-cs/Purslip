@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page">
+    <h1>New Goal</h1>
+    <section class="card" style="max-width: 600px;">
+      <%- include('../partials/form-errors', { errors: errors }) %>
+      <form method="POST" action="/goals">
+        <div class="form-field">
+          <label for="name">Goal Name</label>
+          <input type="text" id="name" name="name" value="<%= values.name || '' %>" required placeholder="e.g. Emergency Fund">
+        </div>
+        <div class="form-field">
+          <label for="accountId">Linked Account</label>
+          <select id="accountId" name="accountId" required>
+            <option value="">— Choose an account —</option>
+            <% accounts.forEach(function(a) { %>
+              <option value="<%= a.id %>" <%= values.accountId === a.id ? 'selected' : '' %>><%= a.account_title || a.name %> (<%= a.bank_name || '—' %>)</option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="targetAmount">Target Amount ($)</label>
+          <input type="number" id="targetAmount" name="targetAmount" step="0.01" min="0.01" value="<%= values.targetAmount || '' %>" required>
+        </div>
+        <div class="form-field">
+          <label for="startingBalance">Starting Balance ($)</label>
+          <input type="number" id="startingBalance" name="startingBalance" step="0.01" value="<%= values.startingBalance || '0' %>">
+          <small style="color: var(--color-text-muted);">The account balance at the time you set this goal. Progress is measured from here.</small>
+        </div>
+        <div class="form-field">
+          <label for="targetDate">Target Date (optional)</label>
+          <input type="date" id="targetDate" name="targetDate" value="<%= values.targetDate || '' %>">
+        </div>
+        <div class="button-row" style="justify-content: flex-start;">
+          <button type="submit" class="button button--primary">Create Goal</button>
+          <a href="/goals" class="button">Cancel</a>
+        </div>
+      </form>
+    </section>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

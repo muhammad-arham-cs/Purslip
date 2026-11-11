@@ -1,0 +1,42 @@
+<header class="app-header <%= locals.currentUser ? '' : 'app-header--public' %>">
+  <div class="app-header__bar">
+    <a class="app-header__brand" href="/"><span class="brand-mark">✦</span><span>Purslip</span></a>
+    <% if (locals.currentUser) { %>
+      <button class="app-header__toggle" id="navToggle" aria-label="<%= t('Toggle navigation') %>" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    <% } %>
+  </div>
+  <% if (locals.currentUser) { %>
+  <nav class="app-nav" id="appNav">
+    <div class="app-nav__eyebrow">PERSONAL FINANCE</div>
+    <a href="/dashboard" class="<%= currentPath.startsWith('/dashboard') ? 'is-active' : '' %>"><%= t('Dashboard') %></a>
+    <a href="/accounts" class="<%= currentPath.startsWith('/accounts') ? 'is-active' : '' %>"><%= t('Accounts') %></a>
+    <a href="/transactions" class="<%= currentPath.startsWith('/transactions') ? 'is-active' : '' %>"><%= t('Transactions') %></a>
+    <a href="/categories" class="<%= currentPath.startsWith('/categories') ? 'is-active' : '' %>"><%= t('Categories') %></a>
+    <a href="/import" class="<%= currentPath.startsWith('/import') ? 'is-active' : '' %>"><%= t('Import') %></a>
+    <a href="/budgets" class="<%= currentPath.startsWith('/budgets') ? 'is-active' : '' %>"><%= t('Budgets') %></a>
+    <a href="/recurring" class="<%= currentPath.startsWith('/recurring') ? 'is-active' : '' %>"><%= t('Recurring') %></a>
+    <a href="/reports" class="<%= currentPath.startsWith('/reports') ? 'is-active' : '' %>"><%= t('Reports') %></a>
+    <a href="/goals" class="<%= currentPath.startsWith('/goals') ? 'is-active' : '' %>"><%= t('Goals') %></a>
+    <a href="/debts" class="<%= currentPath.startsWith('/debts') ? 'is-active' : '' %>"><%= t('Debts') %></a>
+    <a href="/settings" class="<%= currentPath.startsWith('/settings') ? 'is-active' : '' %>"><%= t('Settings') %></a>
+    <button type="button" class="theme-toggle" id="themeToggle" title="<%= t('Theme') %>">◐</button>
+  </nav>
+  <form action="/auth/logout?_method=DELETE" method="POST" class="app-nav__logout">
+    <button type="submit"><%= t('Log out') %></button>
+  </form>
+  <% } else { %>
+  <nav class="public-nav" aria-label="Public navigation">
+    <button type="button" class="theme-toggle" id="themeToggle" title="Switch theme" aria-label="Switch between light, dark, and night mode">◐</button>
+    <a href="/auth/login">Log in</a>
+    <a class="button button--primary" href="/auth/signup">Sign up</a>
+  </nav>
+  <% } %>
+</header>
+<% if (locals.successMessages && successMessages.length) { %>
+  <div class="flash flash--success"><%= successMessages.join(' ') %></div>
+<% } %>
+<% if (locals.errorMessages && errorMessages.length) { %>
+  <div class="flash flash--error"><%= errorMessages.join(' ') %></div>
+<% } %>

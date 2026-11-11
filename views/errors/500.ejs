@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page page--centered">
+    <section class="card error-card">
+      <p class="eyebrow">A small detour</p>
+      <h1>Something went wrong</h1>
+      <p>Please try again. If the problem continues, return to your dashboard.</p>
+      <div class="button-row"><a class="button button--primary" href="<%= retryPath || '/' %>">Try again</a><a class="button button--ghost" href="/dashboard">Dashboard</a></div>
+    </section>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

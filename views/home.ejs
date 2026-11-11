@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('partials/head') %>
+</head>
+<body>
+  <%- include('partials/header') %>
+  <main class="page page--landing">
+    <section class="landing-hero">
+      <div class="landing-hero__copy">
+        <p class="eyebrow">A calmer way to manage money</p>
+        <h1>Know where your money is going.</h1>
+        <p class="landing-hero__lead">Purslip brings accounts, spending, budgets, and goals into one clear daily view.</p>
+        <p class="landing-hero__note">Private by design. Built for your real financial life.</p>
+      </div>
+      <div class="landing-hero__visual" aria-label="Purslip dashboard preview">
+        <div class="landing-orb landing-orb--one"></div>
+        <div class="landing-orb landing-orb--two"></div>
+        <div class="landing-preview">
+          <div class="landing-preview__top"><span>Net worth</span><strong>▦</strong></div>
+          <strong class="landing-preview__amount">PKR 248,500</strong>
+          <span class="landing-preview__change">+8.4% this month</span>
+          <div class="landing-preview__bars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+      </div>
+    </section>
+    <section class="landing-features" aria-label="Purslip features">
+      <article class="card landing-feature"><span class="landing-feature__icon">◒</span><h2>See the whole picture</h2><p>Accounts, transactions, and net worth in one reliable overview.</p></article>
+      <article class="card landing-feature"><span class="landing-feature__icon">⌁</span><h2>Make plans that stick</h2><p>Use budgets and goals to turn your intentions into visible progress.</p></article>
+      <article class="card landing-feature"><span class="landing-feature__icon">✦</span><h2>Stay in control</h2><p>Import your data, export it anytime, and keep ownership of your story.</p></article>
+    </section>
+  </main>
+  <%- include('partials/footer') %>
+</body>
+</html>

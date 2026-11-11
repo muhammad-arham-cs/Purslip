@@ -1,0 +1,96 @@
+<%
+// Included by new.ejs and edit.ejs. Expects: accounts, categories, values
+// (values.splits is an array of { categoryId, amount }, at least one entry).
+const initialSplits = (values.splits && values.splits.length) ? values.splits : [{ categoryId: '', amount: '' }];
+const isSplit = initialSplits.length > 1;
+%>
+<div class="form-field">
+  <label for="accountId">Account</label>
+  <select id="accountId" name="accountId" required>
+    <% accounts.forEach(function(a) { %>
+      <option value="<%= a.id %>" <%= String(values.accountId) === String(a.id) ? 'selected' : '' %>><%= a.account_title || a.name %> (<%= a.bank_name || '—' %>)</option>
+    <% }) %>
+  </select>
+</div>
+
+<div class="grid grid--2">
+  <div class="form-field">
+    <label for="date">Date</label>
+    <input type="date" id="date" name="date" value="<%= values.date || '' %>" required>
+  </div>
+  <div class="form-field">
+    <label for="type">Type</label>
+    <select id="type" name="type" required>
+      <option value="expense" <%= values.type === 'expense' ? 'selected' : '' %>>Expense</option>
+      <option value="income" <%= values.type === 'income' ? 'selected' : '' %>>Income</option>
+      <option value="neither" <%= values.type === 'neither' ? 'selected' : '' %>>Neither (account movement only)</option>
+    </select>
+  </div>
+</div>
+
+<div class="form-field">
+  <label for="amount">Amount</label>
+  <input type="number" step="0.01" min="0.01" id="amount" name="amount" value="<%= values.amount || '' %>" required>
+</div>
+
+<div class="grid grid--2">
+  <div class="form-field">
+    <label for="payee">Payee</label>
+    <input type="text" id="payee" name="payee" value="<%= values.payee || '' %>">
+  </div>
+  <div class="form-field">
+    <label for="note">Note</label>
+    <input type="text" id="note" name="note" value="<%= values.note || '' %>">
+  </div>
+</div>
+
+<div class="form-field">
+  <label>
+    <input type="checkbox" id="splitToggle" <%= isSplit ? 'checked' : '' %>>
+    Split across multiple categories
+  </label>
+</div>
+
+<div id="splitRows">
+  <% initialSplits.forEach(function(split, i) { %>
+    <div class="grid grid--2 split-row">
+      <div class="form-field">
+        <label>Category</label>
+        <select name="splits[<%= i %>][categoryId]">
+          <option value="">Uncategorized</option>
+          <% categories.forEach(function(c) { %>
+            <option value="<%= c.id %>" <%= String(split.categoryId) === String(c.id) ? 'selected' : '' %>><%= c.name %> (<%= c.kind %>)</option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Split amount</label>
+        <input type="number" step="0.01" min="0" class="split-amount" name="splits[<%= i %>][amount]" value="<%= split.amount %>" <%= isSplit ? '' : 'readonly' %>>
+      </div>
+    </div>
+  <% }) %>
+</div>
+
+<div id="splitControls" style="display:<%= isSplit ? 'block' : 'none' %>; margin-bottom: 16px;">
+  <button type="button" class="button" id="addSplitRow">+ Add category</button>
+  <p id="splitRemaining" style="color: var(--color-text-muted);"></p>
+</div>
+
+<p><a href="/categories/new?redirectTo=<%= encodeURIComponent(currentPath) %>">No categories yet? Add one</a></p>
+
+<template id="splitRowTemplate">
+  <div class="grid grid--2 split-row">
+    <div class="form-field">
+      <label>Category</label>
+      <select name="splits[__INDEX__][categoryId]">
+        <option value="">Uncategorized</option>
+        <%- include('_split-fields') %>
+      </select>
+    </div>
+    <div class="form-field">
+      <label>Split amount</label>
+      <input type="number" step="0.01" min="0" class="split-amount" name="splits[__INDEX__][amount]" value="">
+      <button type="button" class="button button--danger removeSplitRow" style="margin-top:4px;">Remove</button>
+    </div>
+  </div>
+</template>

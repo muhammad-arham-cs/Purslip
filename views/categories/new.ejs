@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page page--centered">
+    <section class="card" style="max-width: 420px; width: 100%; text-align: left;">
+      <h1>Add category</h1>
+      <%- include('../partials/form-errors') %>
+      <form method="POST" action="/categories" novalidate>
+        <input type="hidden" name="redirectTo" value="<%= redirectTo %>">
+        <div class="form-field">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" value="<%= values.name || '' %>" required autofocus>
+        </div>
+        <div class="form-field">
+          <label for="parentId">Parent category (optional)</label>
+          <select id="parentId" name="parentId">
+            <option value="">None (top-level category)</option>
+            <% parents.forEach(function(p) { %>
+              <option value="<%= p.id %>" <%= String(values.parentId) === String(p.id) ? 'selected' : '' %>><%= p.name %> (<%= p.kind %>)</option>
+            <% }) %>
+          </select>
+          <small style="color: var(--color-text-muted);">A subcategory inherits its parent's income/expense kind.</small>
+        </div>
+        <div class="form-field">
+          <label for="kind">Kind</label>
+          <select id="kind" name="kind" required>
+            <option value="expense" <%= values.kind === 'expense' ? 'selected' : '' %>>Expense</option>
+            <option value="income" <%= values.kind === 'income' ? 'selected' : '' %>>Income</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>
+            <input type="checkbox" name="rollover" <%= values.rollover ? 'checked' : '' %>>
+            Roll over unused budget to next month
+          </label>
+        </div>
+        <button class="button button--primary" type="submit" style="width:100%;">Create category</button>
+      </form>
+      <p><a href="<%= redirectTo %>">Cancel</a></p>
+    </section>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

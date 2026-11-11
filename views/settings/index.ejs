@@ -1,0 +1,74 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/header') %>
+<main class="page settings-page">
+  <div class="settings-page__heading">
+    <div><p class="eyebrow">ACCOUNT</p><h1><%= t('Settings') %></h1></div>
+  </div>
+  <%- include('../partials/form-errors', { errors }) %>
+
+  <section class="settings-section card">
+    <div class="settings-section__header"><div><h2>Personal information</h2><p>Manage your profile details.</p></div><button class="button" type="button" data-open-editor="profile">Edit</button></div>
+    <form method="POST" action="/settings/profile" class="settings-inline-form" data-inline-form="profile">
+      <div class="settings-fields">
+        <div class="form-field"><label for="fullName">Full name</label><input id="fullName" name="fullName" value="<%= profile.full_name %>" readonly data-editable></div>
+        <div class="form-field"><label for="country">Country</label><input id="country" name="country" value="<%= profile.country %>" readonly data-editable></div>
+        <div class="form-field"><label for="phoneNumber">Phone number</label><input id="phoneNumber" name="phoneNumber" value="<%= profile.phone_number %>" readonly data-editable></div>
+        <div class="form-field"><label>Email</label><input value="<%= profile.email %>" readonly></div>
+        <div class="form-field"><label>CNIC</label><input value="<%= revealedCnic || maskedCnic %>" readonly></div>
+      </div>
+      <div class="settings-editor" hidden>
+        <div class="form-field"><label for="currentPassword">Current password</label><input id="currentPassword" name="currentPassword" type="password" autocomplete="current-password"></div>
+        <div class="button-row"><button class="button button--primary" type="submit" data-save hidden>Save changes</button><button class="button button--ghost" type="button" data-discard>Discard</button></div>
+      </div>
+    </form>
+    <form method="POST" action="/settings/profile/reveal-cnic" class="settings-reveal-form">
+      <div class="form-field"><label for="revealPassword">Password to reveal CNIC</label><input id="revealPassword" name="currentPassword" type="password" required></div>
+      <button class="button button--ghost" type="submit">Reveal CNIC</button>
+    </form>
+  </section>
+
+  <section class="settings-section card">
+    <div class="settings-section__header"><div><h2>Security</h2><p>Update your login email or password.</p></div></div>
+    <div class="settings-security-actions">
+      <button class="button" type="button" data-open-editor="email">Change email</button>
+      <button class="button" type="button" data-open-editor="password">Change password</button>
+    </div>
+    <form method="POST" action="/settings/security/email" class="settings-editor-card" data-inline-form="email" hidden>
+      <h3>Change email</h3>
+      <div class="form-field"><label for="securityEmail">New email</label><input id="securityEmail" name="email" type="email" value="<%= profile.email %>" required></div>
+      <div class="form-field"><label for="emailCurrentPassword">Current password</label><input id="emailCurrentPassword" name="currentPassword" type="password" required></div>
+      <div class="button-row"><button class="button button--primary" type="submit" data-save hidden>Save changes</button><button class="button button--ghost" type="button" data-discard>Discard</button></div>
+    </form>
+    <form method="POST" action="/settings/security/password" class="settings-editor-card" data-inline-form="password" hidden>
+      <h3>Change password</h3>
+      <div class="form-field"><label for="securityCnic">CNIC</label><input id="securityCnic" name="cnic" required></div>
+      <div class="form-field"><label for="passwordCurrentPassword">Current password</label><input id="passwordCurrentPassword" name="currentPassword" type="password" required></div>
+      <div class="form-field"><label for="newPassword">New password</label><input id="newPassword" name="newPassword" type="password" minlength="8" required></div>
+      <div class="form-field"><label for="passwordConfirm">Confirm new password</label><input id="passwordConfirm" name="passwordConfirm" type="password" minlength="8" required></div>
+      <div class="button-row"><button class="button button--primary" type="submit" data-save hidden>Save changes</button><button class="button button--ghost" type="button" data-discard>Discard</button></div>
+    </form>
+  </section>
+
+  <section class="settings-section card">
+    <div class="settings-section__header"><div><h2>Preferences</h2><p>Choose how Purslip looks and displays amounts.</p></div><button class="button" type="button" data-open-editor="preferences">Edit</button></div>
+    <form method="POST" action="/settings" class="settings-inline-form" data-inline-form="preferences">
+      <div class="settings-fields">
+        <div class="form-field"><label for="displayCurrency"><%= t('Display currency') %></label><select id="displayCurrency" name="displayCurrency" disabled data-editable required><% supportedCurrencies.forEach((currency) => { %><option value="<%= currency %>" <%= preferences.display_currency === currency ? 'selected' : '' %>><%= currency %></option><% }) %></select></div>
+        <div class="form-field"><label for="language"><%= t('Language') %></label><select id="language" name="language" disabled data-editable required><% supportedLanguages.forEach((language) => { %><option value="<%= language %>" <%= preferences.language === language ? 'selected' : '' %>><%= language === 'ur' ? t('Urdu') : t('English') %></option><% }) %></select></div>
+        <div class="form-field"><label for="theme"><%= t('Theme') %></label><select id="theme" name="theme" disabled data-editable required><% supportedThemes.forEach((themeOption) => { %><option value="<%= themeOption %>" <%= preferences.theme === themeOption ? 'selected' : '' %>><%= t(`${themeOption === 'light' ? 'Light mode' : themeOption === 'night' ? 'Night mode' : 'Dark mode'}`) %></option><% }) %></select></div>
+        <% supportedCurrencies.forEach((currency) => { %><div class="form-field"><label for="rate<%= currency %>"><%= currency %> rate per PKR</label><input id="rate<%= currency %>" name="rate<%= currency %>" type="number" step="0.000001" min="0.000001" value="<%= preferences.exchange_rates[currency] || (currency === 'PKR' ? 1 : '') %>" disabled data-editable required></div><% }) %>
+      </div>
+      <div class="settings-editor" hidden><div class="button-row"><button class="button button--primary" type="submit" data-save hidden>Save changes</button><button class="button button--ghost" type="button" data-discard>Discard</button></div></div>
+    </form>
+  </section>
+  <section class="settings-section card settings-danger-zone">
+    <div class="settings-section__header"><div><h2>Delete account</h2><p>This permanently removes your profile and financial data.</p></div></div>
+    <form method="POST" action="/settings/delete-account" class="settings-editor-card">
+      <div class="form-field"><label for="deleteConfirmation">Type DELETE to confirm</label><input id="deleteConfirmation" name="confirmation" autocomplete="off" required></div>
+      <div class="form-field"><label for="deletePassword">Current password</label><input id="deletePassword" name="currentPassword" type="password" autocomplete="current-password" required></div>
+      <button class="button button--danger" type="submit">Delete my account</button>
+    </form>
+  </section>
+</main>
+<%- include('../partials/footer') %>
+<script src="/js/settings.js"></script>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page">
+    <section class="card" style="max-width: 640px;">
+      <h1>Map columns &mdash; <%= sourceName %></h1>
+      <%- include('../partials/form-errors') %>
+
+      <p>Preview of your file:</p>
+      <div class="table-wrap" style="margin-bottom: 16px;">
+        <table>
+          <thead><tr><% headers.forEach(function(h) { %><th><%= h %></th><% }) %></tr></thead>
+          <tbody>
+            <% previewRows.forEach(function(row) { %>
+              <tr><% row.forEach(function(cell) { %><td><%= cell %></td><% }) %></tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <form method="POST" action="/import/mapping" novalidate>
+        <div class="form-field">
+          <label for="dateColumn">Date column</label>
+          <select id="dateColumn" name="dateColumn" required>
+            <% headers.forEach(function(h) { %>
+              <option value="<%= h %>" <%= values.dateColumn === h ? 'selected' : '' %>><%= h %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="dateFormat">Date format</label>
+          <select id="dateFormat" name="dateFormat" required>
+            <% dateFormats.forEach(function(f) { %>
+              <option value="<%= f %>" <%= values.dateFormat === f ? 'selected' : '' %>><%= f %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="descriptionColumn">Description column</label>
+          <select id="descriptionColumn" name="descriptionColumn" required>
+            <% headers.forEach(function(h) { %>
+              <option value="<%= h %>" <%= values.descriptionColumn === h ? 'selected' : '' %>><%= h %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="payeeColumn">Payee column (optional &mdash; defaults to description)</label>
+          <select id="payeeColumn" name="payeeColumn">
+            <option value="">Same as description</option>
+            <% headers.forEach(function(h) { %>
+              <option value="<%= h %>" <%= values.payeeColumn === h ? 'selected' : '' %>><%= h %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>Amount format</label>
+          <label style="font-weight:400;"><input type="radio" name="amountMode" value="single" id="modeSingle" <%= values.amountMode === 'single' ? 'checked' : '' %>> One signed amount column</label><br>
+          <label style="font-weight:400;"><input type="radio" name="amountMode" value="debit_credit" id="modeDebitCredit" <%= values.amountMode === 'debit_credit' ? 'checked' : '' %>> Separate debit/credit columns</label>
+        </div>
+
+        <div class="form-field" id="singleAmountField">
+          <label for="amountColumn">Amount column</label>
+          <select id="amountColumn" name="amountColumn">
+            <option value="">&mdash;</option>
+            <% headers.forEach(function(h) { %>
+              <option value="<%= h %>" <%= values.amountColumn === h ? 'selected' : '' %>><%= h %></option>
+            <% }) %>
+          </select>
+          <small style="color: var(--color-text-muted);">Positive = money in, negative = money out.</small>
+        </div>
+
+        <div class="grid grid--2" id="debitCreditFields">
+          <div class="form-field">
+            <label for="debitColumn">Debit column</label>
+            <select id="debitColumn" name="debitColumn">
+              <option value="">&mdash;</option>
+              <% headers.forEach(function(h) { %>
+                <option value="<%= h %>" <%= values.debitColumn === h ? 'selected' : '' %>><%= h %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="creditColumn">Credit column</label>
+            <select id="creditColumn" name="creditColumn">
+              <option value="">&mdash;</option>
+              <% headers.forEach(function(h) { %>
+                <option value="<%= h %>" <%= values.creditColumn === h ? 'selected' : '' %>><%= h %></option>
+              <% }) %>
+            </select>
+          </div>
+        </div>
+
+        <button class="button button--primary" type="submit">Preview import</button>
+      </form>
+    </section>
+  </main>
+  <%- include('../partials/footer') %>
+  <script src="/js/import-mapping.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS display_currency TEXT NOT NULL DEFAULT 'PKR',
+  ADD COLUMN IF NOT EXISTS exchange_rates JSONB NOT NULL DEFAULT '{"PKR": 1, "USD": 1}'::jsonb,
+  ADD COLUMN IF NOT EXISTS language TEXT NOT NULL DEFAULT 'en',
+  ADD COLUMN IF NOT EXISTS theme TEXT NOT NULL DEFAULT 'dark';
+
+ALTER TABLE accounts
+  ADD COLUMN IF NOT EXISTS account_title TEXT,
+  ADD COLUMN IF NOT EXISTS bank_name TEXT NOT NULL DEFAULT '';
+
+UPDATE accounts
+SET account_title = name
+WHERE account_title IS NULL;
+
+ALTER TABLE accounts
+  ALTER COLUMN account_title SET NOT NULL;

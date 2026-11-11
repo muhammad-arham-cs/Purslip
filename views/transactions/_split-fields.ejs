@@ -1,0 +1,7 @@
+<%
+// Shared partial: renders the category <option>s used by both the visible
+// split rows and the JS clone <template>. Included with categories in scope.
+%>
+<% categories.forEach(function(c) { %>
+  <option value="<%= c.id %>"><%= c.name %> (<%= c.kind %>)</option>
+<% }) %>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page">
+    <section class="card" style="max-width: 560px;">
+      <h1>Add transaction</h1>
+      <%- include('../partials/form-errors') %>
+      <form method="POST" action="/transactions" novalidate>
+        <%- include('_transaction-form-body', { accounts, categories, values }) %>
+        <button class="button button--primary" type="submit">Add transaction</button>
+      </form>
+      <p><a href="/transactions/transfer/new">Recording a transfer between your own accounts instead?</a></p>
+    </section>
+  </main>
+  <%- include('../partials/footer') %>
+  <script src="/js/transaction-form.js"></script>
+</body>
+</html>

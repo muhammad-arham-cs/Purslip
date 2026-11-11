@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap: 8px; margin-bottom: 16px;">
+      <h1 style="margin:0;">Recurring</h1>
+      <a class="button button--primary" href="/recurring/new">Add recurring transaction</a>
+    </div>
+
+    <div class="grid grid--2" style="margin-bottom: 24px;">
+      <div class="card">
+        <h2 style="margin-top:0;">Upcoming bills (next 14 days)</h2>
+        <% if (!upcoming.length) { %>
+          <p style="color: var(--color-text-muted);">Nothing due soon.</p>
+        <% } else { %>
+          <ul style="margin:0; padding-left: 1.2em;">
+            <% upcoming.forEach(function(b) { %>
+              <li><%= b.next_run_date %> &mdash; <%= b.payee || b.category_name || 'Bill' %>: <%= Math.abs(Number(b.amount)).toFixed(2) %></li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </div>
+      <div class="card">
+        <h2 style="margin-top:0;">Subscription tracker</h2>
+        <p>Total recurring monthly spend: <strong><%= subscriptions.totalMonthly.toFixed(2) %></strong></p>
+        <% if (subscriptions.templates.length) { %>
+          <ul style="margin:0; padding-left: 1.2em;">
+            <% subscriptions.templates.forEach(function(t) { %>
+              <li><%= t.payee || t.category_name || 'Subscription' %> &mdash; <%= t.frequency %>, <%= Math.abs(Number(t.amount)).toFixed(2) %></li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </div>
+    </div>
+
+    <% if (!templates.length) { %>
+      <div class="card"><p>No recurring transactions yet.</p></div>
+    <% } else { %>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Payee/Category</th><th>Account</th><th>Amount</th><th>Frequency</th><th>Next run</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <% templates.forEach(function(t) { %>
+              <tr>
+                <td><%= t.payee || t.category_name || '—' %></td>
+                <td><%= t.account_name %></td>
+                <td style="color: <%= Number(t.amount) < 0 ? 'var(--color-danger)' : 'var(--color-success)' %>;">
+                  <%= Number(t.amount).toFixed(2) %>
+                </td>
+                <td><%= t.frequency %><%= t.frequency === 'custom_days' ? ' (' + t.custom_interval_days + 'd)' : '' %></td>
+                <td><%= t.next_run_date %></td>
+                <td><%= t.is_active ? 'Active' : 'Paused' %></td>
+                <td>
+                  <div class="button-row" style="justify-content:flex-start; margin:0;">
+                    <a href="/recurring/<%= t.id %>/edit">Edit</a>
+                    <% if (t.is_active) { %>
+                      <form action="/recurring/<%= t.id %>/pause" method="POST"><button class="button" type="submit">Pause</button></form>
+                    <% } else { %>
+                      <form action="/recurring/<%= t.id %>/resume" method="POST"><button class="button" type="submit">Resume</button></form>
+                    <% } %>
+                    <form action="/recurring/<%= t.id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this recurring transaction? Already-generated transactions are kept.');">
+                      <button class="button button--danger" type="submit">Delete</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

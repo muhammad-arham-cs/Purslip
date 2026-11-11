@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page page--auth">
+    <section class="auth-panel">
+      <div class="auth-panel__intro"><span class="brand-mark">✦</span><p class="eyebrow">Start with clarity</p><h1>A better relationship with your money.</h1><p>Create your private Purslip workspace in less than a minute.</p></div>
+      <div class="card auth-card">
+      <h2>Create your account</h2>
+      <%- include('../partials/form-errors') %>
+      <form method="POST" action="/auth/signup" novalidate>
+        <div class="form-field">
+          <label for="fullName">Full name</label>
+          <input type="text" id="fullName" name="fullName" value="<%= values.fullName || '' %>" maxlength="100" required autofocus>
+        </div>
+        <div class="form-field">
+          <label for="country">Country</label>
+          <input type="text" id="country" name="country" value="<%= values.country || '' %>" maxlength="80" required>
+        </div>
+        <div class="form-field">
+          <label for="phoneNumber">Phone number</label>
+          <input type="tel" id="phoneNumber" name="phoneNumber" value="<%= values.phoneNumber || '' %>" maxlength="30" required>
+        </div>
+        <div class="form-field">
+          <label for="cnic">CNIC</label>
+          <input type="text" id="cnic" name="cnic" value="<%= values.cnic || '' %>" maxlength="30" autocomplete="off" required>
+        </div>
+        <div class="form-field">
+          <label for="displayCurrency">Base currency</label>
+          <input type="text" id="displayCurrency" name="displayCurrency" value="<%= values.displayCurrency || 'PKR' %>" minlength="3" maxlength="3" pattern="[A-Za-z]{3}" required>
+        </div>
+        <div class="form-field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" value="<%= values.email || '' %>" required>
+        </div>
+        <div class="form-field">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" minlength="8" required aria-describedby="passwordHelp">
+          <small id="passwordHelp" class="password-strength" aria-live="polite">Use 8 or more characters.</small>
+        </div>
+        <div class="form-field">
+          <label for="passwordConfirm">Confirm password</label>
+          <input type="password" id="passwordConfirm" name="passwordConfirm" minlength="8" required>
+        </div>
+        <button class="button button--primary" type="submit" style="width:100%;">Create account</button>
+      </form>
+      <p>Already have an account? <a href="/auth/login">Log in</a></p>
+      <p class="auth-card__fine-print">By continuing, you agree to keep your account details secure.</p>
+      </div>
+    </section>
+  </main>
+  <%- include('../partials/footer') %>
+  <script src="/js/password-strength.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('partials/head') %>
+</head>
+<body>
+  <%- include('partials/header') %>
+  <main class="page">
+    <div class="dashboard-heading">
+      <div>
+        <p class="eyebrow">OVERVIEW</p>
+        <h1>Dashboard</h1>
+      </div>
+      <a href="/reports" class="button">View reports</a>
+    </div>
+
+    <section class="net-worth-hero card">
+      <div>
+        <span class="summary-card__label">Total net worth</span>
+        <p class="net-worth-hero__value <%= currentNW < 0 ? 'is-negative' : '' %>">
+          <%= formatCurrency(currentNW, displayCurrency) %>
+        </p>
+        <span class="net-worth-hero__hint">Across all your accounts</span>
+      </div>
+      <div class="net-worth-hero__orb" aria-hidden="true"></div>
+      <a href="/reports" class="net-worth-hero__link">See net worth history &rarr;</a>
+    </section>
+
+    <!-- ---- Account Balances ---- -->
+    <section class="dashboard-section">
+      <div class="section-header">
+        <h2>Account Balances</h2>
+        <a href="/accounts" class="button">Manage</a>
+      </div>
+      <% if (!accounts.length) { %>
+        <div class="card"><p>No accounts yet. <a href="/accounts/new">Add one</a> to get started.</p></div>
+      <% } else { %>
+        <div class="grid grid--3">
+          <% accounts.forEach(function(a) { %>
+            <div class="card account-card">
+              <span class="account-card__type"><%= a.type.replace('_', ' ') %></span>
+              <h3 class="account-card__name"><%= a.account_title || a.name %></h3>
+              <small><%= a.bank_name || '' %></small>
+              <p class="account-card__balance <%= Number(a.current_balance) < 0 ? 'is-negative' : '' %>">
+                <%= displayAmount(Number(a.current_balance), a.currency) %>
+              </p>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </section>
+
+    <section class="dashboard-section">
+      <div class="section-header"><h2>Debts</h2><a href="/debts" class="button">Manage</a></div>
+      <div class="grid grid--2">
+        <div class="card summary-card"><span class="summary-card__label">Money lent</span><span class="summary-card__amount"><%= formatCurrency(debtSummary.lent, displayCurrency) %></span></div>
+        <div class="card summary-card"><span class="summary-card__label">Money borrowed</span><span class="summary-card__amount"><%= formatCurrency(debtSummary.borrowed, displayCurrency) %></span></div>
+      </div>
+    </section>
+
+    <!-- ---- Income vs Expenses (this month) ---- -->
+    <section class="dashboard-section">
+      <h2>This Month (<%= month %>)</h2>
+      <div class="grid grid--2">
+        <div class="card summary-card summary-card--income">
+          <span class="summary-card__label">Income</span>
+          <span class="summary-card__amount"><%= formatCurrency(incomeExpense.income, displayCurrency) %></span>
+        </div>
+        <div class="card summary-card summary-card--expense">
+          <span class="summary-card__label">Expenses</span>
+          <span class="summary-card__amount"><%= formatCurrency(incomeExpense.expenses, displayCurrency) %></span>
+        </div>
+      </div>
+
+      <div class="grid grid--2" style="margin-top: var(--spacing-3);">
+        <div class="card">
+          <h3>Spending by Category</h3>
+          <canvas id="spendingChart" height="250"></canvas>
+          <noscript><p>Enable JavaScript to see charts.</p></noscript>
+        </div>
+        <div class="card">
+          <h3>Net Income</h3>
+          <p class="summary-card__amount" style="text-align:center; font-size: 2rem; margin: 1rem 0;">
+            <% const netIncome = incomeExpense.income - incomeExpense.expenses; %>
+            <span class="<%= netIncome >= 0 ? 'amount-positive' : 'amount-negative' %>">
+              <%= formatCurrency(Math.abs(netIncome), displayCurrency) %>
+              <%= netIncome >= 0 ? '' : '(deficit)' %>
+            </span>
+          </p>
+          <div class="button-row">
+            <a href="/transactions/new" class="button button--primary">+ Transaction</a>
+            <a href="/transactions/transfer" class="button">Transfer</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- Upcoming Bills ---- -->
+    <% if (upcoming.length) { %>
+    <section class="dashboard-section">
+      <div class="section-header">
+        <h2>Upcoming Bills (next 14 days)</h2>
+        <a href="/recurring" class="button">All recurring</a>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Due</th><th>Payee</th><th>Amount</th><th>Account</th></tr>
+          </thead>
+          <tbody>
+            <% upcoming.forEach(function(b) { %>
+              <tr>
+                <td><%= b.next_run_date %></td>
+                <td><%= b.payee || '—' %></td>
+                <td class="amount-negative"><%= displayAmount(Math.abs(Number(b.amount)), b.account_currency) %></td>
+                <td><%= b.account_name %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <% } %>
+
+    <div class="button-row dashboard-actions">
+      <a href="/reports" class="button button--primary">Full Reports &rarr;</a>
+      <a href="/budgets" class="button">Budgets</a>
+      <a href="/settings" class="button">Personal information & security</a>
+      <form action="/auth/logout?_method=DELETE" method="POST">
+        <button type="submit" class="button button--ghost">Log out</button>
+      </form>
+    </div>
+  </main>
+  <%- include('partials/footer') %>
+  <script src="/js/chart.umd.js"></script>
+  <script src="/js/dashboard.js"></script>
+  <script>
+    window.__SPENDING_DATA__ = <%- spending %>;
+  </script>
+</body>
+</html>

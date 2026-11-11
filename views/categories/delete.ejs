@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page page--centered">
+    <section class="card" style="max-width: 480px; width: 100%; text-align: left;">
+      <h1>Delete "<%= category.name %>"</h1>
+      <%- include('../partials/form-errors') %>
+
+      <% if (usage.children > 0 || usage.budgets > 0 || usage.recurring > 0) { %>
+        <p>This category can't be deleted yet:</p>
+        <ul>
+          <% if (usage.children > 0) { %><li><%= usage.children %> subcategor<%= usage.children === 1 ? 'y' : 'ies' %> still under it &mdash; move or delete them first.</li><% } %>
+          <% if (usage.budgets > 0) { %><li><%= usage.budgets %> budget(s) reference it &mdash; remove those from the Budgets page first.</li><% } %>
+          <% if (usage.recurring > 0) { %><li><%= usage.recurring %> recurring template(s) reference it &mdash; update those first.</li><% } %>
+        </ul>
+        <p><a class="button" href="/categories">Back to categories</a></p>
+      <% } else if (usage.splits > 0) { %>
+        <p><%= usage.splits %> existing transaction<%= usage.splits === 1 ? '' : 's' %> use this category. Choose where to move them before deleting:</p>
+        <form method="POST" action="/categories/<%= category.id %>?_method=DELETE">
+          <div class="form-field">
+            <label for="reassignToCategoryId">Move existing transactions to</label>
+            <select id="reassignToCategoryId" name="reassignToCategoryId" required>
+              <option value="__uncategorized__">Uncategorized</option>
+              <% reassignTargets.forEach(function(t) { %>
+                <option value="<%= t.id %>"><%= t.name %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="button-row" style="justify-content:flex-start;">
+            <button class="button button--danger" type="submit">Reassign and delete</button>
+            <a class="button" href="/categories">Cancel</a>
+          </div>
+        </form>
+      <% } else { %>
+        <p>This category isn't used anywhere. Deleting it is permanent.</p>
+        <form method="POST" action="/categories/<%= category.id %>?_method=DELETE">
+          <input type="hidden" name="reassignToCategoryId" value="">
+          <div class="button-row" style="justify-content:flex-start;">
+            <button class="button button--danger" type="submit">Delete permanently</button>
+            <a class="button" href="/categories">Cancel</a>
+          </div>
+        </form>
+      <% } %>
+
+      <form action="/categories/<%= category.id %>/archive" method="POST" style="margin-top: 16px;">
+        <button class="button" type="submit">Archive it instead</button>
+        <span style="color: var(--color-text-muted);">(hides it without touching any existing data)</span>
+      </form>
+    </section>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

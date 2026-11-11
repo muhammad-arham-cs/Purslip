@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="page">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap: 8px; margin-bottom: 16px;">
+      <h1 style="margin:0;">Accounts</h1>
+      <a class="button button--primary" href="/accounts/new">Add account</a>
+    </div>
+
+    <% if (!accounts.length) { %>
+      <div class="card">
+        <p>No <%= includeArchived ? 'archived ' : '' %>accounts yet.</p>
+        <% if (!includeArchived) { %><a class="button" href="/accounts/new">Add your first account</a><% } %>
+      </div>
+    <% } else { %>
+      <div class="grid grid--3">
+        <% accounts.forEach(function(account) { %>
+          <div class="card">
+            <h2 style="margin-bottom:4px;"><%= account.account_title || account.name %></h2>
+            <p style="margin:0 0 4px; color: var(--color-text-muted);"><%= account.bank_name || 'Bank/provider not set' %></p>
+            <p class="form-field label" style="color: var(--color-text-muted); margin: 0 0 8px;">
+              <%= account.type.replace('_', ' ') %> &middot; <%= account.currency %>
+              <% if (!account.is_active) { %> &middot; archived<% } %>
+            </p>
+            <p style="font-size:1.5rem; font-weight:700; margin: 0 0 16px;">
+              <%= Number(account.current_balance).toLocaleString(undefined, { style: 'currency', currency: account.currency }) %>
+            </p>
+            <div class="button-row" style="justify-content:flex-start;">
+              <a class="button" href="/accounts/<%= account.id %>/edit">Edit</a>
+              <% if (account.is_active) { %>
+                <form action="/accounts/<%= account.id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this account?');">
+                  <button class="button button--danger" type="submit">Delete</button>
+                </form>
+              <% } else { %>
+                <form action="/accounts/<%= account.id %>/reactivate" method="POST">
+                  <button class="button" type="submit">Reactivate</button>
+                </form>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <p style="margin-top:16px;">
+      <% if (includeArchived) { %>
+        <a href="/accounts">Hide archived accounts</a>
+      <% } else { %>
+        <a href="/accounts?archived=1">Show archived accounts</a>
+      <% } %>
+    </p>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

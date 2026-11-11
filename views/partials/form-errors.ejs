@@ -1,6 +1,7 @@
 <% if (typeof errors !== 'undefined' && errors.length) { %>
-  <div class="flash flash--error">
-    <ul style="margin:0; padding-left: 1.1em;">
+  <div class="flash flash--error" role="alert">
+    <strong class="flash__title">Please check the highlighted details</strong>
+    <ul class="flash__list">
       <% errors.forEach(function(e) { %>
         <li><%= e.msg %></li>
       <% }) %>

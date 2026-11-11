@@ -32,7 +32,7 @@ router.get('/', async (req, res, next) => {
       importMappingsModel.list(req.session.user.id),
     ]);
     if (!accounts.length) {
-      req.flash('error', 'Add an account before importing transactions.');
+      req.flash('error', 'You need an account before you can import transactions. Create one first.');
       return res.redirect('/accounts/new');
     }
     res.render('import/upload', { title: 'Import CSV', errors: [], accounts, mappings });

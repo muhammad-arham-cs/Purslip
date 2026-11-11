@@ -20,7 +20,7 @@ router.get('/new', async (req, res, next) => {
   try {
     const accounts = await accountsModel.list(req.session.user.id);
     if (!accounts.length) {
-      req.flash('error', 'Add an account before creating a goal.');
+      req.flash('error', 'You need an account before you can create a goal. Create one first.');
       return res.redirect('/accounts/new');
     }
     res.render('goals/new', {

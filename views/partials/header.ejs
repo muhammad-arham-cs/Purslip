@@ -1,6 +1,6 @@
 <header class="app-header <%= locals.currentUser ? '' : 'app-header--public' %>">
   <div class="app-header__bar">
-    <a class="app-header__brand" href="/"><span class="brand-mark">✦</span><span>Purslip</span></a>
+    <a class="app-header__brand" href="/"><img class="brand-mark" src="/images/purslip-logo.png" alt="Purslip"><span>Purslip</span></a>
     <% if (locals.currentUser) { %>
       <button class="app-header__toggle" id="navToggle" aria-label="<%= t('Toggle navigation') %>" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -35,8 +35,8 @@
   <% } %>
 </header>
 <% if (locals.successMessages && successMessages.length) { %>
-  <div class="flash flash--success"><%= successMessages.join(' ') %></div>
+  <div class="flash flash--success" role="status"><strong class="flash__title">Done</strong><span><%= successMessages.join(' ') %></span></div>
 <% } %>
 <% if (locals.errorMessages && errorMessages.length) { %>
-  <div class="flash flash--error"><%= errorMessages.join(' ') %></div>
+  <div class="flash flash--error" role="alert"><strong class="flash__title">Something needs your attention</strong><span><%= errorMessages.join(' ') %></span></div>
 <% } %>

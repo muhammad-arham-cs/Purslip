@@ -106,7 +106,7 @@ router.get('/new', async (req, res, next) => {
   try {
     const { accounts, categories } = await loadFormData(req.session.user.id);
     if (!accounts.length) {
-      req.flash('error', 'Add an account before recording transactions.');
+      req.flash('error', 'You need an account before you can record a transaction. Create one first.');
       return res.redirect('/accounts/new');
     }
     res.render('transactions/new', {

@@ -38,7 +38,7 @@ router.get('/new', async (req, res, next) => {
   try {
     const { accounts, categories } = await loadFormData(req.session.user.id);
     if (!accounts.length) {
-      req.flash('error', 'Add an account before creating a recurring transaction.');
+      req.flash('error', 'You need an account before you can create a recurring transaction. Create one first.');
       return res.redirect('/accounts/new');
     }
     res.render('recurring/new', {

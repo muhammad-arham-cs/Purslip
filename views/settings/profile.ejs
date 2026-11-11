@@ -1,0 +1,25 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/header') %>
+<main class="page settings-page settings-editor-page">
+  <a class="back-link" href="/settings">← Back to settings</a>
+  <div class="settings-page__heading"><p class="eyebrow">ACCOUNT</p><h1>Personal information</h1><p class="settings-page__intro">View and edit your personal information.</p></div>
+  <%- include('../partials/form-errors', { errors }) %>
+  <section class="card settings-editor-card">
+    <form method="POST" action="/settings/profile">
+      <div class="settings-fields">
+        <div class="form-field"><label for="fullName">Full name</label><input id="fullName" name="fullName" value="<%= profile.full_name %>" required></div>
+        <div class="form-field"><label for="country">Country</label><input id="country" name="country" value="<%= profile.country %>" required></div>
+        <div class="form-field"><label for="phoneNumber">Phone number</label><input id="phoneNumber" name="phoneNumber" value="<%= profile.phone_number %>" required></div>
+        <div class="form-field"><label>Email</label><input value="<%= profile.email %>" readonly></div>
+        <div class="form-field"><label>CNIC</label><input value="<%= revealedCnic || maskedCnic %>" readonly></div>
+      </div>
+      <div class="form-field"><label for="profilePassword">Current password</label><input id="profilePassword" name="currentPassword" type="password" autocomplete="current-password" required></div>
+      <div class="button-row"><button class="button button--primary" type="submit">Save changes</button><a class="button button--ghost" href="/settings">Cancel</a></div>
+    </form>
+    <form method="POST" action="/settings/profile/reveal-cnic" class="settings-reveal-form">
+      <div class="form-field"><label for="revealPassword">Password to reveal CNIC</label><input id="revealPassword" name="currentPassword" type="password" required></div>
+      <button class="button button--ghost" type="submit">Reveal CNIC</button>
+    </form>
+  </section>
+</main>
+<%- include('../partials/footer') %>

@@ -2,6 +2,7 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 
 const accounts = require('../models/accounts');
+const cardsModel = require('../models/cards');
 const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
@@ -26,8 +27,76 @@ const validateAccount = [
 router.get('/', async (req, res, next) => {
   try {
     const includeArchived = req.query.archived === '1';
-    const list = await accounts.list(req.session.user.id, { includeArchived });
-    res.render('accounts/index', { title: 'Accounts', accounts: list, includeArchived });
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const lastDay = new Date(y, now.getMonth() + 1, 0).getDate();
+    const startDate = `${y}-${m}-01`;
+    const endDate = `${y}-${m}-${String(lastDay).padStart(2, '0')}`;
+
+    const [list, cards] = await Promise.all([
+      accounts.list(req.session.user.id, { includeArchived }),
+      cardsModel.listWithStats(req.session.user.id, startDate, endDate),
+    ]);
+    res.render('accounts/index', { title: 'Accounts & Cards', accounts: list, cards, includeArchived });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post(
+  '/cards',
+  [
+    body('accountId').isUUID().withMessage('Choose an account to link the card to.'),
+    body('cardName').trim().isLength({ min: 1, max: 80 }).withMessage('Enter a card label.'),
+    body('cardholderName').optional({ checkFalsy: true }).trim().isLength({ max: 80 }),
+    body('cardType').isIn(['debit', 'credit']).withMessage('Choose Debit or Credit card.'),
+    body('network').optional({ checkFalsy: true }).isIn(['VISA', 'Mastercard', 'PayPak', 'UnionPay', 'Amex']),
+    body('last4').trim().matches(/^\d{4}$/).withMessage('Enter the last 4 digits of the card.'),
+    body('expiry').optional({ checkFalsy: true }).trim().isLength({ max: 7 }),
+    body('themeColor').optional({ checkFalsy: true }).isIn(['lime', 'slate', 'obsidian', 'emerald', 'amber']),
+    body('spendingLimit').optional({ checkFalsy: true }).isFloat({ gt: 0 }),
+  ],
+  async (req, res, next) => {
+    const returnTo = req.body.returnTo === '/dashboard' ? '/dashboard' : '/accounts#cards';
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+      req.flash('error', result.array().map((e) => e.msg).join(' '));
+      return res.redirect(returnTo);
+    }
+
+    try {
+      const account = await accounts.getById(req.session.user.id, req.body.accountId);
+      if (!account) {
+        req.flash('error', 'Linked account not found.');
+        return res.redirect(returnTo);
+      }
+
+      await cardsModel.create(req.session.user.id, {
+        accountId: account.id,
+        cardName: req.body.cardName,
+        cardholderName: req.body.cardholderName,
+        cardType: req.body.cardType,
+        network: req.body.network || 'VISA',
+        last4: req.body.last4,
+        expiry: req.body.expiry || '03/30',
+        themeColor: req.body.themeColor || (req.body.cardType === 'credit' ? 'slate' : 'lime'),
+        spendingLimit: req.body.spendingLimit || null,
+      });
+      req.flash('success', `${req.body.cardType === 'credit' ? 'Credit' : 'Debit'} card linked to ${account.account_title || account.name}.`);
+      res.redirect(returnTo);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.delete('/cards/:cardId', async (req, res, next) => {
+  const returnTo = req.body.returnTo === '/dashboard' ? '/dashboard' : '/accounts#cards';
+  try {
+    const removed = await cardsModel.remove(req.session.user.id, req.params.cardId);
+    req.flash(removed ? 'success' : 'error', removed ? 'Card unlinked.' : 'Card not found.');
+    res.redirect(returnTo);
   } catch (err) {
     next(err);
   }

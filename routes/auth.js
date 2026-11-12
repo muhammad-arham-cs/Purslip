@@ -5,7 +5,7 @@ const { body, validationResult } = require('express-validator');
 const users = require('../models/users');
 const { redirectIfAuthenticated } = require('../middleware/auth');
 const { sendPasswordResetEmail } = require('../lib/mailer');
-const { authLimiter } = require('../middleware/rateLimit');
+const { authLimiter, loginLimiter } = require('../middleware/rateLimit');
 
 const router = express.Router();
 
@@ -80,22 +80,26 @@ router.post(
 
 router.get('/login', redirectIfAuthenticated, (req, res) => {
   const errors = req.query.expired === '1'
-    ? [{ msg: 'Your session expired after 15 minutes of inactivity. Please log in again.' }]
+    ? [{ msg: 'Your session expired after 5 minutes of inactivity. Please log in again.' }]
     : [];
-  res.render('auth/login', { title: 'Log in', errors, values: {} });
+  res.render('auth/login', { title: 'Log in', errors, values: {}, cooldownSeconds: 0 });
 });
 
 router.post(
   '/login',
   redirectIfAuthenticated,
+  loginLimiter,
   [body('email').isEmail().normalizeEmail(), body('password').notEmpty()],
   async (req, res, next) => {
     const result = validationResult(req);
-    const invalidCredsResponse = () =>
+    const rateRemaining = typeof req.rateLimit?.remaining === 'number' ? req.rateLimit.remaining : null;
+    const invalidCredsResponse = (attemptsRemaining = rateRemaining) =>
       res.status(400).render('auth/login', {
         title: 'Log in',
         errors: [{ msg: 'Invalid email or password.' }],
         values: { email: req.body.email },
+        cooldownSeconds: 0,
+        attemptsRemaining,
       });
 
     if (!result.isEmpty()) {
@@ -110,25 +114,34 @@ router.post(
 
       const { locked, retryAfterMs } = users.lockStatus(user);
       if (locked) {
+        const retryAfterSec = Math.max(1, Math.ceil(retryAfterMs / 1000));
         const minutes = Math.ceil(retryAfterMs / 60000);
+        res.setHeader('Retry-After', String(retryAfterSec));
         return res.status(429).render('auth/login', {
           title: 'Log in',
-          errors: [{ msg: `Account temporarily locked. Try again in ${minutes} minute(s).` }],
+          errors: [{ msg: `Account temporarily locked after 5 failed attempts. Try again in ${minutes} minute(s) (${retryAfterSec}s).` }],
           values: { email: req.body.email },
+          cooldownSeconds: retryAfterSec,
         });
       }
 
       const validPassword = await users.verifyPassword(user, req.body.password);
       if (!validPassword) {
         await users.registerFailedLogin(user);
-        return invalidCredsResponse();
+        const remaining = Math.max(0, users.MAX_FAILED_ATTEMPTS - (Number(user.failed_login_attempts || 0) + 1));
+        return invalidCredsResponse(remaining);
       }
 
       await users.resetFailedLogins(user.id);
+      if (req.rateLimit && typeof loginLimiter.resetKey === 'function') {
+        const emailKey = `${req.ip || 'unknown'}:${String(req.body?.email || '').toLowerCase().trim()}`;
+        loginLimiter.resetKey(emailKey);
+      }
 
       req.session.regenerate((err) => {
         if (err) return next(err);
         req.session.user = { id: user.id, email: user.email };
+        req.session.lastActivityAt = Date.now();
         res.redirect('/dashboard');
       });
     } catch (err) {

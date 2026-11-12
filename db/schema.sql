@@ -85,6 +85,29 @@ CREATE TRIGGER trg_accounts_updated_at BEFORE UPDATE ON accounts
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- ---------------------------------------------------------------------------
+-- Linked Cards (Debit & Credit cards linked to Accounts)
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS cards (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  account_id UUID NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+  card_name TEXT NOT NULL,
+  cardholder_name TEXT NOT NULL DEFAULT '',
+  card_type TEXT NOT NULL DEFAULT 'debit' CHECK (card_type IN ('debit', 'credit')),
+  network TEXT NOT NULL DEFAULT 'VISA',
+  last4 TEXT NOT NULL,
+  expiry TEXT NOT NULL DEFAULT '03/30',
+  theme_color TEXT NOT NULL DEFAULT 'lime',
+  spending_limit NUMERIC(14, 2),
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_cards_user_id ON cards(user_id);
+CREATE INDEX IF NOT EXISTS idx_cards_account_id ON cards(account_id);
+
+-- ---------------------------------------------------------------------------
 -- Categories (custom, with subcategories via self-reference)
 -- ---------------------------------------------------------------------------
 CREATE TYPE category_kind AS ENUM ('income', 'expense');
@@ -147,6 +170,8 @@ CREATE TABLE transactions (
     CHECK (transaction_type IN ('income', 'expense', 'neither')),
   payee TEXT,
   note TEXT,
+  card_id UUID REFERENCES cards(id) ON DELETE SET NULL,
+  payment_method TEXT NOT NULL DEFAULT 'account',
   debt_id UUID REFERENCES debts(id) ON DELETE SET NULL,
   is_transfer BOOLEAN NOT NULL DEFAULT false,
   transfer_group_id UUID,

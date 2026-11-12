@@ -3,7 +3,7 @@ const { pool } = require('../config/db');
 
 const BCRYPT_ROUNDS = 12;
 const MAX_FAILED_ATTEMPTS = 5;
-const LOCKOUT_MINUTES = 15;
+const LOCKOUT_MINUTES = 5;
 
 async function createUser(email, password, {
   fullName = '',
@@ -101,6 +101,7 @@ async function deleteUser(userId) {
     await client.query('DELETE FROM goals WHERE user_id = $1', [userId]);
     await client.query('DELETE FROM import_mappings WHERE user_id = $1', [userId]);
     await client.query('DELETE FROM debts WHERE user_id = $1', [userId]);
+    await client.query('DELETE FROM cards WHERE user_id = $1', [userId]).catch(() => {});
     await client.query('DELETE FROM accounts WHERE user_id = $1', [userId]);
     await client.query(
       'DELETE FROM categories WHERE user_id = $1 AND parent_id IS NOT NULL',

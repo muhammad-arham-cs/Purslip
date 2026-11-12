@@ -1,19 +1,37 @@
 <%
-// Included by new.ejs and edit.ejs. Expects: accounts, categories, values
-// (values.splits is an array of { categoryId, amount }, at least one entry).
+// Included by new.ejs and edit.ejs. Expects: accounts, categories, cards, values
 const initialSplits = (values.splits && values.splits.length) ? values.splits : [{ categoryId: '', amount: '' }];
 const isSplit = initialSplits.length > 1;
+const _cards = Array.isArray(typeof cards !== 'undefined' ? cards : null) ? cards : [];
 %>
-<div class="form-field">
-  <label for="accountId">Account</label>
-  <select id="accountId" name="accountId" required>
-    <% accounts.forEach(function(a) { %>
-      <option value="<%= a.id %>" <%= String(values.accountId) === String(a.id) ? 'selected' : '' %>><%= a.account_title || a.name %> (<%= a.bank_name || '—' %>)</option>
-    <% }) %>
-  </select>
+<div class="grid grid--2">
+  <div class="form-field">
+    <label for="accountId">Account</label>
+    <select id="accountId" name="accountId" required>
+      <% accounts.forEach(function(a) { %>
+        <option value="<%= a.id %>" data-account-type="<%= a.type %>" <%= String(values.accountId) === String(a.id) ? 'selected' : '' %>><%= a.account_title || a.name %> (<%= a.bank_name || '—' %>)</option>
+      <% }) %>
+    </select>
+  </div>
+
+  <div class="form-field">
+    <label for="cardId">Card used <small style="font-weight:400; color: var(--color-text-muted);">(optional · auto-links account)</small></label>
+    <select id="cardId" name="cardId">
+      <option value="">Direct account / No card</option>
+      <% _cards.forEach(function(card) { %>
+        <option
+          value="<%= card.id %>"
+          data-account-id="<%= card.account_id %>"
+          data-card-type="<%= card.card_type %>"
+          data-last4="<%= card.last4 %>"
+          <%= String(values.cardId || '') === String(card.id) ? 'selected' : '' %>
+        ><%= card.network %> •••• <%= card.last4 %> · <%= card.card_name %> (<%= card.card_type === 'credit' ? 'Credit' : 'Debit' %> → <%= card.account_name %>)</option>
+      <% }) %>
+    </select>
+  </div>
 </div>
 
-<div class="grid grid--2">
+<div class="grid grid--3">
   <div class="form-field">
     <label for="date">Date</label>
     <input type="date" id="date" name="date" value="<%= values.date || '' %>" required>
@@ -26,6 +44,20 @@ const isSplit = initialSplits.length > 1;
       <option value="neither" <%= values.type === 'neither' ? 'selected' : '' %>>Neither (account movement only)</option>
     </select>
   </div>
+  <div class="form-field">
+    <label for="paymentMethod">Payment method</label>
+    <select id="paymentMethod" name="paymentMethod">
+      <option value="account" <%= (!values.paymentMethod || values.paymentMethod === 'account') ? 'selected' : '' %>>Bank / Account</option>
+      <option value="debit_card" <%= values.paymentMethod === 'debit_card' ? 'selected' : '' %>>Debit Card</option>
+      <option value="credit_card" <%= values.paymentMethod === 'credit_card' ? 'selected' : '' %>>Credit Card</option>
+      <option value="cash" <%= values.paymentMethod === 'cash' ? 'selected' : '' %>>Cash</option>
+    </select>
+  </div>
+</div>
+
+<div id="cardDetectBanner" class="card-detect-banner" hidden role="status" aria-live="polite">
+  <svg class="icon" aria-hidden="true"><use href="#i-accounts"/></svg>
+  <span id="cardDetectText">Card transaction detected — linked to your account.</span>
 </div>
 
 <div class="form-field">
@@ -35,12 +67,12 @@ const isSplit = initialSplits.length > 1;
 
 <div class="grid grid--2">
   <div class="form-field">
-    <label for="payee">Payee</label>
-    <input type="text" id="payee" name="payee" value="<%= values.payee || '' %>">
+    <label for="payee">Payee / Merchant</label>
+    <input type="text" id="payee" name="payee" value="<%= values.payee || '' %>" placeholder="e.g. Imtiaz POS *7890, Foodpanda, Salary">
   </div>
   <div class="form-field">
     <label for="note">Note</label>
-    <input type="text" id="note" name="note" value="<%= values.note || '' %>">
+    <input type="text" id="note" name="note" value="<%= values.note || '' %>" placeholder="Optional details or card reference">
   </div>
 </div>
 
@@ -76,7 +108,10 @@ const isSplit = initialSplits.length > 1;
   <p id="splitRemaining" style="color: var(--color-text-muted);"></p>
 </div>
 
-<p><a href="/categories/new?redirectTo=<%= encodeURIComponent(currentPath) %>">No categories yet? Add one</a></p>
+<p style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+  <a href="/categories/new?redirectTo=<%= encodeURIComponent(currentPath) %>">No categories yet? Add one</a>
+  <a href="/accounts#cards">Manage linked Debit &amp; Credit cards &rarr;</a>
+</p>
 
 <template id="splitRowTemplate">
   <div class="grid grid--2 split-row">

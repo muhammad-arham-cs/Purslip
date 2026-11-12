@@ -4,6 +4,7 @@ const { body, validationResult } = require('express-validator');
 const transactionsModel = require('../models/transactions');
 const accountsModel = require('../models/accounts');
 const categoriesModel = require('../models/categories');
+const cardsModel = require('../models/cards');
 const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
@@ -22,11 +23,12 @@ function parseSplits(body, type) {
 }
 
 async function loadFormData(userId) {
-  const [accounts, categories] = await Promise.all([
+  const [accounts, categories, cards] = await Promise.all([
     accountsModel.list(userId),
     categoriesModel.list(userId),
+    cardsModel.list(userId),
   ]);
-  return { accounts, categories };
+  return { accounts, categories, cards };
 }
 
 router.get('/', async (req, res, next) => {
@@ -35,6 +37,7 @@ router.get('/', async (req, res, next) => {
     const filters = {
       page,
       accountId: req.query.account || undefined,
+      cardId: req.query.card || undefined,
       categoryId: req.query.category || undefined,
       startDate: req.query.startDate || undefined,
       endDate: req.query.endDate || undefined,
@@ -43,15 +46,17 @@ router.get('/', async (req, res, next) => {
       search: req.query.search || undefined,
     };
     const result = await transactionsModel.list(req.session.user.id, filters);
-    const [accounts, categories] = await Promise.all([
+    const [accounts, categories, cards] = await Promise.all([
       accountsModel.list(req.session.user.id, { includeArchived: true }),
       categoriesModel.list(req.session.user.id, { includeArchived: true }),
+      cardsModel.list(req.session.user.id, { includeInactive: true }),
     ]);
     res.render('transactions/index', {
       title: 'Transactions',
       ...result,
       accounts,
       categories,
+      cards,
       selectedAccountId: filters.accountId,
       filters,
     });
@@ -104,17 +109,30 @@ function csvEscape(value) {
 
 router.get('/new', async (req, res, next) => {
   try {
-    const { accounts, categories } = await loadFormData(req.session.user.id);
+    const { accounts, categories, cards } = await loadFormData(req.session.user.id);
     if (!accounts.length) {
       req.flash('error', 'You need an account before you can record a transaction. Create one first.');
       return res.redirect('/accounts/new');
     }
+    const preselectedType = ['income', 'expense', 'neither'].includes(req.query.type) ? req.query.type : 'expense';
+    const preselectedCardId = req.query.cardId || '';
+    const preselectedMethod = req.query.paymentMethod === 'card'
+      ? (cards[0]?.card_type === 'credit' ? 'credit_card' : 'debit_card')
+      : (req.query.paymentMethod || 'account');
+
     res.render('transactions/new', {
       title: 'Add transaction',
       errors: [],
       accounts,
       categories,
-      values: { date: new Date().toISOString().slice(0, 10), type: 'expense' },
+      cards,
+      values: {
+        date: new Date().toISOString().slice(0, 10),
+        type: preselectedType,
+        cardId: preselectedCardId || (req.query.paymentMethod === 'card' && cards[0] ? cards[0].id : ''),
+        paymentMethod: preselectedMethod,
+        accountId: req.query.accountId || (preselectedCardId && cards.find((c) => c.id === preselectedCardId)?.account_id) || '',
+      },
     });
   } catch (err) {
     next(err);
@@ -122,7 +140,9 @@ router.get('/new', async (req, res, next) => {
 });
 
 const validateTransaction = [
-  body('accountId').isUUID().withMessage('Choose an account.'),
+  body('accountId').optional({ checkFalsy: true }).isUUID().withMessage('Choose an account.'),
+  body('cardId').optional({ checkFalsy: true }).isUUID().withMessage('Choose a valid card.'),
+  body().custom((val) => Boolean(val.accountId || val.cardId)).withMessage('Choose an account or a linked card.'),
   body('date').isISO8601().withMessage('Enter a valid date.'),
   body('amount').isFloat({ gt: 0 }).withMessage('Amount must be a positive number.'),
   body('type').isIn(['expense', 'income', 'neither']).withMessage('Choose a transaction type.'),
@@ -131,12 +151,13 @@ const validateTransaction = [
 router.post('/', validateTransaction, async (req, res, next) => {
   const result = validationResult(req);
   const rerender = async (errors) => {
-    const { accounts, categories } = await loadFormData(req.session.user.id);
+    const { accounts, categories, cards } = await loadFormData(req.session.user.id);
     res.status(400).render('transactions/new', {
       title: 'Add transaction',
       errors,
       accounts,
       categories,
+      cards,
       values: req.body,
     });
   };
@@ -151,7 +172,9 @@ router.post('/', validateTransaction, async (req, res, next) => {
     const splits = parseSplits(req.body, req.body.type);
 
     await transactionsModel.create(req.session.user.id, {
-      accountId: req.body.accountId,
+      accountId: req.body.accountId || null,
+      cardId: req.body.cardId || null,
+      paymentMethod: req.body.paymentMethod || null,
       date: req.body.date,
       amount: signedAmount,
       payee: req.body.payee,
@@ -180,16 +203,19 @@ router.get('/:id/edit', async (req, res, next) => {
       return res.redirect(`/transactions/transfer/${transaction.transfer_group_id}/edit`);
     }
 
-    const { accounts, categories } = await loadFormData(req.session.user.id);
+    const { accounts, categories, cards } = await loadFormData(req.session.user.id);
     const type = transaction.transaction_type || (Number(transaction.amount) < 0 ? 'expense' : 'income');
     res.render('transactions/edit', {
       title: 'Edit transaction',
       errors: [],
       accounts,
       categories,
+      cards,
       transaction,
       values: {
         accountId: transaction.account_id,
+        cardId: transaction.card_id || '',
+        paymentMethod: transaction.payment_method || 'account',
         date: transaction.date,
         amount: Math.abs(Number(transaction.amount)),
         type,
@@ -210,12 +236,13 @@ router.put('/:id', validateTransaction, async (req, res, next) => {
   const result = validationResult(req);
   const rerender = async (errors) => {
     const transaction = await transactionsModel.getById(req.session.user.id, req.params.id);
-    const { accounts, categories } = await loadFormData(req.session.user.id);
+    const { accounts, categories, cards } = await loadFormData(req.session.user.id);
     res.status(400).render('transactions/edit', {
       title: 'Edit transaction',
       errors,
       accounts,
       categories,
+      cards,
       transaction,
       values: req.body,
     });
@@ -231,7 +258,9 @@ router.put('/:id', validateTransaction, async (req, res, next) => {
     const splits = parseSplits(req.body, req.body.type);
 
     await transactionsModel.update(req.session.user.id, req.params.id, {
-      accountId: req.body.accountId,
+      accountId: req.body.accountId || null,
+      cardId: req.body.cardId || null,
+      paymentMethod: req.body.paymentMethod || null,
       date: req.body.date,
       amount: signedAmount,
       payee: req.body.payee,

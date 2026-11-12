@@ -5,12 +5,12 @@
 </head>
 <body>
   <%- include('../partials/header') %>
-  <main class="page">
-    <section class="card" style="max-width: 560px;">
+  <main id="mainContent" class="page">
+    <section class="card glass-panel" style="max-width: 620px;">
       <h1>Edit transaction</h1>
       <%- include('../partials/form-errors') %>
       <form method="POST" action="/transactions/<%= transaction.id %>?_method=PUT" novalidate>
-        <%- include('_transaction-form-body', { accounts, categories, values }) %>
+        <%- include('_transaction-form-body', { accounts, categories, cards: typeof cards !== 'undefined' ? cards : [], values }) %>
         <button class="button button--primary" type="submit">Save changes</button>
       </form>
       <form method="POST" action="/transactions/<%= transaction.id %>?_method=DELETE" data-confirm="Delete this transaction?" style="margin-top:8px;">

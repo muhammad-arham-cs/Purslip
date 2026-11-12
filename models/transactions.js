@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { pool } = require('../config/db');
+const cardsModel = require('./cards');
 
 class ValidationError extends Error {}
 
@@ -60,26 +61,45 @@ async function insertSplits(client, transactionId, splits) {
 }
 
 async function create(userId, {
-  accountId, date, amount, payee, note, splits, debtId = null, transactionType = null,
+  accountId, date, amount, payee, note, splits, debtId = null, transactionType = null, cardId = null, paymentMethod = null,
 }) {
   assertSplitsSumToAmount(amount, splits);
 
   return withTransaction(async (client) => {
-    await assertAccountOwnership(client, userId, accountId);
+    const resolved = await cardsModel.resolveCardAndPaymentMethod(client, userId, {
+      accountId,
+      cardId,
+      paymentMethod,
+      payee,
+      note,
+    });
+    const finalAccountId = resolved.accountId || accountId;
+    await assertAccountOwnership(client, userId, finalAccountId);
 
     const { rows } = await client.query(
       `INSERT INTO transactions
-       (user_id, account_id, date, amount, transaction_type, payee, note, debt_id)
-       VALUES ($1, $2, $3, $4::numeric, COALESCE($5::text, CASE WHEN $4::numeric >= 0 THEN 'income' ELSE 'expense' END), $6, $7, $8)
+       (user_id, account_id, date, amount, transaction_type, payee, note, debt_id, card_id, payment_method)
+       VALUES ($1, $2, $3, $4::numeric, COALESCE($5::text, CASE WHEN $4::numeric >= 0 THEN 'income' ELSE 'expense' END), $6, $7, $8, $9, $10)
        RETURNING *`,
-      [userId, accountId, date, amount, transactionType, payee || null, note || null, debtId]
+      [
+        userId,
+        finalAccountId,
+        date,
+        amount,
+        transactionType,
+        payee || null,
+        note || null,
+        debtId,
+        resolved.cardId,
+        resolved.paymentMethod,
+      ]
     );
     const transaction = rows[0];
 
     await insertSplits(client, transaction.id, splits);
     await client.query('UPDATE accounts SET current_balance = current_balance + $1 WHERE id = $2', [
       amount,
-      accountId,
+      finalAccountId,
     ]);
 
     return transaction;
@@ -106,7 +126,7 @@ async function getById(userId, transactionId) {
 }
 
 async function update(userId, transactionId, {
-  accountId, date, amount, payee, note, splits, transactionType = null,
+  accountId, date, amount, payee, note, splits, transactionType = null, cardId = null, paymentMethod = null,
 }) {
   assertSplitsSumToAmount(amount, splits);
 
@@ -126,7 +146,15 @@ async function update(userId, transactionId, {
       throw new ValidationError('Debt transactions must be changed from the debt details page.');
     }
 
-    await assertAccountOwnership(client, userId, accountId);
+    const resolved = await cardsModel.resolveCardAndPaymentMethod(client, userId, {
+      accountId,
+      cardId,
+      paymentMethod,
+      payee,
+      note,
+    });
+    const finalAccountId = resolved.accountId || accountId;
+    await assertAccountOwnership(client, userId, finalAccountId);
 
     // Reverse the old balance effect, then apply the new one — handles the
     // account changing between edits as well as just the amount changing.
@@ -136,17 +164,17 @@ async function update(userId, transactionId, {
     ]);
     await client.query('UPDATE accounts SET current_balance = current_balance + $1 WHERE id = $2', [
       amount,
-      accountId,
+      finalAccountId,
     ]);
 
     const { rows: updatedRows } = await client.query(
       `UPDATE transactions
        SET account_id = $1, date = $2, amount = $3,
            transaction_type = COALESCE($4::text, CASE WHEN $3::numeric >= 0 THEN 'income' ELSE 'expense' END),
-           payee = $5, note = $6
-       WHERE id = $7
+           payee = $5, note = $6, card_id = $7, payment_method = $8
+       WHERE id = $9
        RETURNING *`,
-      [accountId, date, amount, transactionType, payee || null, note || null, transactionId]
+      [finalAccountId, date, amount, transactionType, payee || null, note || null, resolved.cardId, resolved.paymentMethod, transactionId]
     );
 
     await client.query('DELETE FROM transaction_splits WHERE transaction_id = $1', [transactionId]);
@@ -197,7 +225,8 @@ async function remove(userId, transactionId) {
   });
 }
 
-async function list(userId, { page = 1, pageSize = 25, accountId, categoryId, startDate, endDate, minAmount, maxAmount, search } = {}) {
+async function list(userId, { page = 1, pageSize = 25, accountId, cardId, categoryId, startDate, endDate, minAmount, maxAmount, search } = {}) {
+  await cardsModel.ensureSchema();
   const offset = (page - 1) * pageSize;
   const params = [userId];
   const conditions = ['t.user_id = $1'];
@@ -205,6 +234,10 @@ async function list(userId, { page = 1, pageSize = 25, accountId, categoryId, st
   if (accountId) {
     params.push(accountId);
     conditions.push(`t.account_id = $${params.length}`);
+  }
+  if (cardId) {
+    params.push(cardId);
+    conditions.push(`t.card_id = $${params.length}`);
   }
   if (startDate) {
     params.push(startDate);
@@ -247,12 +280,14 @@ async function list(userId, { page = 1, pageSize = 25, accountId, categoryId, st
   params.push(pageSize, offset);
   const { rows } = await pool.query(
     `SELECT t.*, COALESCE(NULLIF(a.account_title, ''), a.name) AS account_name,
-       a.bank_name AS bank_name, a.currency AS account_currency,
+       a.bank_name AS bank_name, a.currency AS account_currency, a.type AS account_type,
+       cd.card_name AS card_name, cd.card_type AS card_type, cd.network AS card_network, cd.last4 AS card_last4,
        (SELECT json_agg(json_build_object('category_id', s.category_id, 'category_name', c.name, 'amount', s.amount))
         FROM transaction_splits s LEFT JOIN categories c ON c.id = s.category_id
         WHERE s.transaction_id = t.id) AS splits
      FROM transactions t
      JOIN accounts a ON a.id = t.account_id
+     LEFT JOIN cards cd ON cd.id = t.card_id
      WHERE ${whereClause}
      ORDER BY t.date DESC, t.created_at DESC, t.id
      LIMIT $${params.length - 1} OFFSET $${params.length}`,
@@ -412,13 +447,19 @@ async function bulkImport(userId, accountId, rows) {
 
     for (const row of rows) {
       // eslint-disable-next-line no-await-in-loop
+      const resolved = await cardsModel.resolveCardAndPaymentMethod(client, userId, {
+        accountId,
+        payee: row.payee || '',
+        note: row.note || '',
+      });
+      // eslint-disable-next-line no-await-in-loop
       const { rows: inserted } = await client.query(
         `INSERT INTO transactions
-         (user_id, account_id, date, amount, transaction_type, payee, note, import_source, import_hash)
-         VALUES ($1, $2, $3, $4, CASE WHEN $4 >= 0 THEN 'income' ELSE 'expense' END, $5, $6, $7, $8)
+         (user_id, account_id, date, amount, transaction_type, payee, note, import_source, import_hash, card_id, payment_method)
+         VALUES ($1, $2, $3, $4, CASE WHEN $4 >= 0 THEN 'income' ELSE 'expense' END, $5, $6, $7, $8, $9, $10)
          ON CONFLICT (account_id, import_hash) WHERE import_hash IS NOT NULL DO NOTHING
          RETURNING id`,
-        [userId, accountId, row.date, row.amount, row.payee || null, row.note || null, row.importSource || null, row.importHash]
+        [userId, accountId, row.date, row.amount, row.payee || null, row.note || null, row.importSource || null, row.importHash, resolved.cardId, resolved.paymentMethod]
       );
       if (inserted.length) {
         // eslint-disable-next-line no-await-in-loop

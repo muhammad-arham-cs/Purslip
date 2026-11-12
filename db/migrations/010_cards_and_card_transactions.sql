@@ -25,3 +25,4 @@ ALTER TABLE transactions
   ADD COLUMN IF NOT EXISTS payment_method TEXT NOT NULL DEFAULT 'account';
 
 CREATE INDEX IF NOT EXISTS idx_transactions_card_id ON transactions(card_id);
+

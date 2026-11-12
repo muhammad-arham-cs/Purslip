@@ -1,225 +1,657 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <%- include('partials/head') %>
+  <%- include('partials/head', { title }) %>
 </head>
-<body>
+<body class="body--dashboard">
   <%- include('partials/header') %>
-  <main id="mainContent" class="page page--dashboard">
-    <%
-      const netIncome = Number(incomeExpense.income || 0) - Number(incomeExpense.expenses || 0);
-      const totalFlow = Math.max(Number(incomeExpense.income || 0) + Number(incomeExpense.expenses || 0), 1);
-      const incomeShare = Math.round((Number(incomeExpense.income || 0) / totalFlow) * 100);
-      const expenseShare = 100 - incomeShare;
-      let parsedSpending = [];
-      try { parsedSpending = JSON.parse(spending || '[]'); } catch (_e) { parsedSpending = []; }
-    %>
+  <%
+    const currInc = Number(incomeExpense.income || 0);
+    const currExp = Number(incomeExpense.expenses || 0);
+    const netThisMonth = currInc - currExp;
+    const savedThisMonth = Math.max(0, netThisMonth);
+    const prevInc = Number((typeof prevIncomeExpense !== 'undefined' && prevIncomeExpense?.income) || 0);
+    const prevExp = Number((typeof prevIncomeExpense !== 'undefined' && prevIncomeExpense?.expenses) || 0);
+    const prevSaved = Math.max(0, prevInc - prevExp);
 
-    <header class="dashboard-heading">
-      <div class="dashboard-heading__title">
-        <h1>Dashboard</h1>
-        <p class="dashboard-heading__sub">Household overview for <strong><%= month %></strong> &middot; base currency <strong><%= displayCurrency %></strong></p>
-      </div>
-      <div class="button-row dashboard-heading__actions">
-        <a href="/transactions/new" class="button button--primary">
+    function formatTrendLabel(curr, prev) {
+      if (prev > 0) {
+        const pct = (((curr - prev) / prev) * 100).toFixed(1);
+        const arrow = Number(pct) >= 0 ? '↗ +' : '↘ ';
+        return `${arrow}${pct}% from last month`;
+      }
+      if (curr > 0) {
+        return '↗ Recorded this month';
+      }
+      return 'No prior month data';
+    }
+
+    const incomeTrendLabel = formatTrendLabel(currInc, prevInc);
+    const expenseTrendLabel = formatTrendLabel(currExp, prevExp);
+    const savedTrendLabel = formatTrendLabel(savedThisMonth, prevSaved);
+
+    const savingsRate = currInc > 0
+      ? Math.max(0, Math.min(100, Math.round(((currInc - currExp) / currInc) * 100)))
+      : 0;
+
+    const _budgets = Array.isArray(typeof budgetsList !== 'undefined' ? budgetsList : null) ? budgetsList : [];
+    const totalBudgetAvailable = _budgets.reduce((sum, b) => sum + Number(b.available || b.budgetAmount || 0), 0);
+    const totalBudgetSpent = _budgets.reduce((sum, b) => sum + Number(b.spent || 0), 0);
+    const limitAmount = totalBudgetAvailable > 0 ? totalBudgetAvailable : currInc;
+    const limitSpent = totalBudgetAvailable > 0 ? totalBudgetSpent : currExp;
+    const limitPercent = limitAmount > 0
+      ? Math.min(100, Math.max(limitSpent > 0 ? 4 : 0, Math.round((limitSpent / limitAmount) * 100)))
+      : 0;
+
+    const _spendingRows = Array.isArray(typeof spendingRows !== 'undefined' ? spendingRows : null)
+      ? spendingRows
+      : (() => { try { return JSON.parse(spending || '[]'); } catch { return []; } })();
+    const totalCatSpend = _spendingRows.reduce((s, r) => s + Number(r.total || 0), 0);
+
+    const _goals = Array.isArray(typeof goalsList !== 'undefined' ? goalsList : null) ? goalsList : [];
+    const _cards = Array.isArray(typeof cards !== 'undefined' ? cards : null) ? cards : [];
+    const _recentTx = Array.isArray(typeof recentTransactions !== 'undefined' ? recentTransactions : null) ? recentTransactions : [];
+    const _debts = Array.isArray(typeof debtsList !== 'undefined' ? debtsList : null) ? debtsList : [];
+
+    const profileName = (typeof userProfile !== 'undefined' && userProfile?.full_name)
+      ? userProfile.full_name
+      : ((locals.currentUser && currentUser.email) ? currentUser.email.split('@')[0] : 'Account Owner');
+    const profileEmail = (typeof userProfile !== 'undefined' && userProfile?.email)
+      ? userProfile.email
+      : ((locals.currentUser && currentUser.email) || '');
+    const initials = profileName
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0].toUpperCase())
+      .join('') || 'P';
+
+    const monthDateObj = new Date(`${month}-01T00:00:00Z`);
+    const monthName = monthDateObj.toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' });
+
+    const catColors = ['#f59e0b', '#fbbf24', '#facc15', '#a3e635', '#84cc16', '#4d7c0f', '#cbd5e1'];
+  %>
+
+  <main id="mainContent" class="page acru-dashboard">
+    <!-- Top Workspace Bar -->
+    <header class="acru-topbar glass-panel" aria-label="Workspace toolbar">
+      <form class="acru-search" method="GET" action="/transactions" role="search">
+        <svg class="icon acru-search__icon" aria-hidden="true"><use href="#i-search"/></svg>
+        <input
+          type="search"
+          name="search"
+          placeholder="Quick search transactions, merchants, or cards..."
+          aria-label="Quick search transactions"
+        >
+      </form>
+
+      <div class="acru-topbar__actions">
+        <a href="/recurring" class="acru-icon-btn" title="Upcoming recurring bills (<%= upcoming.length %>)" aria-label="Upcoming bills">
+          <svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg>
+          <% if (upcoming.length > 0) { %>
+            <span class="acru-icon-btn__dot num"><%= upcoming.length %></span>
+          <% } %>
+        </a>
+        <a href="/settings" class="acru-icon-btn" title="Settings" aria-label="Settings">
+          <svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg>
+        </a>
+        <a href="/settings/profile" class="acru-user-pill" title="Personal profile">
+          <span class="acru-user-pill__avatar" aria-hidden="true"><%= initials %></span>
+          <span class="acru-user-pill__meta">
+            <strong><%= profileName %></strong>
+            <small><%= profileEmail %></small>
+          </span>
+        </a>
+        <a href="/transactions/new" class="button button--primary button--sm acru-add-widget-btn">
           <svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>
           <span>Add transaction</span>
-        </a>
-        <a href="/transactions/transfer/new" class="button">
-          <svg class="icon" aria-hidden="true"><use href="#i-transactions"/></svg>
-          <span>Transfer</span>
-        </a>
-        <a href="/reports" class="button button--ghost">
-          <svg class="icon" aria-hidden="true"><use href="#i-reports"/></svg>
-          <span>View reports</span>
         </a>
       </div>
     </header>
 
-    <section class="dashboard-command-grid" aria-label="Net worth and monthly cashflow">
-      <div class="slip-card slip-card--navy net-worth-hero" data-tilt>
-        <div class="net-worth-hero__top">
-          <div>
-            <h2 class="net-worth-hero__label">Total Net Worth</h2>
-            <p class="net-worth-hero__value num <%= currentNW < 0 ? 'is-negative' : '' %>">
-              <%= formatCurrency(currentNW, displayCurrency) %>
-            </p>
-            <p class="net-worth-hero__hint">Combined across <%= accounts.length %> active <%= accounts.length === 1 ? 'account' : 'accounts' %></p>
-          </div>
-          <a href="/reports" class="net-worth-hero__link">
-            <span>Net Worth history</span>
-            <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg>
-          </a>
-        </div>
-
-        <div class="cashflow-strip">
-          <div class="cashflow-strip__head">
-            <span>This Month (<%= month %>)</span>
-            <span class="num <%= netIncome >= 0 ? 'amount-positive' : 'amount-negative' %>">
-              Net: <%= formatCurrency(Math.abs(netIncome), displayCurrency) %><%= netIncome < 0 ? ' (deficit)' : '' %>
-            </span>
-          </div>
-          <div class="cashflow-meter" aria-hidden="true">
-            <span class="cashflow-meter__income" style="width:<%= incomeExpense.income > 0 || incomeExpense.expenses > 0 ? incomeShare : 50 %>%"></span>
-            <span class="cashflow-meter__expense" style="width:<%= incomeExpense.income > 0 || incomeExpense.expenses > 0 ? expenseShare : 50 %>%"></span>
-          </div>
-          <div class="cashflow-kpis">
-            <div class="kpi-tile summary-card summary-card--income">
-              <span class="summary-card__label">Income</span>
-              <strong class="summary-card__amount num amount-positive"><%= formatCurrency(incomeExpense.income, displayCurrency) %></strong>
-            </div>
-            <div class="kpi-tile summary-card summary-card--expense">
-              <span class="summary-card__label">Expenses</span>
-              <strong class="summary-card__amount num amount-negative"><%= formatCurrency(incomeExpense.expenses, displayCurrency) %></strong>
-            </div>
-            <div class="kpi-tile summary-card">
-              <span class="summary-card__label">Net Income</span>
-              <strong class="summary-card__amount num <%= netIncome >= 0 ? 'amount-positive' : 'amount-negative' %>">
-                <%= formatCurrency(Math.abs(netIncome), displayCurrency) %>
-                <%= netIncome >= 0 ? '' : '(deficit)' %>
-              </strong>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card dashboard-chart-card">
-        <div class="section-header">
-          <h2>Spending by Category</h2>
-          <a href="/budgets" class="button button--sm">Budgets</a>
-        </div>
-        <% if (parsedSpending.length) { %>
-          <div class="chart-stage">
-            <canvas id="spendingChart" data-currency="<%= displayCurrency %>" height="240"></canvas>
-          </div>
-        <% } else { %>
-          <div class="empty-state">
-            <p>No category expenses recorded for <strong><%= month %></strong> yet.</p>
-            <div class="button-row">
-              <a href="/transactions/new" class="button button--primary button--sm">Record an expense</a>
-              <a href="/import" class="button button--sm">Import CSV</a>
-            </div>
-          </div>
-        <% } %>
-      </div>
-    </section>
-
-    <section class="dashboard-section" aria-labelledby="accountsHeading">
-      <div class="section-header">
-        <div>
-          <h2 id="accountsHeading">Account Balances</h2>
-          <p class="section-header__sub">Live balances converted to <%= displayCurrency %> where needed</p>
-        </div>
-        <div class="button-row">
-          <a href="/accounts/new" class="button button--primary button--sm">+ Add account</a>
-          <a href="/accounts" class="button button--sm">Manage</a>
-        </div>
-      </div>
-
-      <% if (!accounts.length) { %>
-        <div class="card empty-state">
-          <p>No accounts yet. Add your first checking, cash or savings account to start tracking your balance.</p>
-          <a href="/accounts/new" class="button button--primary">Add your first account</a>
-        </div>
-      <% } else { %>
-        <div class="grid grid--3">
-          <% accounts.forEach(function(a) { %>
-            <article class="card account-card" data-tilt>
-              <div class="account-card__top">
-                <span class="account-card__type"><%= a.type.replace('_', ' ') %></span>
-                <span class="account-card__currency"><%= a.currency %></span>
+    <!-- Main ACRU Bento Grid -->
+    <div class="acru-bento">
+      <!-- LEFT / CENTER MAIN COLUMN -->
+      <div class="acru-bento__main">
+        <!-- 1. Balance Overview + 7-Day Stacked Bar Chart + 3 KPIs -->
+        <section class="acru-card acru-balance-card glass-panel" aria-labelledby="balanceOverviewHeading">
+          <div class="acru-balance-card__chart-col">
+            <div class="acru-balance-card__head">
+              <div>
+                <p class="acru-balance-card__value num" id="balanceOverviewHeading"><%= displayAmount(currentNW) %></p>
+                <p class="acru-balance-card__sub">Balance overview &middot; <%= t('Net Worth') %> &middot; <%= accounts.length %> active account<%= accounts.length === 1 ? '' : 's' %></p>
               </div>
-              <h3 class="account-card__name"><%= a.account_title || a.name %></h3>
-              <% if (a.bank_name) { %>
-                <p class="account-card__bank"><%= a.bank_name %></p>
+              <div class="acru-balance-card__controls">
+                <div class="acru-legend">
+                  <span><i class="acru-dot acru-dot--savings"></i>Savings</span>
+                  <span><i class="acru-dot acru-dot--income"></i>Income</span>
+                  <span><i class="acru-dot acru-dot--expenses"></i>Expenses</span>
+                </div>
+                <div class="acru-chart-Subcontrols">
+                  <a href="/reports" class="acru-pill-select" title="Open full cash flow reports">7d &rsaquo;</a>
+                  <button type="button" class="acru-chart-mode is-active" data-chart-view="bars" aria-label="Focus single day" title="Focus selected day">
+                    <svg class="icon" aria-hidden="true"><use href="#i-reports"/></svg>
+                  </button>
+                  <button type="button" class="acru-chart-mode" data-chart-view="compact" aria-label="Highlight all 7 days" title="Highlight all 7 days">
+                    <svg class="icon" aria-hidden="true"><use href="#i-transactions"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="acru-weekly-chart" id="acruWeeklyChart" role="img" aria-label="7-day savings, income, and expense bar chart">
+              <div class="acru-weekly-chart__y" id="acruWeeklyYAxis" aria-hidden="true">
+                <span>30k</span>
+                <span>20k</span>
+                <span>10k</span>
+                <span>0</span>
+                <span>-10k</span>
+              </div>
+              <div class="acru-weekly-chart__stage" id="acruWeeklyStage"></div>
+              <div class="acru-weekly-tooltip" id="acruWeeklyTooltip" hidden></div>
+            </div>
+            <script type="application/json" id="dashboardDailyFlowData"><%- typeof dailyFlow === 'string' ? dailyFlow : JSON.stringify(dailyFlow || []) %></script>
+          </div>
+
+          <div class="acru-balance-card__kpis">
+            <div class="acru-kpi-block">
+              <span class="acru-kpi-block__label"><%= t('This Month Income') %></span>
+              <strong class="acru-kpi-block__amount num"><%= displayAmount(currInc) %></strong>
+              <span class="acru-kpi-block__trend acru-kpi-block__trend--up num"><%= incomeTrendLabel %></span>
+            </div>
+
+            <div class="acru-kpi-block">
+              <span class="acru-kpi-block__label"><%= t('This Month Expenses') %></span>
+              <strong class="acru-kpi-block__amount num"><%= displayAmount(currExp) %></strong>
+              <span class="acru-kpi-block__trend acru-kpi-block__trend--warn num"><%= expenseTrendLabel %></span>
+            </div>
+
+            <div class="acru-kpi-block">
+              <span class="acru-kpi-block__label">Saved balance</span>
+              <strong class="acru-kpi-block__amount num"><%= displayAmount(savedThisMonth) %></strong>
+              <span class="acru-kpi-block__trend acru-kpi-block__trend--up num"><%= savedTrendLabel %></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Middle Row: Monthly Spending Limit + Optimize Your Budget Tips -->
+        <div class="acru-mid-row">
+          <section class="acru-card acru-limit-card glass-panel" aria-labelledby="spendingLimitHeading">
+            <div class="acru-card__head">
+              <div>
+                <h2 id="spendingLimitHeading">Monthly spending limit</h2>
+                <p class="acru-card__sub">
+                  <% if (totalBudgetAvailable > 0) { %>
+                    Across <%= _budgets.length %> active category budget<%= _budgets.length === 1 ? '' : 's' %>
+                  <% } else { %>
+                    Tracked against monthly income (<a href="/budgets">set category limits</a>)
+                  <% } %>
+                </p>
+              </div>
+              <a href="/budgets" class="acru-icon-btn acru-icon-btn--sm" title="Edit monthly budgets" aria-label="Edit monthly budgets">
+                <svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg>
+              </a>
+            </div>
+            <div class="acru-limit-bar" role="progressbar" aria-valuenow="<%= limitPercent %>" aria-valuemin="0" aria-valuemax="100">
+              <div class="acru-limit-bar__fill" style="width: <%= limitPercent %>%"></div>
+            </div>
+            <div class="acru-limit-card__foot num">
+              <strong><%= displayAmount(limitSpent) %> spent</strong>
+              <span>Limit: <%= displayAmount(limitAmount) %></span>
+            </div>
+          </section>
+
+          <section class="acru-card acru-tips-card glass-panel" aria-labelledby="budgetTipsHeading">
+            <div class="acru-tips-card__copy">
+              <h2 id="budgetTipsHeading">Optimize your budget with these quick tips</h2>
+              <% if (upcoming.length > 0) { %>
+                <p>You have <strong><%= upcoming.length %></strong> upcoming recurring bill<%= upcoming.length === 1 ? '' : 's' %> in the next 14 days (next: <%= upcoming[0].payee || upcoming[0].category_name || 'Scheduled bill' %> on <%= upcoming[0].next_run_date %>).</p>
+                <a href="/recurring" class="acru-read-more">Review recurring bills &rsaquo;</a>
               <% } else { %>
-                <p class="account-card__bank">Personal account</p>
+                <p>Assign category budgets and link your Debit or Credit cards so every purchase is tracked against your monthly target.</p>
+                <a href="/budgets" class="acru-read-more">Configure monthly budgets &rsaquo;</a>
               <% } %>
-              <p class="account-card__balance num <%= Number(a.current_balance) < 0 ? 'is-negative' : '' %>">
-                <%= displayAmount(Number(a.current_balance), a.currency) %>
-              </p>
-              <div class="account-card__foot">
-                <a href="/transactions?account=<%= a.id %>">View ledger</a>
-                <a href="/accounts/<%= a.id %>/edit">Edit</a>
+            </div>
+            <div class="acru-tips-card__graphic" aria-hidden="true">
+              <span class="step-col step-col--1"><i></i><i></i></span>
+              <span class="step-col step-col--2"><i></i><i></i><i></i></span>
+              <span class="step-col step-col--3"><i></i><i></i><i></i><i></i></span>
+            </div>
+          </section>
+        </div>
+
+        <!-- 3. Bottom Row: Cost Analysis + Financial Health Gauge + Goal Tracker -->
+        <div class="acru-bottom-row">
+          <!-- Cost Analysis -->
+          <section class="acru-card acru-cost-card glass-panel" aria-labelledby="costAnalysisHeading">
+            <div class="acru-card__head">
+              <div>
+                <h2 id="costAnalysisHeading">Cost analysis</h2>
+                <p class="acru-card__sub">Spending overview</p>
               </div>
-            </article>
-          <% }) %>
-        </div>
-      <% } %>
-    </section>
+              <a href="/reports" class="acru-pill-select"><%= monthName %> &rsaquo;</a>
+            </div>
 
-    <div class="grid grid--2 dashboard-split-sections">
-      <section class="dashboard-section card" aria-labelledby="debtsHeading">
-        <div class="section-header">
-          <div>
-            <h2 id="debtsHeading">Debts</h2>
-            <p class="section-header__sub">Money lent and borrowed</p>
-          </div>
-          <div class="button-row">
-            <a href="/debts/new" class="button button--sm">+ Add</a>
-            <a href="/debts" class="button button--sm">Manage</a>
-          </div>
-        </div>
-        <div class="grid grid--2">
-          <div class="kpi-tile summary-card">
-            <span class="summary-card__label">Money lent</span>
-            <strong class="summary-card__amount num amount-positive"><%= formatCurrency(debtSummary.lent, displayCurrency) %></strong>
-          </div>
-          <div class="kpi-tile summary-card">
-            <span class="summary-card__label">Money borrowed</span>
-            <strong class="summary-card__amount num <%= debtSummary.borrowed > 0 ? 'amount-negative' : '' %>"><%= formatCurrency(debtSummary.borrowed, displayCurrency) %></strong>
-          </div>
-        </div>
-      </section>
+            <p class="acru-cost-card__total num"><%= displayAmount(currExp) %></p>
 
-      <section class="dashboard-section card" aria-labelledby="upcomingHeading">
-        <div class="section-header">
-          <div>
-            <h2 id="upcomingHeading">Upcoming Bills (next 14 days)</h2>
-            <p class="section-header__sub">Scheduled recurring templates</p>
-          </div>
-          <a href="/recurring" class="button button--sm">All recurring</a>
-        </div>
-        <% if (upcoming.length) { %>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Due</th><th>Payee</th><th>Amount</th><th>Account</th></tr>
-              </thead>
-              <tbody>
-                <% upcoming.forEach(function(b) { %>
-                  <tr>
-                    <td class="num"><%= b.next_run_date %></td>
-                    <td><%= b.payee || 'Scheduled bill' %></td>
-                    <td class="num amount-negative"><%= displayAmount(Math.abs(Number(b.amount)), b.account_currency) %></td>
-                    <td><%= b.account_name %></td>
-                  </tr>
+            <% if (_spendingRows.length > 0 && totalCatSpend > 0) { %>
+              <div class="acru-segmented-bar" aria-label="Spending proportions by category">
+                <% _spendingRows.slice(0, 6).forEach(function(row, idx) {
+                  const pct = Math.max(4, Math.round((Number(row.total || 0) / totalCatSpend) * 100));
+                %>
+                  <span style="flex: <%= pct %>; background: <%= catColors[idx % catColors.length] %>;" title="<%= row.category_name || 'Uncategorized' %>: <%= pct %>%"></span>
                 <% }) %>
-              </tbody>
-            </table>
+              </div>
+              <ul class="acru-cost-list">
+                <% _spendingRows.slice(0, 6).forEach(function(row, idx) {
+                  const pct = Math.round((Number(row.total || 0) / totalCatSpend) * 100);
+                %>
+                  <li>
+                    <span class="acru-cost-list__name">
+                      <i style="background: <%= catColors[idx % catColors.length] %>;"></i>
+                      <span><%= row.category_name || 'Uncategorized' %></span>
+                    </span>
+                    <strong class="num"><%= pct %>%</strong>
+                  </li>
+                <% }) %>
+              </ul>
+            <% } else { %>
+              <div class="empty-state empty-state--compact">
+                <p>No categorized expenses recorded in <%= monthName %> yet.</p>
+                <a href="/transactions/new?type=expense" class="button button--ghost button--sm">+ Record an expense</a>
+              </div>
+            <% } %>
+            <script type="application/json" id="dashboardSpendingData"><%- spending %></script>
+          </section>
+
+          <!-- Financial Health Gauge -->
+          <section class="acru-card acru-health-card glass-panel" aria-labelledby="financialHealthHeading">
+            <div class="acru-card__head">
+              <div>
+                <h2 id="financialHealthHeading">Financial health</h2>
+                <p class="acru-card__sub">Current status</p>
+              </div>
+              <a href="/reports" class="acru-pill-select" title="View 30-day financial report">30d &rsaquo;</a>
+            </div>
+
+            <p class="acru-health-card__value num"><%= displayAmount(savedThisMonth > 0 ? savedThisMonth : currentNW) %></p>
+            <span class="acru-kpi-block__trend acru-kpi-block__trend--up num"><%= savedTrendLabel %></span>
+
+            <div class="acru-gauge" role="img" aria-label="Financial health gauge: <%= savingsRate %>% of monthly income saved">
+              <svg viewBox="0 0 220 130" class="acru-gauge__svg">
+                <path
+                  d="M 24 110 A 86 86 0 0 1 196 110"
+                  fill="none"
+                  stroke="var(--gauge-track, rgba(148, 163, 184, 0.2))"
+                  stroke-width="22"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M 24 110 A 86 86 0 0 1 196 110"
+                  fill="none"
+                  stroke="url(#acruGaugeGrad)"
+                  stroke-width="22"
+                  stroke-linecap="round"
+                  stroke-dasharray="270"
+                  stroke-dashoffset="<%= Math.round(270 - (270 * Math.min(100, Math.max(0, savingsRate))) / 100) %>"
+                  class="acru-gauge__arc"
+                />
+                <defs>
+                  <linearGradient id="acruGaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#d9f99d"/>
+                    <stop offset="55%" stop-color="#a3e635"/>
+                    <stop offset="100%" stop-color="#65a30d"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="acru-gauge__center">
+                <strong class="num"><%= savingsRate %>%</strong>
+                <span>Of monthly income saved</span>
+              </div>
+            </div>
+
+            <p class="acru-health-card__foot">Based on your recorded income and expenses this month</p>
+          </section>
+
+          <!-- Goal Tracker -->
+          <section class="acru-card acru-goals-card glass-panel" aria-labelledby="goalTrackerHeading">
+            <div class="acru-card__head">
+              <h2 id="goalTrackerHeading">Goal tracker</h2>
+              <a href="/goals/new" class="acru-pill-btn">+ Add goals</a>
+            </div>
+
+            <% if (_goals.length > 0) { %>
+              <div class="acru-goals-group">
+                <span class="acru-goals-group__title">Active goals</span>
+                <% _goals.slice(0, 4).forEach(function(g, idx) {
+                  const pct = Math.round(Number(g.percentComplete || 0));
+                  const barColor = idx % 2 === 0 ? '#84cc16' : '#f59e0b';
+                %>
+                  <a href="/goals" class="acru-goal-item">
+                    <span class="acru-goal-item__icon">
+                      <svg class="icon" aria-hidden="true"><use href="#i-goals"/></svg>
+                    </span>
+                    <div class="acru-goal-item__body">
+                      <div class="acru-goal-item__top">
+                        <strong><%= g.name %></strong>
+                        <span class="num"><%= displayAmount(g.saved) %> / <small><%= displayAmount(g.target_amount) %></small></span>
+                      </div>
+                      <div class="acru-goal-item__bar">
+                        <span style="width: <%= Math.max(4, pct) %>%; background: <%= barColor %>;"></span>
+                      </div>
+                      <small class="acru-goal-item__meta">
+                        <% if (g.daysRemaining !== null) { %>
+                          <%= g.daysRemaining %> days remaining &middot; <%= pct %>%
+                        <% } else { %>
+                          <%= pct %>% achieved on <%= g.account_name %>
+                        <% } %>
+                      </small>
+                    </div>
+                  </a>
+                <% }) %>
+              </div>
+            <% } else { %>
+              <div class="empty-state empty-state--compact">
+                <p>No active savings goals yet. Link a goal to any savings or bank account to track milestones.</p>
+                <a href="/goals/new" class="button button--ghost button--sm">+ Create savings goal</a>
+              </div>
+            <% } %>
+          </section>
+        </div>
+
+        <!-- 4. Accounts & Linked Balances Strip -->
+        <section class="acru-card acru-accounts-strip glass-panel" aria-labelledby="accountsHeading">
+          <div class="acru-card__head">
+            <div>
+              <h2 id="accountsHeading"><%= t('Accounts') %> &amp; Linked Ledgers</h2>
+              <p class="acru-card__sub">Direct bank accounts, wallets, and lent/borrowed balances</p>
+            </div>
+            <div class="button-row" style="margin:0;">
+              <a href="/debts" class="acru-pill-btn">Lent: <%= displayAmount(debtSummary.lent) %> &middot; Borrowed: <%= displayAmount(debtSummary.borrowed) %></a>
+              <a href="/accounts/new" class="acru-pill-btn">+ <%= t('Add account') %></a>
+            </div>
           </div>
-        <% } else { %>
-          <div class="empty-state empty-state--compact">
-            <p>No recurring bills due in the next 14 days.</p>
-            <a href="/recurring/new" class="button button--sm">Schedule a recurring bill</a>
+
+          <% if (!accounts.length) { %>
+            <div class="empty-state">
+              <p>No accounts yet. Add your primary bank, wallet, or cash account to start tracking.</p>
+              <a class="button button--primary" href="/accounts/new"><%= t('Add your first account') %></a>
+            </div>
+          <% } else { %>
+            <div class="acru-accounts-grid">
+              <% accounts.forEach(function(a) { %>
+                <a class="acru-account-tile" href="/transactions?account=<%= a.id %>">
+                  <div class="acru-account-tile__top">
+                    <strong><%= a.account_title || a.name %></strong>
+                    <span class="acru-account-tile__type"><%= a.type.replace('_', ' ') %></span>
+                  </div>
+                  <p class="acru-account-tile__bank"><%= a.bank_name || a.currency %></p>
+                  <p class="acru-account-tile__bal num <%= Number(a.current_balance) < 0 ? 'amount-negative' : '' %>">
+                    <%= displayAmount(a.current_balance, a.currency) %>
+                  </p>
+                </a>
+              <% }) %>
+            </div>
+          <% } %>
+        </section>
+      </div>
+
+      <!-- RIGHT RAIL COLUMN: My Card + Quick Actions + Quick Payment + Transaction History -->
+      <aside class="acru-bento__rail" aria-label="Cards and recent transactions">
+        <!-- My Card Widget -->
+        <section class="acru-card acru-mycard-widget glass-panel" aria-labelledby="myCardHeading">
+          <div class="acru-card__head">
+            <div>
+              <h2 id="myCardHeading">My card</h2>
+              <p class="acru-card__sub">Quick actions &amp; linked account cards</p>
+            </div>
+            <button type="button" class="acru-pill-btn" data-open-card-modal>+ Add card</button>
           </div>
-        <% } %>
-      </section>
+
+          <!-- Horizontal Card Carousel -->
+          <div class="acru-card-carousel" id="acruCardCarousel">
+            <% if (_cards.length > 0) { %>
+              <% _cards.forEach(function(card, idx) { %>
+                <article
+                  class="acru-visual-card acru-visual-card--<%= card.theme_color || (card.card_type === 'credit' ? 'slate' : 'lime') %> <%= idx === 0 ? 'is-active' : '' %>"
+                  data-card-id="<%= card.id %>"
+                >
+                  <div class="acru-visual-card__top">
+                    <span><%= card.card_type === 'credit' ? 'Credit card' : 'Debit card' %></span>
+                    <strong><%= card.network %></strong>
+                  </div>
+                  <div class="acru-visual-card__chip-row">
+                    <span class="acru-visual-card__chip" aria-hidden="true"></span>
+                    <span class="acru-visual-card__acct"><%= card.account_name %></span>
+                  </div>
+                  <div class="acru-visual-card__num num">&bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; <%= card.last4 %></div>
+                  <div class="acru-visual-card__foot">
+                    <span><%= card.cardholder_name || profileName %></span>
+                    <span class="num"><%= card.expiry %></span>
+                  </div>
+                </article>
+              <% }) %>
+            <% } else { %>
+              <div class="acru-empty-card-cta" data-open-card-modal role="button" tabindex="0" aria-label="Link a Debit or Credit Card">
+                <div class="acru-empty-card-cta__top">
+                  <span class="acru-visual-card__chip" aria-hidden="true"></span>
+                  <span class="acru-empty-card-cta__badge">Debit / Credit</span>
+                </div>
+                <strong>No card linked yet</strong>
+                <p>Link your bank Debit or Credit card to an account to detect and track card transactions automatically.</p>
+                <span class="acru-pill-btn">+ Link your first card</span>
+              </div>
+            <% } %>
+          </div>
+
+          <!-- 5 Quick Action Buttons below the card -->
+          <div class="acru-quick-actions">
+            <a href="/transactions/new?type=income" class="acru-quick-action">
+              <span class="acru-quick-action__icon"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></span>
+              <span>Top up</span>
+            </a>
+            <a href="/transactions/new?type=expense&paymentMethod=card" class="acru-quick-action">
+              <span class="acru-quick-action__icon"><svg class="icon" aria-hidden="true"><use href="#i-card"/></svg></span>
+              <span>Card spend</span>
+            </a>
+            <a href="/transactions/transfer/new" class="acru-quick-action">
+              <span class="acru-quick-action__icon"><svg class="icon" aria-hidden="true"><use href="#i-transactions"/></svg></span>
+              <span>Transfer</span>
+            </a>
+            <a href="/transactions" class="acru-quick-action">
+              <span class="acru-quick-action__icon"><svg class="icon" aria-hidden="true"><use href="#i-recurring"/></svg></span>
+              <span>History</span>
+            </a>
+            <a href="/accounts#cards" class="acru-quick-action">
+              <span class="acru-quick-action__icon"><svg class="icon" aria-hidden="true"><use href="#i-accounts"/></svg></span>
+              <span>Cards</span>
+            </a>
+          </div>
+
+          <!-- Quick Payment / People (Debts & Counterparties) -->
+          <div class="acru-quick-people">
+            <div class="acru-quick-people__head">
+              <strong>Quick payment &amp; people</strong>
+              <a href="/debts" aria-label="Manage debts and people">View all &rsaquo;</a>
+            </div>
+            <div class="acru-people-row">
+              <% if (_debts.length > 0) { %>
+                <% _debts.slice(0, 5).forEach(function(d, idx) {
+                  const pInit = String(d.person_name || 'P').trim().slice(0, 2).toUpperCase();
+                %>
+                  <a href="/debts/<%= d.id %>" class="acru-person-chip" title="<%= d.person_name %> (<%= d.direction %>)">
+                    <span class="acru-person-chip__avatar acru-person-chip__avatar--<%= idx % 4 %>"><%= pInit %></span>
+                    <span class="acru-person-chip__name"><%= d.person_name.split(' ')[0] %></span>
+                  </a>
+                <% }) %>
+              <% } else { %>
+                <a href="/transactions/new?type=expense&paymentMethod=card" class="acru-person-chip">
+                  <span class="acru-person-chip__avatar acru-person-chip__avatar--0">CA</span>
+                  <span class="acru-person-chip__name">Card POS</span>
+                </a>
+                <a href="/transactions/transfer/new" class="acru-person-chip">
+                  <span class="acru-person-chip__avatar acru-person-chip__avatar--1">TR</span>
+                  <span class="acru-person-chip__name">Transfer</span>
+                </a>
+                <a href="/debts/new" class="acru-person-chip">
+                  <span class="acru-person-chip__avatar acru-person-chip__avatar--2">LN</span>
+                  <span class="acru-person-chip__name">Lent</span>
+                </a>
+                <a href="/debts/new" class="acru-person-chip">
+                  <span class="acru-person-chip__avatar acru-person-chip__avatar--3">BR</span>
+                  <span class="acru-person-chip__name">Borrowed</span>
+                </a>
+              <% } %>
+              <a href="/debts/new" class="acru-person-chip" title="Add person / debt">
+                <span class="acru-person-chip__avatar acru-person-chip__avatar--add">+</span>
+                <span class="acru-person-chip__name">Add</span>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Transaction History Widget -->
+        <section class="acru-card acru-tx-widget glass-panel" aria-labelledby="txHistoryHeading">
+          <div class="acru-card__head">
+            <h2 id="txHistoryHeading">Transaction history</h2>
+            <a href="/transactions" class="acru-pill-select">All &rsaquo;</a>
+          </div>
+
+          <div class="acru-tx-widget__cols">
+            <span>&#8593;&#8595; Name</span>
+            <span>Amount</span>
+          </div>
+
+          <% if (_recentTx.length > 0) { %>
+            <ul class="acru-tx-list">
+              <% _recentTx.slice(0, 7).forEach(function(tx, idx) {
+                const titleText = tx.is_transfer ? 'Account Transfer' : (tx.payee || (tx.splits && tx.splits[0]?.category_name) || 'Transaction');
+                const badgeText = tx.card_last4 ? tx.card_network.slice(0, 2).toUpperCase() : titleText.slice(0, 2).toUpperCase();
+                const isPos = Number(tx.amount) >= 0;
+                const isCardTx = Boolean(tx.card_id || tx.payment_method === 'debit_card' || tx.payment_method === 'credit_card' || tx.account_type === 'credit_card');
+              %>
+                <li class="acru-tx-item">
+                  <a href="/transactions/<%= tx.id %>/edit" class="acru-tx-item__link">
+                    <span class="acru-tx-item__badge acru-tx-item__badge--<%= idx % 5 %>"><%= badgeText %></span>
+                    <div class="acru-tx-item__info">
+                      <strong><%= titleText %></strong>
+                      <small>
+                        <%= tx.date %>
+                        <% if (tx.card_last4) { %>
+                          &middot; <span class="acru-tx-card-tag"><%= tx.card_network %> &bull;&bull;<%= tx.card_last4 %> (<%= tx.card_type === 'credit' ? 'Credit' : 'Debit' %>)</span>
+                        <% } else if (isCardTx) { %>
+                          &middot; <span class="acru-tx-card-tag"><%= tx.payment_method === 'credit_card' || tx.account_type === 'credit_card' ? 'Credit card' : 'Debit card' %></span>
+                        <% } else { %>
+                          &middot; <%= tx.account_name %>
+                        <% } %>
+                      </small>
+                    </div>
+                    <div class="acru-tx-item__right num">
+                      <strong class="<%= isPos ? 'amount-positive' : '' %>">
+                        <%= isPos ? '+' : '-' %><%= displayAmount(Math.abs(Number(tx.amount)), tx.account_currency) %>
+                      </strong>
+                      <small class="acru-tx-status <%= isCardTx ? 'acru-tx-status--card' : '' %>">
+                        <%= isCardTx ? 'Card Verified' : 'Completed' %>
+                      </small>
+                    </div>
+                  </a>
+                </li>
+              <% }) %>
+            </ul>
+          <% } else { %>
+            <div class="acru-tx-empty empty-state empty-state--compact">
+              <p>No transactions recorded yet.</p>
+              <a href="/transactions/new" class="button button--primary button--sm">Record first transaction</a>
+            </div>
+          <% } %>
+        </section>
+      </aside>
     </div>
 
-    <div class="button-row dashboard-actions">
-      <a href="/reports" class="button button--primary">Full Reports &rarr;</a>
-      <a href="/budgets" class="button">Budgets</a>
-      <a href="/goals" class="button">Savings Goals</a>
-      <a href="/settings" class="button">Personal information &amp; security</a>
-      <form action="/auth/logout?_method=DELETE" method="POST">
-        <button type="submit" class="button button--ghost">Log out</button>
-      </form>
+    <!-- Modal to Link a Debit or Credit Card directly from the Dashboard -->
+    <div class="acru-modal-backdrop" id="addCardModal" hidden>
+      <div class="acru-modal glass-panel" role="dialog" aria-modal="true" aria-labelledby="addCardModalTitle">
+        <div class="acru-modal__head">
+          <div>
+            <h2 id="addCardModalTitle">Link a Debit or Credit Card</h2>
+            <p class="acru-card__sub">Connect a card to one of your Purslip accounts so card transactions are tracked automatically.</p>
+          </div>
+          <button type="button" class="acru-icon-btn acru-icon-btn--sm" data-close-card-modal aria-label="Close modal">
+            <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+          </button>
+        </div>
+
+        <% if (accounts.length > 0) { %>
+          <form method="POST" action="/accounts/cards">
+            <input type="hidden" name="returnTo" value="/dashboard">
+            <div class="grid grid--2">
+              <div class="form-field">
+                <label for="modalAccountId">Linked Account</label>
+                <select id="modalAccountId" name="accountId" required>
+                  <% accounts.forEach(function(a) { %>
+                    <option value="<%= a.id %>"><%= a.account_title || a.name %> (<%= a.bank_name || a.currency %>)</option>
+                  <% }) %>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="modalCardName">Card Label</label>
+                <input type="text" id="modalCardName" name="cardName" placeholder="e.g. HBL Visa Debit, Meezan Credit" required maxlength="80">
+              </div>
+            </div>
+            <div class="grid grid--3">
+              <div class="form-field">
+                <label for="modalCardType">Card Type</label>
+                <select id="modalCardType" name="cardType" required>
+                  <option value="debit">Debit card</option>
+                  <option value="credit">Credit card</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="modalNetwork">Network</label>
+                <select id="modalNetwork" name="network">
+                  <option value="VISA">VISA</option>
+                  <option value="Mastercard">Mastercard</option>
+                  <option value="PayPak">PayPak</option>
+                  <option value="UnionPay">UnionPay</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="modalTheme">Card Finish</label>
+                <select id="modalTheme" name="themeColor">
+                  <option value="lime">ACRU Lime Green</option>
+                  <option value="slate">Frosted Silver</option>
+                  <option value="obsidian">Obsidian Carbon</option>
+                  <option value="emerald">Emerald Glass</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid grid--3">
+              <div class="form-field">
+                <label for="modalHolder">Cardholder Name</label>
+                <input type="text" id="modalHolder" name="cardholderName" value="<%= profileName %>" maxlength="80">
+              </div>
+              <div class="form-field">
+                <label for="modalLast4">Last 4 Digits</label>
+                <input type="text" id="modalLast4" name="last4" pattern="\d{4}" maxlength="4" placeholder="4 digits" required>
+              </div>
+              <div class="form-field">
+                <label for="modalExpiry">Expiry (MM/YY)</label>
+                <input type="text" id="modalExpiry" name="expiry" placeholder="MM/YY" maxlength="7" required>
+              </div>
+            </div>
+            <div class="button-row" style="justify-content:flex-end; margin-top: 12px;">
+              <button type="button" class="button button--ghost" data-close-card-modal>Cancel</button>
+              <button type="submit" class="button button--primary">Link Card</button>
+            </div>
+          </form>
+        <% } else { %>
+          <p>Create your first bank or wallet account before linking a card.</p>
+          <a href="/accounts/new" class="button button--primary">Add an account first</a>
+        <% } %>
+      </div>
     </div>
   </main>
   <%- include('partials/footer') %>
-  <script type="application/json" id="spendingData"><%- spending %></script>
-  <script src="/js/chart.umd.js"></script>
-  <script src="/js/dashboard.js?v=3"></script>
+  <script src="/js/dashboard.js?v=5" defer></script>
 </body>
 </html>

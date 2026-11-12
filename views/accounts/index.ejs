@@ -5,28 +5,34 @@
 </head>
 <body>
   <%- include('../partials/header') %>
-  <main class="page">
+  <main id="mainContent" class="page">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap: 8px; margin-bottom: 16px;">
-      <h1 style="margin:0;">Accounts</h1>
-      <a class="button button--primary" href="/accounts/new">Add account</a>
+      <div>
+        <h1 style="margin:0;">Accounts &amp; Linked Cards</h1>
+        <p style="margin:4px 0 0; color: var(--color-text-muted);">Manage your bank accounts, wallets, and the Debit or Credit cards linked to them.</p>
+      </div>
+      <div class="button-row" style="margin:0;">
+        <a class="button button--ghost" href="#cards">Link a card</a>
+        <a class="button button--primary" href="/accounts/new">Add account</a>
+      </div>
     </div>
 
     <% if (!accounts.length) { %>
-      <div class="card">
+      <div class="card glass-panel">
         <p>No <%= includeArchived ? 'archived ' : '' %>accounts yet.</p>
-        <% if (!includeArchived) { %><a class="button" href="/accounts/new">Add your first account</a><% } %>
+        <% if (!includeArchived) { %><a class="button button--primary" href="/accounts/new">Add your first account</a><% } %>
       </div>
     <% } else { %>
       <div class="grid grid--3">
         <% accounts.forEach(function(account) { %>
-          <div class="card">
+          <div class="card glass-panel">
             <h2 style="margin-bottom:4px;"><%= account.account_title || account.name %></h2>
             <p style="margin:0 0 4px; color: var(--color-text-muted);"><%= account.bank_name || 'Bank/provider not set' %></p>
             <p class="form-field label" style="color: var(--color-text-muted); margin: 0 0 8px;">
               <%= account.type.replace('_', ' ') %> &middot; <%= account.currency %>
               <% if (!account.is_active) { %> &middot; archived<% } %>
             </p>
-            <p style="font-size:1.5rem; font-weight:700; margin: 0 0 16px;">
+            <p class="num" style="font-size:1.5rem; font-weight:700; margin: 0 0 16px;">
               <%= Number(account.current_balance).toLocaleString(undefined, { style: 'currency', currency: account.currency }) %>
             </p>
             <div class="button-row" style="justify-content:flex-start;">
@@ -53,6 +59,121 @@
         <a href="/accounts?archived=1">Show archived accounts</a>
       <% } %>
     </p>
+
+    <% const _cards = Array.isArray(typeof cards !== 'undefined' ? cards : null) ? cards : []; %>
+    <section id="cards" style="margin-top: 36px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap: 12px; margin-bottom: 16px;">
+        <div>
+          <h2 style="margin:0;">My Linked Cards (Debit &amp; Credit)</h2>
+          <p style="margin:4px 0 0; color: var(--color-text-muted);">Every card transaction automatically updates its linked account balance and tags your spending history.</p>
+        </div>
+      </div>
+
+      <% if (_cards.length) { %>
+        <div class="cards-showcase-grid" style="margin-bottom: 24px;">
+          <% _cards.forEach(function(card) { %>
+            <article class="bank-card bank-card--<%= card.theme_color || (card.card_type === 'credit' ? 'slate' : 'lime') %>">
+              <div class="bank-card__top">
+                <span class="bank-card__type"><%= card.card_type === 'credit' ? 'Credit card' : 'Debit card' %></span>
+                <span class="bank-card__network"><%= card.network %></span>
+              </div>
+              <div class="bank-card__chip-row">
+                <span class="bank-card__chip" aria-hidden="true"></span>
+                <span class="bank-card__linked">Linked to <%= card.account_name %> (<%= card.bank_name || card.account_currency %>)</span>
+              </div>
+              <div class="bank-card__number num">**** **** **** <%= card.last4 %></div>
+              <div class="bank-card__bottom">
+                <div>
+                  <small>Cardholder</small>
+                  <strong><%= card.cardholder_name || card.card_name %></strong>
+                </div>
+                <div>
+                  <small>Expires</small>
+                  <strong class="num"><%= card.expiry %></strong>
+                </div>
+                <div>
+                  <small>This month</small>
+                  <strong class="num"><%= Number(card.month_spent || 0).toLocaleString(undefined, { style: 'currency', currency: card.account_currency || 'PKR' }) %></strong>
+                </div>
+              </div>
+              <div class="bank-card__actions">
+                <a class="button button--sm" href="/transactions/new?cardId=<%= card.id %>">Record spend</a>
+                <a class="button button--sm button--ghost" href="/transactions?card=<%= card.id %>">History (<%= card.tx_count || 0 %>)</a>
+                <form action="/accounts/cards/<%= card.id %>?_method=DELETE" method="POST" data-confirm="Unlink this card from <%= card.account_name %>?">
+                  <button type="submit" class="button button--sm button--danger">Unlink</button>
+                </form>
+              </div>
+            </article>
+          <% }) %>
+        </div>
+      <% } %>
+
+      <% if (accounts.length) { %>
+        <div class="card glass-panel" style="max-width: 720px;">
+          <h3 style="margin-top:0;">Link a Debit or Credit Card to an Account</h3>
+          <form method="POST" action="/accounts/cards">
+            <div class="grid grid--2">
+              <div class="form-field">
+                <label for="cardAccountId">Linked account</label>
+                <select id="cardAccountId" name="accountId" required>
+                  <% accounts.forEach(function(a) { %>
+                    <option value="<%= a.id %>"><%= a.account_title || a.name %> (<%= a.bank_name || a.currency %>)</option>
+                  <% }) %>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="cardName">Card label</label>
+                <input type="text" id="cardName" name="cardName" placeholder="e.g. HBL Visa Debit, Meezan Gold Credit" required maxlength="80">
+              </div>
+            </div>
+            <div class="grid grid--3">
+              <div class="form-field">
+                <label for="cardType">Card type</label>
+                <select id="cardType" name="cardType" required>
+                  <option value="debit">Debit card</option>
+                  <option value="credit">Credit card</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="network">Network</label>
+                <select id="network" name="network">
+                  <option value="VISA">VISA</option>
+                  <option value="Mastercard">Mastercard</option>
+                  <option value="PayPak">PayPak</option>
+                  <option value="UnionPay">UnionPay</option>
+                  <option value="Amex">Amex</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="themeColor">Card finish</label>
+                <select id="themeColor" name="themeColor">
+                  <option value="lime">ACRU Lime Green</option>
+                  <option value="slate">Frosted Silver</option>
+                  <option value="obsidian">Obsidian Carbon</option>
+                  <option value="emerald">Emerald Glass</option>
+                  <option value="amber">Gold Brass</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid grid--3">
+              <div class="form-field">
+                <label for="cardholderName">Name on card</label>
+                <input type="text" id="cardholderName" name="cardholderName" placeholder="e.g. Muhammad Arham" maxlength="80">
+              </div>
+              <div class="form-field">
+                <label for="last4">Last 4 digits</label>
+                <input type="text" id="last4" name="last4" pattern="\d{4}" maxlength="4" placeholder="4 digits" required>
+              </div>
+              <div class="form-field">
+                <label for="expiry">Expiry (MM/YY)</label>
+                <input type="text" id="expiry" name="expiry" placeholder="MM/YY" maxlength="7" required>
+              </div>
+            </div>
+            <button type="submit" class="button button--primary">+ Link card to account</button>
+          </form>
+        </div>
+      <% } %>
+    </section>
   </main>
   <%- include('../partials/footer') %>
 </body>

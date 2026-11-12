@@ -17,9 +17,13 @@ const __dirname = path.dirname(__filename);
 const { pool } = require('./config/db');
 const { requireAuth } = require('./middleware/auth');
 const accountsModel = require('./models/accounts');
+const cardsModel = require('./models/cards');
 const reportsModel = require('./models/reports');
 const recurringModel = require('./models/recurring');
 const debtsModel = require('./models/debts');
+const budgetsModel = require('./models/budgets');
+const goalsModel = require('./models/goals');
+const transactionsModel = require('./models/transactions');
 const usersModel = require('./models/users');
 const { formatCurrency } = require('./lib/currency');
 const { convertAmount } = require('./lib/currency');
@@ -27,10 +31,8 @@ const { translate } = require('./lib/i18n');
 const { writeLimiter } = require('./middleware/rateLimit');
 const { siteLocals } = require('./lib/site');
 
-const dashboardCache = new Map<string, { expiresAt: number; value: any }>();
 const dashboardGenerationByUser = new Map<string, string>();
-const DASHBOARD_CACHE_TTL = 10000;
-const SESSION_IDLE_TIMEOUT_MS = 15 * 60 * 1000;
+const SESSION_IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes inactivity timeout
 
 declare module 'express-session' {
   interface SessionData {
@@ -186,7 +188,7 @@ app.get('/', (req: Request, res: Response) => {
 
 app.get('/dashboard', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    res.setHeader('Cache-Control', 'private, max-age=10, must-revalidate');
+    res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
     const userId = (req.session as any).user.id;
 
     const now = new Date();
@@ -196,26 +198,51 @@ app.get('/dashboard', requireAuth, async (req: Request, res: Response, next: Nex
     const startDate = `${y}-${m}-01`;
     const endDate = `${y}-${m}-${String(lastDay).padStart(2, '0')}`;
 
+    const prevDate = new Date(y, now.getMonth() - 1, 1);
+    const py = prevDate.getFullYear();
+    const pm = String(prevDate.getMonth() + 1).padStart(2, '0');
+    const prevLastDay = new Date(py, prevDate.getMonth() + 1, 0).getDate();
+    const prevStartDate = `${py}-${pm}-01`;
+    const prevEndDate = `${py}-${pm}-${String(prevLastDay).padStart(2, '0')}`;
+
     const todayKey = new Date().toISOString().slice(0, 10);
     if (dashboardGenerationByUser.get(userId) !== todayKey) {
       await recurringModel.generateDue({ userId });
       dashboardGenerationByUser.set(userId, todayKey);
     }
 
-    const cacheKey = `${userId}:${startDate}:${endDate}:${res.locals.displayCurrency}`;
-    const cached = dashboardCache.get(cacheKey);
-    if (cached && cached.expiresAt > Date.now()) {
-      return res.render('dashboard', { title: 'Dashboard', ...cached.value });
-    }
-
-    const [accounts, incomeExpense, spending, currentNW, upcoming, debtRows] = await Promise.all([
+    const [
+      accounts,
+      cards,
+      incomeExpense,
+      prevIncomeExpense,
+      dailyFlow,
+      spending,
+      currentNW,
+      upcoming,
+      debtRows,
+      debtsList,
+      budgetsList,
+      goalsList,
+      recentTxResult,
+      userProfile,
+    ] = await Promise.all([
       accountsModel.list(userId),
+      cardsModel.listWithStats(userId, startDate, endDate),
       reportsModel.incomeExpenseForRange(userId, startDate, endDate),
+      reportsModel.incomeExpenseForRange(userId, prevStartDate, prevEndDate),
+      reportsModel.dailyCashFlow(userId, 7),
       reportsModel.spendingByCategory(userId, startDate, endDate),
       reportsModel.currentNetWorth(userId),
       recurringModel.upcomingBills(userId, 14),
       debtsModel.summary(userId),
+      debtsModel.list(userId),
+      budgetsModel.listForMonth(userId, `${y}-${m}`),
+      goalsModel.list(userId),
+      transactionsModel.list(userId, { page: 1, pageSize: 8 }),
+      usersModel.getProfile(userId),
     ]);
+
     const debtSummary = debtRows.reduce((summary: { lent: number; borrowed: number }, row: { direction: string; remaining: number; currency: string }) => {
       if (row.direction === 'lent' || row.direction === 'borrowed') {
         summary[row.direction] += convertAmount(row.remaining, row.currency, res.locals.displayCurrency, res.locals.exchangeRates);
@@ -225,14 +252,24 @@ app.get('/dashboard', requireAuth, async (req: Request, res: Response, next: Nex
 
     const dashboardData = {
       accounts,
+      cards,
       incomeExpense,
+      prevIncomeExpense,
+      dailyFlow: JSON.stringify(dailyFlow),
+      dailyFlowRows: dailyFlow,
       spending: JSON.stringify(spending),
+      spendingRows: spending,
       currentNW,
       upcoming,
       debtSummary,
+      debtsList,
+      budgetsList,
+      goalsList,
+      recentTransactions: recentTxResult.transactions || [],
+      recentTotal: recentTxResult.total || 0,
+      userProfile: userProfile || { email: (req.session as any).user.email, full_name: '' },
       month: `${y}-${m}`,
     };
-    dashboardCache.set(cacheKey, { value: dashboardData, expiresAt: Date.now() + DASHBOARD_CACHE_TTL });
     res.render('dashboard', { title: 'Dashboard', ...dashboardData });
   } catch (err: any) {
     next(err);

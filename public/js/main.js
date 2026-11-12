@@ -5,6 +5,31 @@
     const toggle = document.getElementById('navToggle');
     const nav = document.getElementById('appNav');
     const backdrop = document.getElementById('navBackdrop');
+    const header = document.querySelector('.app-header--authed');
+    const collapseBtn = document.getElementById('sidebarCollapseBtn');
+
+    // Mark body when authenticated sidebar is present
+    if (header) {
+      document.body.classList.add('has-sidebar');
+      try {
+        if (localStorage.getItem('purslip.sidebarCollapsed') === '1') {
+          document.body.classList.add('is-sidebar-collapsed');
+        }
+      } catch {
+        // Ignore storage restrictions
+      }
+    }
+
+    if (collapseBtn) {
+      collapseBtn.addEventListener('click', () => {
+        const collapsed = document.body.classList.toggle('is-sidebar-collapsed');
+        try {
+          localStorage.setItem('purslip.sidebarCollapsed', collapsed ? '1' : '0');
+        } catch {
+          // Ignore storage restrictions
+        }
+      });
+    }
 
     function setMenuOpen(open) {
       if (!toggle || !nav) return;
@@ -65,12 +90,83 @@
       main.id = 'mainContent';
     }
 
+    // Login cooldown live countdown timer (after 5 failed attempts)
+    const cooldownBanner = document.querySelector('[data-cooldown-seconds]');
+    if (cooldownBanner) {
+      let remaining = parseInt(cooldownBanner.getAttribute('data-cooldown-seconds'), 10) || 0;
+      const counterEl = cooldownBanner.querySelector('[data-cooldown-counter]');
+      const submitBtn = document.getElementById('loginSubmitBtn');
+      const timer = setInterval(() => {
+        remaining -= 1;
+        if (remaining <= 0) {
+          clearInterval(timer);
+          if (counterEl) counterEl.textContent = '0s (Ready)';
+          if (submitBtn) submitBtn.disabled = false;
+          cooldownBanner.classList.add('is-ready');
+        } else if (counterEl) {
+          const mins = Math.floor(remaining / 60);
+          const secs = remaining % 60;
+          counterEl.textContent = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+        }
+      }, 1000);
+    }
+
+    // 5-Minute Inactivity Auto-Logout Watcher on Authenticated Pages
+    const timeoutHeader = document.querySelector('[data-session-timeout]');
+    if (timeoutHeader) {
+      const timeoutSec = parseInt(timeoutHeader.getAttribute('data-session-timeout'), 10) || 300;
+      const timeoutMs = timeoutSec * 1000;
+      const warningMs = Math.max(10000, timeoutMs - 45000); // Warn 45s before 5-min auto-logout
+      let lastActive = Date.now();
+      let warningToast = null;
+
+      const resetIdle = () => {
+        lastActive = Date.now();
+        if (warningToast) {
+          warningToast.hidden = true;
+        }
+      };
+
+      ['pointerdown', 'mousemove', 'keydown', 'scroll', 'touchstart'].forEach((evt) => {
+        window.addEventListener(evt, resetIdle, { passive: true });
+      });
+
+      setInterval(() => {
+        const idleMs = Date.now() - lastActive;
+        if (idleMs >= timeoutMs) {
+          window.location.href = '/auth/login?expired=1';
+          return;
+        }
+        if (idleMs >= warningMs) {
+          const leftSec = Math.max(1, Math.ceil((timeoutMs - idleMs) / 1000));
+          if (!warningToast) {
+            warningToast = document.createElement('div');
+            warningToast.className = 'idle-warning-toast glass-panel';
+            warningToast.setAttribute('role', 'status');
+            document.body.appendChild(warningToast);
+          }
+          warningToast.hidden = false;
+          warningToast.innerHTML = `
+            <span>Session locks in <strong class="num">${leftSec}s</strong> due to 5-min inactivity rule.</span>
+            <button type="button" class="button button--primary button--sm" data-keep-alive>Stay signed in</button>
+          `;
+          const keepBtn = warningToast.querySelector('[data-keep-alive]');
+          if (keepBtn) {
+            keepBtn.onclick = () => {
+              resetIdle();
+              fetch('/healthz', { credentials: 'same-origin' }).catch(() => {});
+            };
+          }
+        }
+      }, 1000);
+    }
+
     // Staggered reveal on scroll
     const animatedItems = document.querySelectorAll(
-      '.card, .slip-card, .kpi-tile, .dashboard-section, .table-wrap, .filter-panel, .landing-stage__step'
+      '.card, .acru-card, .slip-card, .kpi-tile, .dashboard-section, .table-wrap, .filter-panel, .landing-specimen'
     );
     animatedItems.forEach((item, index) => {
-      item.style.setProperty('--motion-delay', `${Math.min(index * 40, 280)}ms`);
+      item.style.setProperty('--motion-delay', `${Math.min(index * 35, 260)}ms`);
       item.classList.add('motion-ready');
     });
 
@@ -84,28 +180,11 @@
             }
           });
         },
-        { threshold: 0.06 }
+        { threshold: 0.05 }
       );
       document.querySelectorAll('.motion-ready').forEach((item) => observer.observe(item));
     } else {
       document.querySelectorAll('.motion-ready').forEach((item) => item.classList.add('motion-visible'));
-    }
-
-    // Interactive 3D tilt on cards marked [data-tilt]
-    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      document.querySelectorAll('[data-tilt]').forEach((card) => {
-        card.addEventListener('pointermove', (e) => {
-          const rect = card.getBoundingClientRect();
-          const x = (e.clientX - rect.left) / rect.width - 0.5;
-          const y = (e.clientY - rect.top) / rect.height - 0.5;
-          card.style.setProperty('--tilt-x', `${(-y * 5).toFixed(2)}deg`);
-          card.style.setProperty('--tilt-y', `${(x * 6).toFixed(2)}deg`);
-        });
-        card.addEventListener('pointerleave', () => {
-          card.style.setProperty('--tilt-x', '0deg');
-          card.style.setProperty('--tilt-y', '0deg');
-        });
-      });
     }
   }
 

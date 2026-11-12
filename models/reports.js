@@ -285,6 +285,61 @@ async function transactionsForExport(userId, { startDate, endDate, accountId, ca
   return rows;
 }
 
+/**
+ * Daily income, expenses, and net savings for the last N days (chronological).
+ * Used by the ACRU Balance Overview 7d stacked bar chart.
+ */
+async function dailyCashFlow(userId, days = 7) {
+  const safeDays = Math.max(1, Math.min(90, Number(days) || 7));
+  const now = new Date();
+  const endStr = now.toISOString().slice(0, 10);
+  const startObj = new Date(now.getTime() - (safeDays - 1) * 24 * 60 * 60 * 1000);
+  const startStr = startObj.toISOString().slice(0, 10);
+
+  const { rows } = await pool.query(
+    `SELECT t.date, t.amount::float, a.currency
+     FROM transactions t
+     JOIN accounts a ON a.id = t.account_id
+     WHERE t.user_id = $1 AND t.is_transfer = false AND t.debt_id IS NULL
+       AND COALESCE(t.transaction_type, CASE WHEN t.amount >= 0 THEN 'income' ELSE 'expense' END) <> 'neither'
+       AND t.date >= $2::date AND t.date <= $3::date
+     ORDER BY t.date ASC`,
+    [userId, startStr, endStr]
+  );
+
+  const context = await displayContext(userId);
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const map = new Map();
+
+  for (let i = 0; i < safeDays; i += 1) {
+    const d = new Date(startObj.getTime() + i * 24 * 60 * 60 * 1000);
+    const iso = d.toISOString().slice(0, 10);
+    map.set(iso, {
+      date: iso,
+      dayLabel: dayNames[d.getUTCDay()],
+      fullLabel: d.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }),
+      income: 0,
+      expenses: 0,
+      savings: 0,
+    });
+  }
+
+  for (const row of rows) {
+    const entry = map.get(row.date);
+    if (!entry) continue;
+    const converted = convertAmount(row.amount, row.currency, context.currency, context.rates);
+    if (converted > 0) entry.income += converted;
+    else entry.expenses += Math.abs(converted);
+  }
+
+  return [...map.values()].map((entry) => ({
+    ...entry,
+    income: Math.round(entry.income * 100) / 100,
+    expenses: Math.round(entry.expenses * 100) / 100,
+    savings: Math.round(Math.max(0, entry.income - entry.expenses) * 100) / 100,
+  }));
+}
+
 module.exports = {
   incomeExpenseForRange,
   spendingByCategory,
@@ -294,4 +349,5 @@ module.exports = {
   netWorthHistory,
   currentNetWorth,
   transactionsForExport,
+  dailyCashFlow,
 };

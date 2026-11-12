@@ -5,24 +5,25 @@
 </head>
 <body>
   <%- include('../partials/header') %>
-  <main class="page">
+  <main id="mainContent" class="page">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap: 8px; margin-bottom: 16px;">
       <h1 style="margin:0;">Transactions</h1>
       <div class="button-row" style="margin:0;">
-        <a class="button" href="/transactions/export<%= Object.keys(filters).filter(k => filters[k] && k !== 'page').length ? '?' + Object.keys(filters).filter(k => filters[k] && k !== 'page').map(k => (k === 'accountId' ? 'account' : k === 'categoryId' ? 'category' : k) + '=' + encodeURIComponent(filters[k])).join('&') : '' %>">Export CSV</a>
+        <a class="button" href="/transactions/export<%= Object.keys(filters).filter(k => filters[k] && k !== 'page').length ? '?' + Object.keys(filters).filter(k => filters[k] && k !== 'page').map(k => (k === 'accountId' ? 'account' : k === 'categoryId' ? 'category' : k === 'cardId' ? 'card' : k) + '=' + encodeURIComponent(filters[k])).join('&') : '' %>">Export CSV</a>
         <a class="button" href="/transactions/transfer/new">Add transfer</a>
         <a class="button button--primary" href="/transactions/new">Add transaction</a>
       </div>
     </div>
 
+    <% const _cards = Array.isArray(typeof cards !== 'undefined' ? cards : null) ? cards : []; %>
     <!-- Search & Filter -->
-    <details class="card filter-panel" <% if (filters.search || filters.startDate || filters.endDate || filters.categoryId || filters.minAmount || filters.maxAmount) { %>open<% } %>>
-      <summary style="cursor:pointer; font-weight:600;">Search & Filter</summary>
+    <details class="card glass-panel filter-panel" <% if (filters.search || filters.startDate || filters.endDate || filters.categoryId || filters.cardId || filters.minAmount || filters.maxAmount) { %>open<% } %>>
+      <summary style="cursor:pointer; font-weight:600;">Search &amp; Filter</summary>
       <form method="GET" action="/transactions" class="filter-form" style="margin-top: var(--spacing-3);">
         <div class="filter-form__row">
           <div class="form-field" style="margin-bottom:0; flex: 2 1 200px;">
             <label for="search">Search payee/notes</label>
-            <input type="text" id="search" name="search" value="<%= filters.search || '' %>" placeholder="Search...">
+            <input type="text" id="search" name="search" value="<%= filters.search || '' %>" placeholder="Search merchant, note, or card...">
           </div>
           <div class="form-field" style="margin-bottom:0; flex: 1 1 140px;">
             <label for="account">Account</label>
@@ -33,6 +34,17 @@
               <% }) %>
             </select>
           </div>
+          <% if (_cards.length) { %>
+          <div class="form-field" style="margin-bottom:0; flex: 1 1 150px;">
+            <label for="card">Card</label>
+            <select id="card" name="card">
+              <option value="">All cards</option>
+              <% _cards.forEach(function(cd) { %>
+                <option value="<%= cd.id %>" <%= String(filters.cardId) === String(cd.id) ? 'selected' : '' %>><%= cd.network %> •••• <%= cd.last4 %> (<%= cd.card_name %>)</option>
+              <% }) %>
+            </select>
+          </div>
+          <% } %>
           <div class="form-field" style="margin-bottom:0; flex: 1 1 140px;">
             <label for="category">Category</label>
             <select id="category" name="category">
@@ -53,11 +65,11 @@
             <input type="date" id="endDate" name="endDate" value="<%= filters.endDate || '' %>">
           </div>
           <div class="form-field" style="margin-bottom:0; flex: 1 1 100px;">
-            <label for="minAmount">Min $</label>
+            <label for="minAmount">Min amount</label>
             <input type="number" id="minAmount" name="minAmount" step="0.01" min="0" value="<%= filters.minAmount || '' %>">
           </div>
           <div class="form-field" style="margin-bottom:0; flex: 1 1 100px;">
-            <label for="maxAmount">Max $</label>
+            <label for="maxAmount">Max amount</label>
             <input type="number" id="maxAmount" name="maxAmount" step="0.01" min="0" value="<%= filters.maxAmount || '' %>">
           </div>
           <button type="submit" class="button button--primary" style="align-self:flex-end;">Apply</button>
@@ -71,14 +83,14 @@
     <% } %>
 
     <% if (!transactions.length) { %>
-      <div class="card"><p>No transactions found.</p></div>
+      <div class="card glass-panel"><p>No transactions found.</p></div>
     <% } else { %>
-      <div class="table-wrap">
+      <div class="table-wrap glass-panel">
         <table>
           <thead>
             <tr>
               <th>Date</th>
-              <th>Account</th>
+              <th>Account &amp; Card</th>
               <th>Payee</th>
               <th>Category</th>
               <th>Amount</th>
@@ -88,14 +100,28 @@
           <tbody>
             <% transactions.forEach(function(t) { %>
               <tr>
-                <td><%= t.date %></td>
-                <td><%= t.account_name %> <small><%= t.bank_name || '' %></small></td>
+                <td class="num"><%= t.date %></td>
+                <td>
+                  <div><%= t.account_name %> <small><%= t.bank_name || '' %></small></div>
+                  <% if (t.card_id && t.card_last4) { %>
+                    <span class="tx-card-pill tx-card-pill--<%= t.card_type || 'debit' %>">
+                      <%= t.card_network || 'CARD' %> &bull;&bull;&bull;&bull; <%= t.card_last4 %> &middot; <%= t.card_type === 'credit' ? 'Credit' : 'Debit' %>
+                    </span>
+                  <% } else if (t.payment_method === 'credit_card' || t.account_type === 'credit_card') { %>
+                    <span class="tx-card-pill tx-card-pill--credit">Credit Card</span>
+                  <% } else if (t.payment_method === 'debit_card') { %>
+                    <span class="tx-card-pill tx-card-pill--debit">Debit Card</span>
+                  <% } else if (t.payment_method === 'cash' || t.account_type === 'cash') { %>
+                    <span class="tx-card-pill">Cash</span>
+                  <% } %>
+                </td>
                 <td>
                   <% if (t.is_transfer) { %>
                     <span class="transfer-payee">Self</span>
                     <small class="transfer-direction"><%= Number(t.amount) < 0 ? 'outgoing' : 'incoming' %></small>
                   <% } else { %>
-                    <%= t.payee || '&mdash;' %>
+                    <%= t.payee || '—' %>
+                    <% if (t.note) { %><small style="display:block; color: var(--color-text-muted);"><%= t.note %></small><% } %>
                   <% } %>
                 </td>
                 <td>
@@ -109,7 +135,7 @@
                     Uncategorized
                   <% } %>
                 </td>
-                <td style="color: <%= Number(t.amount) < 0 ? 'var(--color-danger)' : 'var(--color-success)' %>;">
+                <td class="num" style="color: <%= Number(t.amount) < 0 ? 'var(--color-danger)' : 'var(--color-success)' %>;">
                   <%= Number(t.amount).toLocaleString(undefined, { style: 'currency', currency: t.account_currency || 'PKR' }) %>
                 </td>
                 <td>
@@ -122,9 +148,8 @@
       </div>
 
       <%
-        // Build query string preserving all current filters for pagination links
         const qs = Object.keys(filters).filter(k => filters[k] && k !== 'page').map(k => {
-          const name = k === 'accountId' ? 'account' : k === 'categoryId' ? 'category' : k;
+          const name = k === 'accountId' ? 'account' : k === 'categoryId' ? 'category' : k === 'cardId' ? 'card' : k;
           return name + '=' + encodeURIComponent(filters[k]);
         }).join('&');
         const qsPrefix = qs ? '&' + qs : '';

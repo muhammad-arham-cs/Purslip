@@ -1,14 +1,27 @@
-<%- include('../partials/head', { title }) %>
-<%- include('../partials/header') %>
-<main class="page settings-page settings-editor-page">
-  <a class="back-link" href="/settings/delete-account">← Back to delete account</a>
-  <div class="settings-page__heading"><p class="eyebrow">FINAL CONFIRMATION</p><h1 class="settings-danger-title">Are you sure?</h1><p class="settings-page__intro">This action cannot be undone. Your profile and all financial data will be permanently deleted.</p></div>
-  <section class="card settings-editor-card settings-danger-zone settings-confirm-card">
-    <p><strong>Confirm permanent account deletion.</strong> You will be signed out immediately and your data cannot be recovered.</p>
-    <form method="POST" action="/settings/delete-account/confirm">
-      <input type="hidden" name="confirmation" value="<%= confirmation %>">
-      <div class="button-row"><button class="button button--danger" type="submit">Yes, delete my account</button><a class="button button--ghost" href="/settings">No, keep my account</a></div>
-    </form>
-  </section>
-</main>
-<%- include('../partials/footer') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title }) %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main id="mainContent" class="page settings-page settings-editor-page">
+    <a class="back-link" href="/settings/delete-account">
+      <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>
+      <span>Back to delete account</span>
+    </a>
+    <div class="settings-page__heading">
+      <h1 class="settings-danger-title">Are you sure?</h1>
+      <p class="settings-page__intro">This action cannot be undone. Your profile and all financial data will be permanently deleted.</p>
+    </div>
+    <section class="card settings-editor-card settings-danger-zone settings-confirm-card">
+      <p><strong>Confirm permanent account deletion.</strong> You will be signed out immediately and your data cannot be recovered.</p>
+      <form method="POST" action="/settings/delete-account/confirm">
+        <input type="hidden" name="confirmation" value="<%= confirmation %>">
+        <div class="button-row"><button class="button button--danger" type="submit">Yes, delete my account</button><a class="button button--ghost" href="/settings">No, keep my account</a></div>
+      </form>
+    </section>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

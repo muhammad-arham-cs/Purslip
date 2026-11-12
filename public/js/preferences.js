@@ -1,10 +1,25 @@
 (function () {
   const script = document.currentScript;
   const language = script?.dataset.language || 'en';
-  const savedTheme = window.localStorage.getItem('purslip-theme');
+  let savedTheme = null;
+  try {
+    savedTheme = window.localStorage.getItem('purslip-theme');
+  } catch (e) { /* storage blocked */ }
   const theme = savedTheme || script?.dataset.theme || 'dark';
   document.documentElement.dataset.theme = theme;
   document.documentElement.lang = language;
+
+  const THEME_LABELS = {
+    light: 'Light',
+    dark: 'Dark',
+    night: 'Night',
+  };
+
+  function syncThemeLabels(activeTheme) {
+    document.querySelectorAll('[data-theme-label]').forEach((el) => {
+      el.textContent = THEME_LABELS[activeTheme] || 'Theme';
+    });
+  }
 
   const urdu = {
     'Purslip — your data, your control.': 'Purslip — آپ کا ڈیٹا، آپ کا اختیار۔',
@@ -17,6 +32,7 @@
     'Recurring': 'بار بار آنے والے',
     'Reports': 'رپورٹس',
     'Goals': 'اہداف',
+    'Debts': 'قرضے',
     'Settings': 'ترتیبات',
     'Log out': 'لاگ آؤٹ',
     'Account title': 'اکاؤنٹ کا عنوان',
@@ -47,26 +63,40 @@
     'Export CSV': 'CSV برآمد کریں',
   };
 
-  if (language === 'ur') {
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-    const nodes = [];
-    while (walker.nextNode()) nodes.push(walker.currentNode);
-    nodes.forEach((node) => {
-      const value = node.nodeValue.trim();
-      if (urdu[value]) node.nodeValue = node.nodeValue.replace(value, urdu[value]);
-    });
-    document.querySelectorAll('input[placeholder], textarea[placeholder]').forEach((input) => {
-      if (urdu[input.placeholder]) input.placeholder = urdu[input.placeholder];
+  function initPreferences() {
+    syncThemeLabels(document.documentElement.dataset.theme || 'dark');
+
+    if (language === 'ur') {
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      const nodes = [];
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+      nodes.forEach((node) => {
+        const value = node.nodeValue.trim();
+        if (urdu[value]) node.nodeValue = node.nodeValue.replace(value, urdu[value]);
+      });
+      document.querySelectorAll('input[placeholder], textarea[placeholder]').forEach((input) => {
+        if (urdu[input.placeholder]) input.placeholder = urdu[input.placeholder];
+      });
+    }
+
+    const toggles = document.querySelectorAll('#themeToggle, [data-theme-toggle]');
+    toggles.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const current = document.documentElement.dataset.theme;
+        const next = current === 'light' ? 'dark' : current === 'dark' ? 'night' : 'light';
+        document.documentElement.dataset.theme = next;
+        try {
+          window.localStorage.setItem('purslip-theme', next);
+        } catch (e) { /* storage blocked */ }
+        syncThemeLabels(next);
+        window.dispatchEvent(new CustomEvent('purslip:themechange', { detail: { theme: next } }));
+      });
     });
   }
 
-  const themeToggle = document.getElementById('themeToggle');
-  if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-      const next = document.documentElement.dataset.theme === 'light' ? 'dark'
-        : document.documentElement.dataset.theme === 'dark' ? 'night' : 'light';
-      document.documentElement.dataset.theme = next;
-      window.localStorage.setItem('purslip-theme', next);
-    });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPreferences);
+  } else {
+    initPreferences();
   }
 })();

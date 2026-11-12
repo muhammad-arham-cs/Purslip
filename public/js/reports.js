@@ -1,29 +1,43 @@
-/* Reports page — multiple Chart.js charts */
+/* Reports page — multiple Chart.js charts (CSP-safe) */
 (function () {
   'use strict';
 
   var COLORS = [
-    '#2f6f4f', '#4fae7d', '#6cc494', '#96d6b4', '#c0e8d4',
-    '#b8860b', '#d4a843', '#e8c97b', '#f0daa8', '#f8ecd5',
-    '#5b7fb4', '#7d9ccb', '#a0b9de', '#c3d6ee', '#e6f0fa',
-    '#9b59b6', '#b07cc7', '#c59fd8', '#dac2e9', '#efe5fa',
+    '#e9b949', '#2cc996', '#4ea8ff', '#f06478', '#9b7bff',
+    '#41c4c4', '#f59342', '#7cc668', '#e07ab8', '#6888e0',
   ];
 
+  var charts = [];
+
+  function readJson(id, fallbackGlobal) {
+    var el = document.getElementById(id);
+    if (el && el.textContent) {
+      try {
+        return JSON.parse(el.textContent);
+      } catch (_e) { /* fall through */ }
+    }
+    return fallbackGlobal || [];
+  }
+
   function textColor() {
-    return getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim() || '#1a1d23';
+    return getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim() || '#e8edf6';
   }
 
   function gridColor() {
-    return getComputedStyle(document.documentElement).getPropertyValue('--color-border').trim() || '#e1e4e9';
+    return getComputedStyle(document.documentElement).getPropertyValue('--color-border').trim() || 'rgba(255,255,255,0.12)';
+  }
+
+  function getCurrency() {
+    var el = document.querySelector('[data-currency]');
+    return (el && el.getAttribute('data-currency')) || window.reportCurrency || 'PKR';
   }
 
   function dollarCallback(value) {
-    return (window.reportCurrency || 'PKR') + ' ' + Number(value).toLocaleString('en-US');
+    return getCurrency() + ' ' + Number(value).toLocaleString('en-US');
   }
 
-  // ---- Spending by Category Doughnut ----
   function initSpendingPie() {
-    var data = window.__SPENDING_DATA__;
+    var data = readJson('spendingReportData', window.__SPENDING_DATA__);
     if (!data || !data.length) return;
 
     var canvas = document.getElementById('spendingPie');
@@ -34,25 +48,29 @@
     });
     var amounts = data.map(function (d) { return d.total; });
 
-    new Chart(canvas, {
+    charts.push(new Chart(canvas, {
       type: 'doughnut',
       data: {
         labels: labels,
         datasets: [{
           data: amounts,
-          backgroundColor: COLORS.slice(0, labels.length),
-          borderWidth: 0,
+          backgroundColor: COLORS.slice(0, Math.max(labels.length, 1)),
+          borderWidth: 2,
+          borderColor: getComputedStyle(document.documentElement).getPropertyValue('--color-surface-solid').trim() || '#111b2e',
         }],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        cutout: '64%',
         plugins: {
           legend: {
             position: 'bottom',
             labels: {
-              boxWidth: 12,
-              padding: 8,
+              boxWidth: 10,
+              boxHeight: 10,
+              usePointStyle: true,
+              padding: 10,
               font: { size: 11 },
               color: textColor(),
             },
@@ -60,18 +78,17 @@
           tooltip: {
             callbacks: {
               label: function (ctx) {
-                return ctx.label + ': ' + (window.reportCurrency || 'PKR') + ' ' + ctx.parsed.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                return ctx.label + ': ' + getCurrency() + ' ' + ctx.parsed.toLocaleString('en-US', { minimumFractionDigits: 2 });
               },
             },
           },
         },
       },
-    });
+    }));
   }
 
-  // ---- Monthly Trends (income vs expenses bar chart) ----
   function initTrendsChart() {
-    var data = window.__TRENDS_DATA__;
+    var data = readJson('trendsReportData', window.__TRENDS_DATA__);
     if (!data || !data.length) return;
 
     var canvas = document.getElementById('trendsChart');
@@ -79,7 +96,7 @@
 
     var labels = data.map(function (d) { return d.month; });
 
-    new Chart(canvas, {
+    charts.push(new Chart(canvas, {
       type: 'bar',
       data: {
         labels: labels,
@@ -87,12 +104,14 @@
           {
             label: 'Income',
             data: data.map(function (d) { return d.income; }),
-            backgroundColor: '#4fae7d',
+            backgroundColor: '#2cc996',
+            borderRadius: 6,
           },
           {
             label: 'Expenses',
             data: data.map(function (d) { return d.expenses; }),
-            backgroundColor: '#b3261e',
+            backgroundColor: '#f06478',
+            borderRadius: 6,
           },
         ],
       },
@@ -111,30 +130,26 @@
           },
         },
         plugins: {
-          legend: {
-            labels: { color: textColor() },
-          },
+          legend: { labels: { color: textColor() } },
           tooltip: {
             callbacks: {
               label: function (ctx) {
-                return ctx.dataset.label + ': ' + (window.reportCurrency || 'PKR') + ' ' + ctx.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                return ctx.dataset.label + ': ' + getCurrency() + ' ' + ctx.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2 });
               },
             },
           },
         },
       },
-    });
+    }));
   }
 
-  // ---- Category Spending Over Time (grouped bar) ----
   function initCategoryTrendsChart() {
-    var data = window.__CATEGORY_TRENDS_DATA__;
+    var data = readJson('categoryTrendsReportData', window.__CATEGORY_TRENDS_DATA__);
     if (!data || !data.length) return;
 
     var canvas = document.getElementById('categoryTrendsChart');
     if (!canvas) return;
 
-    // Pivot: unique months as x-axis labels, unique categories as datasets
     var monthSet = [];
     var catSet = [];
     data.forEach(function (d) {
@@ -151,13 +166,14 @@
       return {
         label: cat,
         backgroundColor: COLORS[i % COLORS.length],
+        borderRadius: 4,
         data: monthSet.map(function (m) {
           return lookup[m + '|' + cat] || 0;
         }),
       };
     });
 
-    new Chart(canvas, {
+    charts.push(new Chart(canvas, {
       type: 'bar',
       data: { labels: monthSet, datasets: datasets },
       options: {
@@ -179,41 +195,40 @@
         plugins: {
           legend: {
             position: 'bottom',
-            labels: { boxWidth: 12, padding: 8, color: textColor(), font: { size: 11 } },
+            labels: { boxWidth: 10, padding: 10, color: textColor(), font: { size: 11 } },
           },
           tooltip: {
             callbacks: {
               label: function (ctx) {
-                return ctx.dataset.label + ': ' + (window.reportCurrency || 'PKR') + ' ' + ctx.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                return ctx.dataset.label + ': ' + getCurrency() + ' ' + ctx.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2 });
               },
             },
           },
         },
       },
-    });
+    }));
   }
 
-  // ---- Net Worth Over Time (line chart) ----
   function initNetWorthChart() {
-    var data = window.__NET_WORTH_DATA__;
+    var data = readJson('netWorthReportData', window.__NET_WORTH_DATA__);
     if (!data || !data.length) return;
 
     var canvas = document.getElementById('netWorthChart');
     if (!canvas) return;
 
-    new Chart(canvas, {
+    charts.push(new Chart(canvas, {
       type: 'line',
       data: {
         labels: data.map(function (d) { return d.month; }),
         datasets: [{
           label: 'Net Worth',
           data: data.map(function (d) { return d.net_worth; }),
-          borderColor: '#2f6f4f',
-          backgroundColor: 'rgba(47, 111, 79, 0.1)',
+          borderColor: '#e9b949',
+          backgroundColor: 'rgba(233, 185, 73, 0.14)',
           fill: true,
-          tension: 0.3,
-          pointRadius: 3,
-          pointHoverRadius: 5,
+          tension: 0.32,
+          pointRadius: 3.5,
+          pointHoverRadius: 6,
         }],
       },
       options: {
@@ -234,16 +249,19 @@
           tooltip: {
             callbacks: {
               label: function (ctx) {
-                return 'Net Worth: ' + (window.reportCurrency || 'PKR') + ' ' + ctx.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2 });
+                return 'Net Worth: ' + getCurrency() + ' ' + ctx.parsed.y.toLocaleString('en-US', { minimumFractionDigits: 2 });
               },
             },
           },
         },
       },
-    });
+    }));
   }
 
   function init() {
+    if (typeof Chart === 'undefined') return;
+    charts.forEach(function (c) { c.destroy(); });
+    charts = [];
     initSpendingPie();
     initTrendsChart();
     initCategoryTrendsChart();
@@ -255,4 +273,6 @@
   } else {
     init();
   }
+
+  window.addEventListener('purslip:themechange', init);
 })();

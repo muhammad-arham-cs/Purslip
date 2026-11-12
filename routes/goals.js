@@ -131,7 +131,7 @@ router.put('/:id', validateGoal, async (req, res, next) => {
 router.post('/:id/achieve', async (req, res, next) => {
   try {
     await goalsModel.setAchieved(req.session.user.id, req.params.id, true);
-    req.flash('success', 'Goal marked as achieved! 🎉');
+    req.flash('success', 'Goal marked as achieved.');
     res.redirect('/goals');
   } catch (err) {
     next(err);
@@ -151,7 +151,7 @@ router.post('/:id/reopen', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
   try {
     const deleted = await goalsModel.remove(req.session.user.id, req.params.id);
-    req.flash('success', deleted ? 'Goal deleted.' : 'Goal not found.');
+    req.flash(deleted ? 'success' : 'error', deleted ? 'Goal deleted.' : 'Goal not found.');
     res.redirect('/goals');
   } catch (err) {
     next(err);

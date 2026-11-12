@@ -252,7 +252,7 @@ router.put('/:id', validateTransaction, async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
   try {
     const outcome = await transactionsModel.remove(req.session.user.id, req.params.id);
-    req.flash('success', outcome ? 'Transaction deleted.' : 'Transaction not found.');
+    req.flash(outcome ? 'success' : 'error', outcome ? 'Transaction deleted.' : 'Transaction not found.');
     res.redirect('/transactions');
   } catch (err) {
     if (err instanceof transactionsModel.ValidationError) {
@@ -264,6 +264,10 @@ router.delete('/:id', async (req, res, next) => {
 });
 
 // --- Transfers ---
+
+router.get('/transfer', (req, res) => {
+  res.redirect('/transactions/transfer/new');
+});
 
 router.get('/transfer/new', async (req, res, next) => {
   try {
@@ -396,7 +400,7 @@ router.delete('/transfer/:transferGroupId', async (req, res, next) => {
       req.params.transferGroupId
     );
     const outcome = legId ? await transactionsModel.remove(req.session.user.id, legId) : null;
-    req.flash('success', outcome ? 'Transfer deleted.' : 'Transfer not found.');
+    req.flash(outcome ? 'success' : 'error', outcome ? 'Transfer deleted.' : 'Transfer not found.');
     res.redirect('/transactions');
   } catch (err) {
     next(err);

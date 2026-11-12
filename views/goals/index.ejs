@@ -18,7 +18,7 @@
         <% goals.forEach(function(g) { %>
           <div class="card goal-card <%= g.is_achieved ? 'goal-card--achieved' : '' %>">
             <% if (g.is_achieved) { %>
-              <span class="goal-card__badge">✓ Achieved</span>
+              <span class="goal-card__badge"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg> Achieved</span>
             <% } %>
             <h2 class="goal-card__name"><%= g.name %></h2>
             <p class="goal-card__account"><%= g.account_name %></p>
@@ -53,7 +53,7 @@
                   <button type="submit" class="button">Reopen</button>
                 </form>
               <% } %>
-              <form action="/goals/<%= g.id %>?_method=DELETE" method="POST" style="display:inline;" onsubmit="return confirm('Delete this goal?');">
+              <form action="/goals/<%= g.id %>?_method=DELETE" method="POST" style="display:inline;" data-confirm="Delete this goal?">
                 <button type="submit" class="button button--danger">Delete</button>
               </form>
             </div>

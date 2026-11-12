@@ -3,33 +3,180 @@
 <head>
   <%- include('partials/head') %>
 </head>
-<body>
+<body class="body--landing">
   <%- include('partials/header') %>
-  <main class="page page--landing">
+  <main id="mainContent" class="page page--landing">
     <section class="landing-hero">
       <div class="landing-hero__copy">
-        <p class="eyebrow">A calmer way to manage money</p>
-        <h1>Know where your money is going.</h1>
-        <p class="landing-hero__lead">Purslip brings accounts, spending, budgets, and goals into one clear daily view.</p>
-        <p class="landing-hero__note">Private by design. Built for your real financial life.</p>
+        <h1>See into your purse before the month runs out.</h1>
+        <p class="landing-hero__lead">
+          Purslip holds your bank accounts, cash wallets, monthly budgets, recurring bills, savings goals and personal debts in one private daily ledger.
+        </p>
+
+        <% if (locals.currentUser) { %>
+          <div class="slip-card landing-signin-slip" data-tilt>
+            <div class="landing-signin-slip__head">
+              <h2>Signed in as <%= currentUser.email %></h2>
+              <span class="status-pill status-pill--positive">Active session</span>
+            </div>
+            <p class="landing-signin-slip__sub">Your accounts, budgets and reports are ready.</p>
+            <div class="button-row">
+              <a class="button button--primary" href="/dashboard">
+                <span>Open dashboard</span>
+                <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+              </a>
+              <a class="button button--ghost" href="/transactions/new">Add transaction</a>
+            </div>
+          </div>
+        <% } else { %>
+          <div class="slip-card landing-signin-slip" data-tilt>
+            <div class="landing-signin-slip__head">
+              <h2>Sign in to your ledger</h2>
+              <span class="status-pill">PKR &middot; Multi-currency</span>
+            </div>
+            <form method="POST" action="/auth/login" class="landing-signin-form" novalidate>
+              <div class="landing-signin-form__grid">
+                <div class="form-field">
+                  <label for="heroEmail">Email</label>
+                  <input type="email" id="heroEmail" name="email" autocomplete="email" placeholder="you@family.pk" required>
+                </div>
+                <div class="form-field">
+                  <label for="heroPassword">Password</label>
+                  <input type="password" id="heroPassword" name="password" autocomplete="current-password" placeholder="8+ characters" required>
+                </div>
+              </div>
+              <div class="landing-signin-form__actions">
+                <button class="button button--primary" type="submit">
+                  <span>Log in to Purslip</span>
+                  <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+                </button>
+                <div class="landing-signin-form__links">
+                  <a href="/auth/signup">Create an account</a>
+                  <span aria-hidden="true">&middot;</span>
+                  <a href="/auth/forgot-password">Reset password</a>
+                </div>
+              </div>
+            </form>
+          </div>
+        <% } %>
       </div>
-      <div class="landing-hero__visual" aria-label="Purslip dashboard preview">
-        <div class="landing-orb landing-orb--one"></div>
-        <div class="landing-orb landing-orb--two"></div>
-        <div class="landing-preview">
-          <div class="landing-preview__top"><span>Net worth</span><strong>▦</strong></div>
-          <strong class="landing-preview__amount">Your overview</strong>
-          <span class="landing-preview__change">Clearer money decisions</span>
-          <div class="landing-preview__bars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+      <div class="landing-stage-3d" aria-label="Interactive 3D view of Purslip ledger slips and brass coins">
+        <canvas id="purseCanvas" class="landing-stage-3d__canvas"></canvas>
+        <div class="landing-stage-3d__fallback" aria-hidden="true">
+          <div class="slip-card slip-card--porcelain">
+            <div class="slip-card__row">
+              <span>Net Worth &middot; Household</span>
+              <strong>PKR 1,482,500</strong>
+            </div>
+            <div class="slip-card__row slip-card__row--muted">
+              <span>Meezan Current &middot; HBL Savings &middot; Cash</span>
+              <span class="amount-positive">+PKR 68,400 this month</span>
+            </div>
+          </div>
+          <div class="slip-card slip-card--navy">
+            <div class="slip-card__row">
+              <span>Monthly Budgets &middot; Rollover</span>
+              <strong>68% used</strong>
+            </div>
+            <div class="progress-bar"><div class="progress-bar__fill" style="width:68%"></div></div>
+          </div>
         </div>
+        <p class="landing-stage-3d__caption">Move pointer or tap to tilt the slips &amp; spin the brass stack</p>
       </div>
     </section>
-    <section class="landing-features" aria-label="Purslip features">
-      <article class="card landing-feature"><span class="landing-feature__icon">◒</span><h2>See the whole picture</h2><p>Accounts, transactions, and net worth in one reliable overview.</p></article>
-      <article class="card landing-feature"><span class="landing-feature__icon">⌁</span><h2>Make plans that stick</h2><p>Use budgets and goals to turn your intentions into visible progress.</p></article>
-      <article class="card landing-feature"><span class="landing-feature__icon">✦</span><h2>Stay in control</h2><p>Import your data, export it anytime, and keep ownership of your story.</p></article>
+
+    <section class="landing-anatomy" id="inside" aria-labelledby="insideHeading">
+      <div class="landing-anatomy__intro">
+        <h2 id="insideHeading">What sits inside the purse</h2>
+        <p>Every part of Purslip maps to a real piece of household bookkeeping — no synthetic scores, no ads, and no third-party bank scraping.</p>
+      </div>
+
+      <div class="landing-anatomy__spread">
+        <article class="slip-card slip-card--porcelain landing-specimen" data-tilt>
+          <header class="landing-specimen__head">
+            <h3>Multi-currency accounts &amp; self-transfers</h3>
+            <span class="status-pill">PKR &middot; USD &middot; EUR &middot; GBP &middot; AED &middot; SAR</span>
+          </header>
+          <p class="landing-specimen__copy">
+            Keep checking, savings, credit card, cash and investment balances in their native currency while viewing your combined net worth in your chosen base currency. Moving money between your own accounts records linked outgoing and incoming entries without inflating income or expense totals.
+          </p>
+          <dl class="landing-specimen__ledger">
+            <div><dt>Checking &amp; Wallets</dt><dd class="num">PKR 412,000.00</dd></div>
+            <div><dt>Foreign Currency Reserve</dt><dd class="num">USD 1,850.00</dd></div>
+            <div><dt>Internal Transfer</dt><dd class="num amount-neutral">Excluded from spending</dd></div>
+          </dl>
+        </article>
+
+        <article class="slip-card landing-specimen" data-tilt>
+          <header class="landing-specimen__head">
+            <h3>Category budgets, splits &amp; recurring bills</h3>
+            <span class="status-pill status-pill--brass">Rollover ready</span>
+          </header>
+          <p class="landing-specimen__copy">
+            Divide a single grocery or utility receipt across multiple sub-categories. Set monthly category limits with optional unused-budget rollover, and let scheduled recurring templates post due bills automatically when you open your dashboard.
+          </p>
+          <dl class="landing-specimen__ledger">
+            <div><dt>Groceries &amp; Household (rollover on)</dt><dd class="num">PKR 42,000 / 60,000</dd></div>
+            <div><dt>Electricity &amp; Fibre (next 14 days)</dt><dd class="num amount-negative">Due on the 18th</dd></div>
+            <div><dt>Split receipt allocation</dt><dd class="num amount-positive">100% balanced</dd></div>
+          </dl>
+        </article>
+
+        <article class="slip-card landing-specimen" data-tilt>
+          <header class="landing-specimen__head">
+            <h3>Savings goals, personal debts &amp; CSV control</h3>
+            <span class="status-pill status-pill--positive">Full export</span>
+          </header>
+          <p class="landing-specimen__copy">
+            Tie savings goals to real accounts with target dates, track money lent to or borrowed from family and friends with partial repayments, and import bank CSV statements with reusable column mappings and duplicate detection.
+          </p>
+          <dl class="landing-specimen__ledger">
+            <div><dt>Emergency Fund target</dt><dd class="num amount-positive">82% complete</dd></div>
+            <div><dt>Lent &amp; borrowed ledger</dt><dd class="num">Linked or standalone</dd></div>
+            <div><dt>CSV import &amp; export</dt><dd class="num">Saved bank mappings</dd></div>
+          </dl>
+        </article>
+      </div>
+    </section>
+
+    <section class="landing-specs" id="features" aria-labelledby="specsHeading">
+      <div class="landing-specs__panel slip-card">
+        <div class="landing-specs__copy">
+          <h2 id="specsHeading">Built for daily entry on a phone or laptop</h2>
+          <p>Switch between Light, Dark and Night themes, view the interface in English or Urdu, and export your entire transaction history to CSV whenever you want.</p>
+          <div class="button-row">
+            <% if (locals.currentUser) { %>
+              <a class="button button--primary" href="/dashboard">Go to Dashboard</a>
+              <a class="button button--ghost" href="/reports">View Reports</a>
+            <% } else { %>
+              <a class="button button--primary" href="/auth/signup">Create your private account</a>
+              <a class="button button--ghost" href="/auth/login">Log in</a>
+            <% } %>
+          </div>
+        </div>
+        <dl class="landing-specs__table">
+          <div>
+            <dt>Themes</dt>
+            <dd>Light porcelain, Dark navy leather, and low-glare Night mode</dd>
+          </div>
+          <div>
+            <dt>Languages</dt>
+            <dd>English &amp; Urdu (`اردو`) with instant preference switching</dd>
+          </div>
+          <div>
+            <dt>Security</dt>
+            <dd>Session-based authentication with 15-minute idle lock &amp; masked CNIC</dd>
+          </div>
+          <div>
+            <dt>Data portability</dt>
+            <dd>Bank CSV import with duplicate checks &amp; filtered CSV export</dd>
+          </div>
+        </dl>
+      </div>
     </section>
   </main>
   <%- include('partials/footer') %>
+  <script type="module" src="/js/landing-3d.js?v=3"></script>
 </body>
 </html>

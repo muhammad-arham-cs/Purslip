@@ -1,15 +1,28 @@
-<%- include('../partials/head', { title }) %>
-<%- include('../partials/header') %>
-<main class="page settings-page settings-editor-page">
-  <a class="back-link" href="/settings">← Back to settings</a>
-  <div class="settings-page__heading"><p class="eyebrow">DANGER ZONE</p><h1 class="settings-danger-title">Delete account</h1><p class="settings-page__intro">This permanently removes your profile and financial data.</p></div>
-  <%- include('../partials/form-errors', { errors }) %>
-  <section class="card settings-editor-card settings-danger-zone">
-    <form method="POST" action="/settings/delete-account">
-      <div class="form-field"><label for="deleteConfirmation">Type DELETE to confirm</label><input id="deleteConfirmation" name="confirmation" autocomplete="off" required></div>
-      <div class="form-field"><label for="deletePassword">Current password</label><input id="deletePassword" name="currentPassword" type="password" autocomplete="current-password" required></div>
-      <div class="button-row"><button class="button button--danger" type="submit">Continue to delete</button><a class="button button--ghost" href="/settings">Cancel</a></div>
-    </form>
-  </section>
-</main>
-<%- include('../partials/footer') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title }) %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main id="mainContent" class="page settings-page settings-editor-page">
+    <a class="back-link" href="/settings">
+      <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>
+      <span>Back to settings</span>
+    </a>
+    <div class="settings-page__heading">
+      <h1 class="settings-danger-title">Delete account</h1>
+      <p class="settings-page__intro">This permanently removes your profile and all financial data.</p>
+    </div>
+    <%- include('../partials/form-errors', { errors }) %>
+    <section class="card settings-editor-card settings-danger-zone">
+      <form method="POST" action="/settings/delete-account">
+        <div class="form-field"><label for="deleteConfirmation">Type DELETE to confirm</label><input id="deleteConfirmation" name="confirmation" autocomplete="off" required></div>
+        <div class="form-field"><label for="deletePassword">Current password</label><input id="deletePassword" name="currentPassword" type="password" autocomplete="current-password" required></div>
+        <div class="button-row"><button class="button button--danger" type="submit">Continue to delete</button><a class="button button--ghost" href="/settings">Cancel</a></div>
+      </form>
+    </section>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

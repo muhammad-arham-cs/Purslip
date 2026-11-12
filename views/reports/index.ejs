@@ -5,49 +5,49 @@
 </head>
 <body>
   <%- include('../partials/header') %>
-  <main class="page">
-    <h1>Reports</h1>
+  <main id="mainContent" class="page">
+    <header class="page-header">
+      <div>
+        <h1>Reports</h1>
+        <p class="page-header__sub">Cashflow, category breakdown and net worth history (<%= range.startDate %> to <%= range.endDate %>)</p>
+      </div>
+      <a href="/reports/export?startDate=<%= range.startDate %>&endDate=<%= range.endDate %>" class="button">
+        <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>
+        <span>Export CSV</span>
+      </a>
+    </header>
 
-    <!-- ---- Date Range Picker ---- -->
-    <section class="card" style="margin-bottom: var(--spacing-3);">
+    <section class="card filter-panel">
       <form method="GET" action="/reports" class="report-range-form">
-        <div class="form-field" style="margin-bottom:0;">
+        <div class="form-field">
           <label for="startDate">From</label>
           <input type="date" id="startDate" name="startDate" value="<%= range.startDate %>">
         </div>
-        <div class="form-field" style="margin-bottom:0;">
+        <div class="form-field">
           <label for="endDate">To</label>
           <input type="date" id="endDate" name="endDate" value="<%= range.endDate %>">
         </div>
-        <button type="submit" class="button button--primary">Apply</button>
-        <a href="/reports/export?startDate=<%= range.startDate %>&endDate=<%= range.endDate %>" class="button">Export CSV</a>
+        <div class="report-range-form__actions">
+          <button type="submit" class="button button--primary">Apply range</button>
+        </div>
       </form>
     </section>
 
-    <section class="dashboard-section">
-      <h2>Outstanding debts</h2>
-      <div class="grid grid--2">
-        <div class="card summary-card"><span class="summary-card__label">Money lent</span><span class="summary-card__amount"><%= formatCurrency(debtSummary.lent, displayCurrency) %></span></div>
-        <div class="card summary-card"><span class="summary-card__label">Money borrowed</span><span class="summary-card__amount"><%= formatCurrency(debtSummary.borrowed, displayCurrency) %></span></div>
-      </div>
-    </section>
-
-    <!-- ---- Income vs Expenses Summary ---- -->
-    <section class="dashboard-section">
-      <h2>Summary (<%= range.startDate %> to <%= range.endDate %>)</h2>
+    <section class="dashboard-section" aria-labelledby="summaryHeading">
+      <h2 id="summaryHeading">Summary (<%= range.startDate %> to <%= range.endDate %>)</h2>
       <div class="grid grid--3">
         <div class="card summary-card summary-card--income">
           <span class="summary-card__label">Income</span>
-          <span class="summary-card__amount"><%= formatCurrency(incomeExpense.income, displayCurrency) %></span>
+          <span class="summary-card__amount num amount-positive"><%= formatCurrency(incomeExpense.income, displayCurrency) %></span>
         </div>
         <div class="card summary-card summary-card--expense">
           <span class="summary-card__label">Expenses</span>
-          <span class="summary-card__amount"><%= formatCurrency(incomeExpense.expenses, displayCurrency) %></span>
+          <span class="summary-card__amount num amount-negative"><%= formatCurrency(incomeExpense.expenses, displayCurrency) %></span>
         </div>
         <div class="card summary-card">
           <span class="summary-card__label">Net</span>
           <% const netIncome = incomeExpense.income - incomeExpense.expenses; %>
-          <span class="summary-card__amount <%= netIncome >= 0 ? 'amount-positive' : 'amount-negative' %>">
+          <span class="summary-card__amount num <%= netIncome >= 0 ? 'amount-positive' : 'amount-negative' %>">
             <%= formatCurrency(Math.abs(netIncome), displayCurrency) %>
             <%= netIncome < 0 ? '(deficit)' : '' %>
           </span>
@@ -55,48 +55,62 @@
       </div>
     </section>
 
-    <!-- ---- Spending by Category ---- -->
-    <section class="dashboard-section">
-      <h2>Spending by Category</h2>
+    <section class="dashboard-section" aria-labelledby="debtsReportHeading">
+      <h2 id="debtsReportHeading">Outstanding debts</h2>
+      <div class="grid grid--2">
+        <div class="card summary-card">
+          <span class="summary-card__label">Money lent</span>
+          <span class="summary-card__amount num amount-positive"><%= formatCurrency(debtSummary.lent, displayCurrency) %></span>
+        </div>
+        <div class="card summary-card">
+          <span class="summary-card__label">Money borrowed</span>
+          <span class="summary-card__amount num <%= debtSummary.borrowed > 0 ? 'amount-negative' : '' %>"><%= formatCurrency(debtSummary.borrowed, displayCurrency) %></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="dashboard-section" aria-labelledby="spendingCategoryHeading">
+      <h2 id="spendingCategoryHeading">Spending by Category</h2>
       <div class="grid grid--2">
         <div class="card">
-          <canvas id="spendingPie" height="280"></canvas>
+          <div class="chart-stage">
+            <canvas id="spendingPie" data-currency="<%= displayCurrency %>" height="280"></canvas>
+          </div>
         </div>
         <div class="card">
           <% if (spending.length) { %>
-            <div class="table-wrap" style="border:none;">
+            <div class="table-wrap table-wrap--flush">
               <table>
-                <thead><tr><th>Category</th><th style="text-align:right">Amount</th></tr></thead>
+                <thead><tr><th>Category</th><th class="num-col">Amount</th></tr></thead>
                 <tbody>
                   <% spending.forEach(function(s) { %>
                     <tr>
                       <td><%= s.parent_name ? s.parent_name + ' › ' : '' %><%= s.category_name || 'Uncategorized' %></td>
-                      <td style="text-align:right"><%= formatCurrency(s.total, displayCurrency) %></td>
+                      <td class="num num-col"><%= formatCurrency(s.total, displayCurrency) %></td>
                     </tr>
                   <% }) %>
                 </tbody>
               </table>
             </div>
           <% } else { %>
-            <p style="color: var(--color-text-muted);">No expenses in this date range.</p>
+            <p class="text-muted">No expenses in this date range.</p>
           <% } %>
         </div>
       </div>
     </section>
 
-    <!-- ---- Income by Category ---- -->
     <% if (income.length) { %>
-    <section class="dashboard-section">
-      <h2>Income by Category</h2>
+    <section class="dashboard-section" aria-labelledby="incomeCategoryHeading">
+      <h2 id="incomeCategoryHeading">Income by Category</h2>
       <div class="card">
-        <div class="table-wrap" style="border:none;">
+        <div class="table-wrap table-wrap--flush">
           <table>
-            <thead><tr><th>Category</th><th style="text-align:right">Amount</th></tr></thead>
+            <thead><tr><th>Category</th><th class="num-col">Amount</th></tr></thead>
             <tbody>
               <% income.forEach(function(s) { %>
                 <tr>
                   <td><%= s.parent_name ? s.parent_name + ' › ' : '' %><%= s.category_name || 'Uncategorized' %></td>
-                  <td style="text-align:right"><%= formatCurrency(s.total, displayCurrency) %></td>
+                  <td class="num num-col"><%= formatCurrency(s.total, displayCurrency) %></td>
                 </tr>
               <% }) %>
             </tbody>
@@ -106,47 +120,47 @@
     </section>
     <% } %>
 
-    <!-- ---- Monthly Trends (last 12 months) ---- -->
-    <section class="dashboard-section">
-      <h2>Monthly Trends (last 12 months)</h2>
+    <section class="dashboard-section" aria-labelledby="trendsHeading">
+      <h2 id="trendsHeading">Monthly Trends (last 12 months)</h2>
       <div class="card">
-        <canvas id="trendsChart" height="300"></canvas>
+        <div class="chart-stage chart-stage--tall">
+          <canvas id="trendsChart" data-currency="<%= displayCurrency %>" height="300"></canvas>
+        </div>
       </div>
     </section>
 
-    <!-- ---- Category Trends ---- -->
-    <section class="dashboard-section">
-      <h2>Spending by Category Over Time</h2>
+    <section class="dashboard-section" aria-labelledby="catTrendsHeading">
+      <h2 id="catTrendsHeading">Spending by Category Over Time</h2>
       <div class="card">
-        <canvas id="categoryTrendsChart" height="300"></canvas>
+        <div class="chart-stage chart-stage--tall">
+          <canvas id="categoryTrendsChart" data-currency="<%= displayCurrency %>" height="300"></canvas>
+        </div>
       </div>
     </section>
 
-    <!-- ---- Net Worth Over Time ---- -->
-    <section class="dashboard-section">
-      <h2>Net Worth Over Time</h2>
+    <section class="dashboard-section" aria-labelledby="nwHistoryHeading">
+      <h2 id="nwHistoryHeading">Net Worth Over Time</h2>
       <div class="grid grid--2">
         <div class="card">
-          <canvas id="netWorthChart" height="280"></canvas>
+          <div class="chart-stage">
+            <canvas id="netWorthChart" data-currency="<%= displayCurrency %>" height="280"></canvas>
+          </div>
         </div>
         <div class="card summary-card">
           <span class="summary-card__label">Current Net Worth</span>
-          <span class="summary-card__amount <%= currentNW >= 0 ? 'amount-positive' : 'amount-negative' %>">
+          <span class="summary-card__amount num <%= currentNW >= 0 ? 'amount-positive' : 'amount-negative' %>">
             <%= formatCurrency(currentNW, displayCurrency) %>
           </span>
         </div>
       </div>
     </section>
-
   </main>
   <%- include('../partials/footer') %>
+  <script type="application/json" id="spendingReportData"><%- JSON.stringify(spending) %></script>
+  <script type="application/json" id="trendsReportData"><%- trends %></script>
+  <script type="application/json" id="categoryTrendsReportData"><%- categoryTrends %></script>
+  <script type="application/json" id="netWorthReportData"><%- netWorth %></script>
   <script src="/js/chart.umd.js"></script>
-  <script src="/js/reports.js"></script>
-  <script>
-    window.__SPENDING_DATA__ = <%- JSON.stringify(spending) %>;
-    window.__TRENDS_DATA__ = <%- trends %>;
-    window.__CATEGORY_TRENDS_DATA__ = <%- categoryTrends %>;
-    window.__NET_WORTH_DATA__ = <%- netWorth %>;
-  </script>
+  <script src="/js/reports.js?v=3"></script>
 </body>
 </html>

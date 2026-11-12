@@ -13,7 +13,7 @@
         <%- include('_transaction-form-body', { accounts, categories, values }) %>
         <button class="button button--primary" type="submit">Save changes</button>
       </form>
-      <form method="POST" action="/transactions/<%= transaction.id %>?_method=DELETE" onsubmit="return confirm('Delete this transaction?');" style="margin-top:8px;">
+      <form method="POST" action="/transactions/<%= transaction.id %>?_method=DELETE" data-confirm="Delete this transaction?" style="margin-top:8px;">
         <button class="button button--danger" type="submit">Delete transaction</button>
       </form>
     </section>

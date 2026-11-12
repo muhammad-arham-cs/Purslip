@@ -5,12 +5,26 @@
 </head>
 <body>
   <%- include('../partials/header') %>
-  <main class="page page--centered">
-    <section class="card error-card">
-      <p class="eyebrow">Lost in the ledger</p>
-      <h1>404</h1>
-      <p>We couldn't find that page. It may have moved, or the link may be out of date.</p>
-      <div class="button-row"><a class="button button--primary" href="/">Back home</a><a class="button button--ghost" href="/dashboard">Dashboard</a></div>
+  <main id="mainContent" class="page page--centered">
+    <section class="slip-card error-card" aria-labelledby="error404Heading">
+      <div class="error-card__badge">
+        <span class="status-pill status-pill--brass">HTTP 404 &middot; Missing slip</span>
+      </div>
+      <h1 id="error404Heading">Page not found in your ledger</h1>
+      <p class="error-card__lead">
+        We couldn't find <% if (typeof currentPath === 'string' && currentPath) { %><code><%= currentPath %></code><% } else { %>that page<% } %>. It may have been moved, renamed, or the address has a typo.
+      </p>
+      <div class="button-row error-card__actions">
+        <% if (locals.currentUser) { %>
+          <a class="button button--primary" href="/dashboard">Return to Dashboard</a>
+          <a class="button" href="/transactions">Transactions</a>
+          <a class="button button--ghost" href="/accounts">Accounts</a>
+        <% } else { %>
+          <a class="button button--primary" href="/">Back to Home</a>
+          <a class="button" href="/auth/login">Log in</a>
+          <a class="button button--ghost" href="/auth/signup">Create account</a>
+        <% } %>
+      </div>
     </section>
   </main>
   <%- include('../partials/footer') %>

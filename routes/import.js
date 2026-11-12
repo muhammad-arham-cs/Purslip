@@ -41,6 +41,10 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+router.get('/upload', (req, res) => {
+  res.redirect('/import');
+});
+
 router.post('/upload', (req, res, next) => {
   upload.single('file')(req, res, async (err) => {
     if (err) {

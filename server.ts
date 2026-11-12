@@ -25,6 +25,7 @@ const { formatCurrency } = require('./lib/currency');
 const { convertAmount } = require('./lib/currency');
 const { translate } = require('./lib/i18n');
 const { writeLimiter } = require('./middleware/rateLimit');
+const { siteLocals } = require('./lib/site');
 
 const dashboardCache = new Map<string, { expiresAt: number; value: any }>();
 const dashboardGenerationByUser = new Map<string, string>();
@@ -86,16 +87,11 @@ app.use(express.static(path.join(__dirname, 'public'), {
   etag: true,
 }));
 
-app.get('/', (req: Request, res: Response) => {
-  res.render('home', {
-    title: 'Purslip',
-    currentUser: null,
-    currentPath: '/',
-    successMessages: [],
-    errorMessages: [],
-    t: (key: string) => key,
-  });
+app.get('/favicon.ico', (req: Request, res: Response) => {
+  res.redirect(301, '/images/favicon-32.png');
 });
+
+app.use(siteLocals);
 
 if (!process.env.SESSION_SECRET) {
   throw new Error('SESSION_SECRET is not set. Copy .env.example to .env and configure it.');
@@ -180,6 +176,12 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
 app.get('/healthz', (req: Request, res: Response) => {
   res.setHeader('Cache-Control', 'no-store');
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+app.get('/', (req: Request, res: Response) => {
+  res.render('home', {
+    title: 'Purslip',
+  });
 });
 
 app.get('/dashboard', requireAuth, async (req: Request, res: Response, next: NextFunction) => {

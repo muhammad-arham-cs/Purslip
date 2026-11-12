@@ -1,10 +1,13 @@
-<% if (typeof errors !== 'undefined' && errors.length) { %>
-  <div class="flash flash--error" role="alert">
-    <strong class="flash__title">Please check the highlighted details</strong>
-    <ul class="flash__list">
-      <% errors.forEach(function(e) { %>
-        <li><%= e.msg %></li>
-      <% }) %>
-    </ul>
+<% if (typeof errors !== 'undefined' && errors && errors.length) { %>
+  <div class="flash flash--error flash--inline" role="alert" aria-live="assertive">
+    <svg class="icon flash__icon" aria-hidden="true"><use href="#i-alert"/></svg>
+    <div class="flash__body">
+      <strong class="flash__title">Please check the details below and try again</strong>
+      <ul class="flash__list">
+        <% errors.forEach(function(e) { %>
+          <li><%= e.msg %></li>
+        <% }) %>
+      </ul>
+    </div>
   </div>
 <% } %>

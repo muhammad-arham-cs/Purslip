@@ -207,7 +207,7 @@ router.post('/:id/resume', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
   try {
     const deleted = await recurringModel.remove(req.session.user.id, req.params.id);
-    req.flash('success', deleted ? 'Recurring transaction deleted.' : 'Not found.');
+    req.flash(deleted ? 'success' : 'error', deleted ? 'Recurring transaction deleted.' : 'Recurring transaction not found.');
     res.redirect('/recurring');
   } catch (err) {
     next(err);

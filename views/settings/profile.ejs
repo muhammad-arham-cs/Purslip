@@ -1,25 +1,38 @@
-<%- include('../partials/head', { title }) %>
-<%- include('../partials/header') %>
-<main class="page settings-page settings-editor-page">
-  <a class="back-link" href="/settings">← Back to settings</a>
-  <div class="settings-page__heading"><p class="eyebrow">ACCOUNT</p><h1>Personal information</h1><p class="settings-page__intro">View and edit your personal information.</p></div>
-  <%- include('../partials/form-errors', { errors }) %>
-  <section class="card settings-editor-card">
-    <form method="POST" action="/settings/profile">
-      <div class="settings-fields">
-        <div class="form-field"><label for="fullName">Full name</label><input id="fullName" name="fullName" value="<%= profile.full_name %>" required></div>
-        <div class="form-field"><label for="country">Country</label><input id="country" name="country" value="<%= profile.country %>" required></div>
-        <div class="form-field"><label for="phoneNumber">Phone number</label><input id="phoneNumber" name="phoneNumber" value="<%= profile.phone_number %>" required></div>
-        <div class="form-field"><label>Email</label><input value="<%= profile.email %>" readonly></div>
-        <div class="form-field"><label>CNIC</label><input value="<%= revealedCnic || maskedCnic %>" readonly></div>
-      </div>
-      <div class="form-field"><label for="profilePassword">Current password</label><input id="profilePassword" name="currentPassword" type="password" autocomplete="current-password" required></div>
-      <div class="button-row"><button class="button button--primary" type="submit">Save changes</button><a class="button button--ghost" href="/settings">Cancel</a></div>
-    </form>
-    <form method="POST" action="/settings/profile/reveal-cnic" class="settings-reveal-form">
-      <div class="form-field"><label for="revealPassword">Password to reveal CNIC</label><input id="revealPassword" name="currentPassword" type="password" required></div>
-      <button class="button button--ghost" type="submit">Reveal CNIC</button>
-    </form>
-  </section>
-</main>
-<%- include('../partials/footer') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title }) %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main id="mainContent" class="page settings-page settings-editor-page">
+    <a class="back-link" href="/settings">
+      <svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg>
+      <span>Back to settings</span>
+    </a>
+    <div class="settings-page__heading">
+      <h1>Personal information</h1>
+      <p class="settings-page__intro">View and edit your personal information. Direct links: <a href="mailto:<%= profile.email %>"><%= profile.email %></a><% if (profile.phone_number) { %> &middot; <a href="tel:<%= String(profile.phone_number).replace(/[^\d+]/g, '') %>"><%= profile.phone_number %></a><% } %></p>
+    </div>
+    <%- include('../partials/form-errors', { errors }) %>
+    <section class="card settings-editor-card">
+      <form method="POST" action="/settings/profile">
+        <div class="settings-fields">
+          <div class="form-field"><label for="fullName">Full name</label><input id="fullName" name="fullName" value="<%= profile.full_name %>" required></div>
+          <div class="form-field"><label for="country">Country</label><input id="country" name="country" value="<%= profile.country %>" required></div>
+          <div class="form-field"><label for="phoneNumber">Phone number</label><input id="phoneNumber" name="phoneNumber" type="tel" value="<%= profile.phone_number %>" required></div>
+          <div class="form-field"><label for="readonlyEmail">Email</label><input id="readonlyEmail" value="<%= profile.email %>" readonly></div>
+          <div class="form-field"><label for="readonlyCnic">CNIC</label><input id="readonlyCnic" value="<%= revealedCnic || maskedCnic %>" readonly></div>
+        </div>
+        <div class="form-field"><label for="profilePassword">Current password</label><input id="profilePassword" name="currentPassword" type="password" autocomplete="current-password" required></div>
+        <div class="button-row"><button class="button button--primary" type="submit">Save changes</button><a class="button button--ghost" href="/settings">Cancel</a></div>
+      </form>
+      <form method="POST" action="/settings/profile/reveal-cnic" class="settings-reveal-form">
+        <div class="form-field"><label for="revealPassword">Password to reveal CNIC</label><input id="revealPassword" name="currentPassword" type="password" autocomplete="current-password" required></div>
+        <button class="button button--ghost" type="submit">Reveal CNIC</button>
+      </form>
+    </section>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

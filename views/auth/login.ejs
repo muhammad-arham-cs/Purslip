@@ -5,25 +5,34 @@
 </head>
 <body>
   <%- include('../partials/header') %>
-  <main class="page page--auth">
+  <main id="mainContent" class="page page--auth">
     <section class="auth-panel">
-      <div class="auth-panel__intro"><img class="brand-mark" src="/images/purslip-logo.png" alt="Purslip"><p class="eyebrow">Welcome back</p><h1>Your money, in focus.</h1><p>Pick up where you left off with a clear view of your finances.</p></div>
+      <div class="auth-panel__intro">
+        <a class="auth-panel__brand" href="/" aria-label="Purslip home">
+          <%- include('../partials/logo-mark') %>
+          <span>Purslip</span>
+        </a>
+        <h1>Your money, in focus.</h1>
+        <p>Pick up where you left off with a clear daily view of your accounts, budgets, goals and recurring bills.</p>
+      </div>
       <div class="card auth-card">
-      <h2>Log in</h2>
-      <%- include('../partials/form-errors') %>
-      <form method="POST" action="/auth/login" novalidate>
-        <div class="form-field">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" value="<%= values.email || '' %>" required autofocus>
+        <h2>Log in</h2>
+        <%- include('../partials/form-errors') %>
+        <form method="POST" action="/auth/login" novalidate>
+          <div class="form-field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" value="<%= values.email || '' %>" autocomplete="email" required autofocus>
+          </div>
+          <div class="form-field">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" autocomplete="current-password" required>
+          </div>
+          <button class="button button--primary button--block" type="submit">Log in</button>
+        </form>
+        <div class="auth-card__links">
+          <p><a href="/auth/forgot-password">Forgot your password?</a></p>
+          <p>New here? <a href="/auth/signup">Create an account</a></p>
         </div>
-        <div class="form-field">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" required>
-        </div>
-        <button class="button button--primary" type="submit" style="width:100%;">Log in</button>
-      </form>
-      <p><a href="/auth/forgot-password">Forgot your password?</a></p>
-      <p>New here? <a href="/auth/signup">Create an account</a></p>
       </div>
     </section>
   </main>

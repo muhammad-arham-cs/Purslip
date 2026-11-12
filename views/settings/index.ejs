@@ -1,55 +1,100 @@
-<%- include('../partials/head', { title }) %>
-<%- include('../partials/header') %>
-<main class="page settings-page">
-  <div class="settings-page__heading">
-    <p class="eyebrow">ACCOUNT</p>
-    <h1><%= t('Settings') %></h1>
-    <p class="settings-page__intro">Manage your account, security, and display preferences.</p>
-  </div>
-  <%- include('../partials/form-errors', { errors }) %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title }) %>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main id="mainContent" class="page settings-page">
+    <div class="settings-page__heading">
+      <h1><%= t('Settings') %></h1>
+      <p class="settings-page__intro">Manage your personal details, security credentials, and display preferences.</p>
+    </div>
+    <%- include('../partials/form-errors', { errors }) %>
 
-  <div class="settings-overview">
-    <section class="settings-section card">
-      <div class="settings-section__header">
-        <div><h2>Personal information</h2><p>View and edit your personal information.</p></div>
-        <a class="button" href="/settings/profile">View and edit</a>
-      </div>
-      <dl class="settings-summary">
-        <div><dt>Full name</dt><dd><%= profile.full_name || 'Not provided' %></dd></div>
-        <div><dt>Email</dt><dd><%= profile.email %></dd></div>
-        <div><dt>Country</dt><dd><%= profile.country || 'Not provided' %></dd></div>
-      </dl>
-    </section>
+    <div class="settings-overview">
+      <section class="settings-section card">
+        <div class="settings-section__header">
+          <div>
+            <h2>Personal information</h2>
+            <p>View and edit your personal profile and contact details.</p>
+          </div>
+          <a class="button" href="/settings/profile">View and edit</a>
+        </div>
+        <dl class="settings-summary">
+          <div>
+            <dt>Full name</dt>
+            <dd><%= profile.full_name || 'Not provided' %></dd>
+          </div>
+          <div>
+            <dt>Email</dt>
+            <dd><a href="mailto:<%= profile.email %>"><%= profile.email %></a></dd>
+          </div>
+          <div>
+            <dt>Phone number</dt>
+            <dd>
+              <% if (profile.phone_number) { %>
+                <a href="tel:<%= String(profile.phone_number).replace(/[^\d+]/g, '') %>"><%= profile.phone_number %></a>
+              <% } else { %>
+                Not provided
+              <% } %>
+            </dd>
+          </div>
+          <div>
+            <dt>Country</dt>
+            <dd><%= profile.country || 'Not provided' %></dd>
+          </div>
+        </dl>
+      </section>
 
-    <section class="settings-section card">
-      <div class="settings-section__header">
-        <div><h2>Security</h2><p>Update your login email or password.</p></div>
-        <span class="settings-section__icon" aria-hidden="true">⌁</span>
-      </div>
-      <div class="settings-action-list">
-        <a class="settings-action" href="/settings/security/email"><span><strong>Change email</strong><small>Update the email used to sign in.</small></span><span aria-hidden="true">→</span></a>
-        <a class="settings-action" href="/settings/security/password"><span><strong>Change password</strong><small>Set a new password for your account.</small></span><span aria-hidden="true">→</span></a>
-      </div>
-    </section>
+      <section class="settings-section card">
+        <div class="settings-section__header">
+          <div>
+            <h2>Security</h2>
+            <p>Update your login email or password.</p>
+          </div>
+          <span class="settings-section__icon" aria-hidden="true">
+            <svg class="icon"><use href="#i-shield"/></svg>
+          </span>
+        </div>
+        <div class="settings-action-list">
+          <a class="settings-action" href="/settings/security/email">
+            <span><strong>Change email</strong><small>Update the email address used to sign in.</small></span>
+            <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+          </a>
+          <a class="settings-action" href="/settings/security/password">
+            <span><strong>Change password</strong><small>Set a new password for your account.</small></span>
+            <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg>
+          </a>
+        </div>
+      </section>
 
-    <section class="settings-section card">
-      <div class="settings-section__header">
-        <div><h2>Preferences</h2><p>View and set your display preferences.</p></div>
-        <a class="button" href="/settings/preferences">View and edit</a>
-      </div>
-      <dl class="settings-summary">
-        <div><dt>Display currency</dt><dd><%= preferences.display_currency %></dd></div>
-        <div><dt>Language</dt><dd><%= preferences.language === 'ur' ? 'Urdu' : 'English' %></dd></div>
-        <div><dt>Theme</dt><dd><%= preferences.theme === 'night' ? 'Night mode' : preferences.theme === 'light' ? 'Light mode' : 'Dark mode' %></dd></div>
-      </dl>
-    </section>
+      <section class="settings-section card">
+        <div class="settings-section__header">
+          <div>
+            <h2>Preferences</h2>
+            <p>Set your display currency, exchange rates, language, and theme.</p>
+          </div>
+          <a class="button" href="/settings/preferences">View and edit</a>
+        </div>
+        <dl class="settings-summary">
+          <div><dt>Display currency</dt><dd><%= preferences.display_currency %></dd></div>
+          <div><dt>Language</dt><dd><%= preferences.language === 'ur' ? 'Urdu' : 'English' %></dd></div>
+          <div><dt>Theme</dt><dd><%= preferences.theme === 'night' ? 'Night mode' : preferences.theme === 'light' ? 'Light mode' : 'Dark mode' %></dd></div>
+        </dl>
+      </section>
 
-    <section class="settings-section card settings-danger-zone">
-      <div class="settings-section__header">
-        <div><h2>Delete account</h2><p>Permanently remove your profile and financial data.</p></div>
-        <a class="button button--danger" href="/settings/delete-account">Delete account</a>
-      </div>
-    </section>
-  </div>
-</main>
-<%- include('../partials/footer') %>
+      <section class="settings-section card settings-danger-zone">
+        <div class="settings-section__header">
+          <div>
+            <h2>Delete account</h2>
+            <p>Permanently remove your profile and financial data.</p>
+          </div>
+          <a class="button button--danger" href="/settings/delete-account">Delete account</a>
+        </div>
+      </section>
+    </div>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

@@ -1,4 +1,80 @@
-<footer class="app-footer">
-  <p>Purslip &mdash; your data, your control.</p>
+<%
+  const _site = (locals && locals.site) ? locals.site : {};
+  const _year = _site.year || new Date().getFullYear();
+  const _phone = _site.phone || '+92 300 1234567';
+  const _phoneHref = _site.phoneHref || 'tel:+923001234567';
+  const _email = _site.email || 'muhammadarham979@gmail.com';
+  const _emailHref = _site.emailHref || 'mailto:muhammadarham979@gmail.com';
+  const _authed = !!(locals && locals.currentUser);
+%>
+<footer class="app-footer" id="contact">
+  <div class="app-footer__inner">
+    <div class="app-footer__brand-col">
+      <a class="app-footer__brand" href="<%= _authed ? '/dashboard' : '/' %>" aria-label="Purslip home">
+        <%- include('logo-mark') %>
+        <span>Purslip</span>
+      </a>
+      <p class="app-footer__tagline">Purslip &mdash; your data, your control.</p>
+      <div class="app-footer__contact">
+        <a class="app-footer__contact-link" href="<%= _phoneHref %>">
+          <svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg>
+          <span><%= _phone %></span>
+        </a>
+        <a class="app-footer__contact-link" href="<%= _emailHref %>">
+          <svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg>
+          <span><%= _email %></span>
+        </a>
+      </div>
+    </div>
+
+    <nav class="app-footer__nav" aria-label="Footer navigation">
+      <% if (_authed) { %>
+        <div class="app-footer__group">
+          <strong class="app-footer__heading">Ledger</strong>
+          <a href="/dashboard">Dashboard</a>
+          <a href="/accounts">Accounts</a>
+          <a href="/transactions">Transactions</a>
+          <a href="/transactions/transfer/new">Transfers</a>
+          <a href="/import">Import CSV</a>
+        </div>
+        <div class="app-footer__group">
+          <strong class="app-footer__heading">Planning</strong>
+          <a href="/budgets">Budgets</a>
+          <a href="/goals">Goals</a>
+          <a href="/debts">Debts</a>
+          <a href="/recurring">Recurring</a>
+          <a href="/reports">Reports</a>
+        </div>
+        <div class="app-footer__group">
+          <strong class="app-footer__heading">Workspace</strong>
+          <a href="/categories">Categories</a>
+          <a href="/settings">Settings</a>
+          <a href="/settings/profile">Profile</a>
+          <a href="/settings/preferences">Preferences</a>
+        </div>
+      <% } else { %>
+        <div class="app-footer__group">
+          <strong class="app-footer__heading">Product</strong>
+          <a href="/">Home</a>
+          <a href="/#inside">Inside the purse</a>
+          <a href="/#features">Capabilities</a>
+        </div>
+        <div class="app-footer__group">
+          <strong class="app-footer__heading">Account</strong>
+          <a href="/auth/login">Log in</a>
+          <a href="/auth/signup">Create account</a>
+          <a href="/auth/forgot-password">Reset password</a>
+        </div>
+      <% } %>
+    </nav>
+  </div>
+
+  <div class="app-footer__bottom">
+    <p>&copy; <%= _year %> Purslip. Private household finance ledger.</p>
+    <p class="app-footer__meta">
+      <a href="<%= _emailHref %>"><%= _email %></a>
+      <span aria-hidden="true">&middot;</span>
+      <a href="<%= _phoneHref %>"><%= _phone %></a>
+    </p>
+  </div>
 </footer>
-<script src="/js/main.js"></script>

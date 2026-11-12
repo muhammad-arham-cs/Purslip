@@ -1,42 +1,137 @@
-<header class="app-header <%= locals.currentUser ? '' : 'app-header--public' %>">
+<%- include('icons') %>
+<%
+  const _t = typeof t === 'function' ? t : function (k) { return k; };
+  const _path = typeof currentPath === 'string' ? currentPath : '/';
+  const _authed = !!(locals.currentUser);
+%>
+<a class="skip-link" href="#mainContent">Skip to main content</a>
+<header class="app-header <%= _authed ? 'app-header--authed' : 'app-header--public' %>">
   <div class="app-header__bar">
-    <a class="app-header__brand" href="/"><img class="brand-mark" src="/images/purslip-logo.png" alt="Purslip"><span>Purslip</span></a>
-    <% if (locals.currentUser) { %>
-      <button class="app-header__toggle" id="navToggle" aria-label="<%= t('Toggle navigation') %>" aria-expanded="false">
-        <span></span><span></span><span></span>
+    <a class="app-header__brand" href="<%= _authed ? '/dashboard' : '/' %>" aria-label="Purslip home">
+      <%- include('logo-mark') %>
+      <span class="app-header__wordmark">Purslip</span>
+    </a>
+    <div class="app-header__mobile-controls">
+      <button type="button" class="theme-toggle theme-toggle--bar" data-theme-toggle title="<%= _t('Theme') %>" aria-label="Switch between light, dark, and night mode">
+        <svg class="icon" aria-hidden="true"><use href="#i-theme"/></svg>
       </button>
-    <% } %>
+      <button type="button" class="app-header__toggle" id="navToggle" aria-label="<%= _t('Toggle navigation') %>" aria-expanded="false" aria-controls="appNav">
+        <span class="app-header__toggle-bars" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span class="app-header__toggle-label">Menu</span>
+      </button>
+    </div>
   </div>
-  <% if (locals.currentUser) { %>
-  <nav class="app-nav" id="appNav">
-    <div class="app-nav__eyebrow">PERSONAL FINANCE</div>
-    <a href="/dashboard" class="<%= currentPath.startsWith('/dashboard') ? 'is-active' : '' %>"><%= t('Dashboard') %></a>
-    <a href="/accounts" class="<%= currentPath.startsWith('/accounts') ? 'is-active' : '' %>"><%= t('Accounts') %></a>
-    <a href="/transactions" class="<%= currentPath.startsWith('/transactions') ? 'is-active' : '' %>"><%= t('Transactions') %></a>
-    <a href="/categories" class="<%= currentPath.startsWith('/categories') ? 'is-active' : '' %>"><%= t('Categories') %></a>
-    <a href="/import" class="<%= currentPath.startsWith('/import') ? 'is-active' : '' %>"><%= t('Import') %></a>
-    <a href="/budgets" class="<%= currentPath.startsWith('/budgets') ? 'is-active' : '' %>"><%= t('Budgets') %></a>
-    <a href="/recurring" class="<%= currentPath.startsWith('/recurring') ? 'is-active' : '' %>"><%= t('Recurring') %></a>
-    <a href="/reports" class="<%= currentPath.startsWith('/reports') ? 'is-active' : '' %>"><%= t('Reports') %></a>
-    <a href="/goals" class="<%= currentPath.startsWith('/goals') ? 'is-active' : '' %>"><%= t('Goals') %></a>
-    <a href="/debts" class="<%= currentPath.startsWith('/debts') ? 'is-active' : '' %>"><%= t('Debts') %></a>
-    <a href="/settings" class="<%= currentPath.startsWith('/settings') ? 'is-active' : '' %>"><%= t('Settings') %></a>
-    <button type="button" class="theme-toggle" id="themeToggle" title="<%= t('Theme') %>">◐</button>
+
+  <% if (_authed) { %>
+  <nav class="app-nav" id="appNav" aria-label="Primary navigation">
+    <div class="app-nav__quick">
+      <a href="/transactions/new" class="button button--primary button--sm app-nav__cta">
+        <svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>
+        <span><%= _t('Add transaction') %></span>
+      </a>
+    </div>
+
+    <div class="app-nav__group">
+      <a href="/dashboard" class="<%= _path.startsWith('/dashboard') ? 'is-active' : '' %>">
+        <svg class="icon" aria-hidden="true"><use href="#i-dashboard"/></svg>
+        <span><%= _t('Dashboard') %></span>
+      </a>
+      <a href="/accounts" class="<%= _path.startsWith('/accounts') ? 'is-active' : '' %>">
+        <svg class="icon" aria-hidden="true"><use href="#i-accounts"/></svg>
+        <span><%= _t('Accounts') %></span>
+      </a>
+      <a href="/transactions" class="<%= _path.startsWith('/transactions') ? 'is-active' : '' %>">
+        <svg class="icon" aria-hidden="true"><use href="#i-transactions"/></svg>
+        <span><%= _t('Transactions') %></span>
+      </a>
+      <a href="/budgets" class="<%= _path.startsWith('/budgets') ? 'is-active' : '' %>">
+        <svg class="icon" aria-hidden="true"><use href="#i-budgets"/></svg>
+        <span><%= _t('Budgets') %></span>
+      </a>
+      <a href="/goals" class="<%= _path.startsWith('/goals') ? 'is-active' : '' %>">
+        <svg class="icon" aria-hidden="true"><use href="#i-goals"/></svg>
+        <span><%= _t('Goals') %></span>
+      </a>
+      <a href="/debts" class="<%= _path.startsWith('/debts') ? 'is-active' : '' %>">
+        <svg class="icon" aria-hidden="true"><use href="#i-debts"/></svg>
+        <span><%= _t('Debts') %></span>
+      </a>
+      <a href="/recurring" class="<%= _path.startsWith('/recurring') ? 'is-active' : '' %>">
+        <svg class="icon" aria-hidden="true"><use href="#i-recurring"/></svg>
+        <span><%= _t('Recurring') %></span>
+      </a>
+      <a href="/reports" class="<%= _path.startsWith('/reports') ? 'is-active' : '' %>">
+        <svg class="icon" aria-hidden="true"><use href="#i-reports"/></svg>
+        <span><%= _t('Reports') %></span>
+      </a>
+      <a href="/categories" class="<%= _path.startsWith('/categories') ? 'is-active' : '' %>">
+        <svg class="icon" aria-hidden="true"><use href="#i-categories"/></svg>
+        <span><%= _t('Categories') %></span>
+      </a>
+      <a href="/import" class="<%= _path.startsWith('/import') ? 'is-active' : '' %>">
+        <svg class="icon" aria-hidden="true"><use href="#i-import"/></svg>
+        <span><%= _t('Import') %></span>
+      </a>
+      <a href="/settings" class="<%= _path.startsWith('/settings') ? 'is-active' : '' %>">
+        <svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg>
+        <span><%= _t('Settings') %></span>
+      </a>
+    </div>
+
+    <div class="app-nav__footer">
+      <button type="button" class="theme-toggle" id="themeToggle" data-theme-toggle title="<%= _t('Theme') %>" aria-label="Switch between light, dark, and night mode">
+        <svg class="icon" aria-hidden="true"><use href="#i-theme"/></svg>
+        <span class="theme-toggle__text" data-theme-label>Theme</span>
+      </button>
+      <form action="/auth/logout?_method=DELETE" method="POST" class="app-nav__logout">
+        <button type="submit">
+          <svg class="icon" aria-hidden="true"><use href="#i-logout"/></svg>
+          <span><%= _t('Log out') %></span>
+        </button>
+      </form>
+    </div>
   </nav>
-  <form action="/auth/logout?_method=DELETE" method="POST" class="app-nav__logout">
-    <button type="submit"><%= t('Log out') %></button>
-  </form>
   <% } else { %>
-  <nav class="public-nav" aria-label="Public navigation">
-    <button type="button" class="theme-toggle" id="themeToggle" title="Switch theme" aria-label="Switch between light, dark, and night mode">◐</button>
-    <a href="/auth/login">Log in</a>
-    <a class="button button--primary" href="/auth/signup">Sign up</a>
+  <nav class="public-nav" id="appNav" aria-label="Public navigation">
+    <div class="public-nav__links">
+      <a href="/#inside" class="<%= _path === '/' ? 'is-active' : '' %>">Overview</a>
+      <a href="/#features">Features</a>
+      <a href="/#contact">Contact</a>
+    </div>
+    <div class="public-nav__actions">
+      <button type="button" class="theme-toggle" id="themeToggle" data-theme-toggle title="Switch theme" aria-label="Switch between light, dark, and night mode">
+        <svg class="icon" aria-hidden="true"><use href="#i-theme"/></svg>
+        <span class="theme-toggle__text" data-theme-label>Theme</span>
+      </button>
+      <a class="button button--ghost" href="/auth/login">Log in</a>
+      <a class="button button--primary" href="/auth/signup">Sign up</a>
+    </div>
   </nav>
   <% } %>
 </header>
+<div class="nav-backdrop" id="navBackdrop" hidden></div>
+
 <% if (locals.successMessages && successMessages.length) { %>
-  <div class="flash flash--success" role="status"><strong class="flash__title">Done</strong><span><%= successMessages.join(' ') %></span></div>
+  <div class="flash flash--success" role="status" aria-live="polite">
+    <svg class="icon flash__icon" aria-hidden="true"><use href="#i-check"/></svg>
+    <div class="flash__body">
+      <strong class="flash__title">Saved</strong>
+      <span><%= successMessages.join(' ') %></span>
+    </div>
+    <button type="button" class="flash__close" data-dismiss-flash aria-label="Dismiss notification">
+      <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+    </button>
+  </div>
 <% } %>
 <% if (locals.errorMessages && errorMessages.length) { %>
-  <div class="flash flash--error" role="alert"><strong class="flash__title">Something needs your attention</strong><span><%= errorMessages.join(' ') %></span></div>
+  <div class="flash flash--error" role="alert" aria-live="assertive">
+    <svg class="icon flash__icon" aria-hidden="true"><use href="#i-alert"/></svg>
+    <div class="flash__body">
+      <strong class="flash__title">Needs your attention</strong>
+      <span><%= errorMessages.join(' ') %></span>
+    </div>
+    <button type="button" class="flash__close" data-dismiss-flash aria-label="Dismiss alert">
+      <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+    </button>
+  </div>
 <% } %>

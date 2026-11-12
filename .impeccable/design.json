@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-12T23:34:00+05:00",
+  "title": "Design System: Purslip",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Minted Brass", "canonical": "#e9b949", "tonalRamp": ["#3a2a07", "#5c430d", "#825f14", "#a97d1d", "#ce9c2f", "#e9b949", "#f4d483", "#fbf0d0"] },
+      "ink-navy": { "role": "neutral", "displayName": "Ink-Navy Leather", "canonical": "#0a1324", "tonalRamp": ["#050811", "#0a1324", "#12203a", "#182a4a", "#2b446e", "#5472a3", "#9fb1cd", "#eef2f9"] },
+      "porcelain": { "role": "neutral", "displayName": "Porcelain Slip", "canonical": "#eef1f6", "tonalRamp": ["#0c172c", "#1e2f4d", "#3b4f73", "#647899", "#98a8c2", "#c8d2e3", "#e2e7f0", "#eef1f6"] },
+      "gain-mint": { "role": "secondary", "displayName": "Ledger Mint", "canonical": "#2cc996", "tonalRamp": ["#062e21", "#0b4d37", "#0d7a58", "#18a377", "#2cc996", "#64dbb3", "#a3ecd2", "#e1f9f0"] },
+      "loss-coral": { "role": "tertiary", "displayName": "Deficit Coral", "canonical": "#f06478", "tonalRamp": ["#360b12", "#611421", "#961f33", "#c42b44", "#f06478", "#f591a0", "#fac0c8", "#fde8eb"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero headline and primary net worth figure." },
+      "headline": { "displayName": "Headline", "purpose": "Page titles (h1)." },
+      "title": { "displayName": "Title", "purpose": "Section headings (h2) and slip titles." },
+      "body": { "displayName": "Body", "purpose": "Ledger copy, tables, and descriptions." },
+      "label": { "displayName": "Label", "purpose": "Form labels, table headers, and status pills." }
+    },
+    "shadows": [
+      { "name": "shadow-card", "value": "0 14px 34px rgba(3, 8, 18, 0.36)", "purpose": "Resting elevation for slips and cards." },
+      { "name": "shadow-elevated", "value": "0 22px 48px rgba(3, 8, 18, 0.5)", "purpose": "Mobile navigation drawer and floating surfaces." }
+    ],
+    "motion": [
+      { "name": "ease-out-expo", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Entrance reveals, progress bar fills, and card tilt." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "960px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary brass action button used for the main call to action per view.",
+      "html": "<button class=\"ds-btn-primary\">Log in to Purslip</button>",
+      "css": ".ds-btn-primary { background: #e9b949; color: #0b1426; padding: 10px 16px; border-radius: 10px; border: 1px solid transparent; font-weight: 600; font-size: 0.92rem; cursor: pointer; transition: transform 150ms ease, background-color 150ms ease; } .ds-btn-primary:hover { background: #f3c963; transform: translateY(-1px); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Neutral slate action button for secondary controls.",
+      "html": "<button class=\"ds-btn-secondary\">Export CSV</button>",
+      "css": ".ds-btn-secondary { background: #182a4a; color: #eef2f9; padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(182, 204, 240, 0.15); font-weight: 600; font-size: 0.92rem; cursor: pointer; transition: transform 150ms ease, border-color 150ms ease; } .ds-btn-secondary:hover { border-color: rgba(233, 185, 73, 0.36); transform: translateY(-1px); }"
+    },
+    {
+      "name": "Ledger Input",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Recessed navy input field with brass focus ring.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"you@family.pk\" />",
+      "css": ".ds-input { background: #0d182c; color: #eef2f9; padding: 10px 13px; border-radius: 10px; border: 1px solid rgba(182, 204, 240, 0.15); font-size: 0.95rem; } .ds-input:focus { outline: none; border-color: #e9b949; box-shadow: 0 0 0 3px rgba(233, 185, 73, 0.18); }"
+    },
+    {
+      "name": "Slip Card",
+      "kind": "card",
+      "refersTo": "slip-card",
+      "description": "Primary ledger container with 18px radius and soft offset shadow.",
+      "html": "<div class=\"ds-slip-card\"><strong>Total Net Worth</strong><p>PKR 1,482,500</p></div>",
+      "css": ".ds-slip-card { background: #12203a; color: #eef2f9; padding: 22px; border-radius: 18px; border: 1px solid rgba(182, 204, 240, 0.15); box-shadow: 0 14px 34px rgba(3, 8, 18, 0.36); }"
+    },
+    {
+      "name": "Status Pill",
+      "kind": "chip",
+      "refersTo": "status-pill",
+      "description": "Capsule badge for currency, rollover, and status indicators.",
+      "html": "<span class=\"ds-pill\">PKR · Multi-currency</span>",
+      "css": ".ds-pill { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; font-size: 0.76rem; font-weight: 600; background: rgba(233, 185, 73, 0.15); color: #e9b949; border: 1px solid rgba(233, 185, 73, 0.35); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Inside the Purse",
+    "overview": "Purslip is a private household ledger built around the tactile anatomy of its brand mark: a deep ink-navy leather wallet (#0a1324), crisp porcelain paper slips (#eef1f6), and a stack of warm brass coins (#e9b949).",
+    "keyCharacteristics": [
+      "Tactile material contrast between dark navy leather grounds and high-contrast porcelain/slate slips.",
+      "Brass coin accent reserved strictly for the primary action and active wayfinding.",
+      "Self-hosted Bricolage Grotesque for expressive headings paired with Geist tabular numerals for every currency amount.",
+      "Zero horizontal scroll across all viewports, with responsive drawer navigation and contained table scrollers."
+    ],
+    "rules": [
+      { "name": "The Brass Coin Rule", "body": "Minted Brass (#e9b949) is reserved for the single most important action in a view and active wayfinding.", "section": "colors" },
+      { "name": "The Tabular Ledger Rule", "body": "Every currency amount, date, percentage, and table cell uses font-variant-numeric: tabular-nums.", "section": "typography" },
+      { "name": "The No-Eyebrow Rule", "body": "Headings never carry an uppercase kicker or eyebrow label above them.", "section": "typography" }
+    ],
+    "dos": [
+      "Do use font-variant-numeric: tabular-nums (.num) on every balance, transaction amount, budget figure, and date.",
+      "Do use the shared SVG icon sprite (views/partials/icons.ejs) for all navigation, action, and status icons.",
+      "Do keep all scripts external (script-src 'self') and pass chart data via <script type=\"application/json\">."
+    ],
+    "donts": [
+      "Don't place uppercase eyebrow or kicker labels above headings.",
+      "Don't use Unicode symbols or emoji in place of drawn SVG icons.",
+      "Don't use thick colored border-left or border-right stripes on cards or alerts."
+    ]
+  }
+}

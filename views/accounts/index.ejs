@@ -32,7 +32,7 @@
             <div class="button-row" style="justify-content:flex-start;">
               <a class="button" href="/accounts/<%= account.id %>/edit">Edit</a>
               <% if (account.is_active) { %>
-                <form action="/accounts/<%= account.id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this account?');">
+                <form action="/accounts/<%= account.id %>?_method=DELETE" method="POST" data-confirm="Delete this account?">
                   <button class="button button--danger" type="submit">Delete</button>
                 </form>
               <% } else { %>

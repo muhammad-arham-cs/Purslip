@@ -1,6 +1,35 @@
+<%
+  const _rawTitle = typeof title !== 'undefined' && title ? String(title) : '';
+  const _pageTitle = !_rawTitle || _rawTitle === 'Purslip'
+    ? 'Purslip · Personal finance, in one clear view'
+    : _rawTitle + ' · Purslip';
+  const _desc = (typeof metaDescription !== 'undefined' && metaDescription)
+    ? metaDescription
+    : 'Purslip is a private personal finance manager: accounts, transactions, budgets, recurring bills, goals, debts and reports in one clear daily view.';
+  const _theme = typeof theme !== 'undefined' && theme ? theme : 'dark';
+  const _isPrivate = !!(typeof currentUser !== 'undefined' && currentUser);
+%>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><%= typeof title !== 'undefined' ? title + ' · Purslip' : 'Purslip' %></title>
-<script src="/js/theme-init.js"></script>
-<link rel="stylesheet" href="/css/style.css">
-<script src="/js/preferences.js" data-language="<%= typeof language !== 'undefined' ? language : 'en' %>" data-theme="<%= typeof theme !== 'undefined' ? theme : 'dark' %>" defer></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title><%= _pageTitle %></title>
+<meta name="description" content="<%= _desc %>">
+<% if (_isPrivate) { %><meta name="robots" content="noindex, nofollow"><% } %>
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0a1324" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f5f9" media="(prefers-color-scheme: light)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Purslip">
+<meta property="og:title" content="<%= _pageTitle %>">
+<meta property="og:description" content="<%= _desc %>">
+<meta property="og:image" content="/images/icon-512.png">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/images/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preload" href="/fonts/onest.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<script src="/js/theme-init.js" data-theme="<%= _theme %>"></script>
+<link rel="stylesheet" href="/css/style.css?v=3">
+<script src="/js/preferences.js" data-language="<%= typeof language !== 'undefined' ? language : 'en' %>" data-theme="<%= _theme %>" defer></script>
+<script src="/js/main.js?v=3" defer></script>

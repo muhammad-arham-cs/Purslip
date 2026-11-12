@@ -64,7 +64,7 @@
                     <% } else { %>
                       <form action="/recurring/<%= t.id %>/resume" method="POST"><button class="button" type="submit">Resume</button></form>
                     <% } %>
-                    <form action="/recurring/<%= t.id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this recurring transaction? Already-generated transactions are kept.');">
+                    <form action="/recurring/<%= t.id %>?_method=DELETE" method="POST" data-confirm="Delete this recurring transaction? Already-generated transactions are kept.">
                       <button class="button button--danger" type="submit">Delete</button>
                     </form>
                   </div>

@@ -58,3 +58,4 @@ jobs:
         uses: prisma/cloud-deploy-action@v1
         with:
           teardown: true
+

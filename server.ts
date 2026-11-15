@@ -186,6 +186,14 @@ app.get('/', (req: Request, res: Response) => {
   });
 });
 
+app.get('/login', (req: Request, res: Response) => {
+  res.redirect(302, '/auth/login');
+});
+
+app.get('/register', (req: Request, res: Response) => {
+  res.redirect(302, '/auth/signup');
+});
+
 app.get('/dashboard', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
   try {
     res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');

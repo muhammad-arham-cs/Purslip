@@ -1,182 +1,1099 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <%- include('partials/head') %>
-</head>
-<body class="body--landing">
-  <%- include('partials/header') %>
-  <main id="mainContent" class="page page--landing">
-    <section class="landing-hero">
-      <div class="landing-hero__copy">
-        <h1>See into your purse before the month runs out.</h1>
-        <p class="landing-hero__lead">
-          Purslip holds your bank accounts, cash wallets, monthly budgets, recurring bills, savings goals and personal debts in one private daily ledger.
-        </p>
-
-        <% if (locals.currentUser) { %>
-          <div class="slip-card landing-signin-slip" data-tilt>
-            <div class="landing-signin-slip__head">
-              <h2>Signed in as <%= currentUser.email %></h2>
-              <span class="status-pill status-pill--positive">Active session</span>
-            </div>
-            <p class="landing-signin-slip__sub">Your accounts, budgets and reports are ready.</p>
-            <div class="button-row">
-              <a class="button button--primary" href="/dashboard">
-                <span>Open dashboard</span>
-                <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg>
-              </a>
-              <a class="button button--ghost" href="/transactions/new">Add transaction</a>
-            </div>
-          </div>
-        <% } else { %>
-          <div class="slip-card landing-signin-slip" data-tilt>
-            <div class="landing-signin-slip__head">
-              <h2>Sign in to your ledger</h2>
-              <span class="status-pill">PKR &middot; Multi-currency</span>
-            </div>
-            <form method="POST" action="/auth/login" class="landing-signin-form" novalidate>
-              <div class="landing-signin-form__grid">
-                <div class="form-field">
-                  <label for="heroEmail">Email</label>
-                  <input type="email" id="heroEmail" name="email" autocomplete="email" placeholder="you@family.pk" required>
-                </div>
-                <div class="form-field">
-                  <label for="heroPassword">Password</label>
-                  <input type="password" id="heroPassword" name="password" autocomplete="current-password" placeholder="8+ characters" required>
-                </div>
-              </div>
-              <div class="landing-signin-form__actions">
-                <button class="button button--primary" type="submit">
-                  <span>Log in to Purslip</span>
-                  <svg class="icon" aria-hidden="true"><use href="#i-arrow-right"/></svg>
-                </button>
-                <div class="landing-signin-form__links">
-                  <a href="/auth/signup">Create an account</a>
-                  <span aria-hidden="true">&middot;</span>
-                  <a href="/auth/forgot-password">Reset password</a>
-                </div>
-              </div>
-            </form>
-          </div>
-        <% } %>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Purslip — Personal Financial Command Center</title>
+    <meta
+      name="description"
+      content="Track your spending, manage your budgets, monitor your savings and understand your entire financial picture — all in one place."
+    />
+    <meta property="og:title" content="Purslip — Personal Financial Command Center" />
+    <meta
+      property="og:description"
+      content="Track your spending, manage your budgets, monitor your savings and understand your entire financial picture — all in one place."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/images/icon-512.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/images/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/images/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preload" as="image" href="/purslip-frames/frame_0000.webp?v=city153" type="image/webp" />
+    <link rel="stylesheet" href="/css/purslip-landing.css?v=city153-v3" />
+  </head>
+  <body style="margin: 0; background-color: #050403;">
+    <div class="ps-landing" id="purslip-landing">
+      <!-- ====================================================================
+           FIXED SCROLL-CONTROLLED 3D IMAGE-SEQUENCE CANVAS
+           Independently replaceable 300-500 frame sequence stage
+           ==================================================================== -->
+      <div class="ps-canvas-stage" aria-hidden="true" data-scroll-sequence-stage>
+        <canvas
+          id="purslip-scroll-canvas"
+          class="ps-scroll-canvas"
+          data-testid="purslip-scroll-canvas"
+        ></canvas>
+        <div class="ps-canvas-vignette"></div>
       </div>
 
-      <div class="landing-stage-3d" aria-label="Interactive 3D view of Purslip ledger slips and brass coins">
-        <canvas id="purseCanvas" class="landing-stage-3d__canvas"></canvas>
-        <div class="landing-stage-3d__fallback" aria-hidden="true">
-          <div class="slip-card slip-card--porcelain">
-            <div class="slip-card__row">
-              <span>Net Worth &middot; Household</span>
-              <strong>PKR 1,482,500</strong>
-            </div>
-            <div class="slip-card__row slip-card__row--muted">
-              <span>Meezan Current &middot; HBL Savings &middot; Cash</span>
-              <span class="amount-positive">+PKR 68,400 this month</span>
-            </div>
-          </div>
-          <div class="slip-card slip-card--navy">
-            <div class="slip-card__row">
-              <span>Monthly Budgets &middot; Rollover</span>
-              <strong>68% used</strong>
-            </div>
-            <div class="progress-bar"><div class="progress-bar__fill" style="width:68%"></div></div>
-          </div>
-        </div>
-        <p class="landing-stage-3d__caption">Move pointer or tap to tilt the slips &amp; spin the brass stack</p>
-      </div>
-    </section>
+      <!-- ====================================================================
+           A. FLOATING NAVIGATION BAR
+           ==================================================================== -->
+      <div class="ps-nav-wrapper">
+        <header class="ps-nav" id="purslip-nav" data-scrolled="false">
+          <a href="#top" class="ps-brand" aria-label="Purslip Home">
+            <%- include('partials/logo-mark') %>
+            <span>Purslip</span>
+          </a>
 
-    <section class="landing-anatomy" id="inside" aria-labelledby="insideHeading">
-      <div class="landing-anatomy__intro">
-        <h2 id="insideHeading">What sits inside the purse</h2>
-        <p>Every part of Purslip maps to a real piece of household bookkeeping — no synthetic scores, no ads, and no third-party bank scraping.</p>
-      </div>
+          <nav class="ps-nav-links" aria-label="Primary Navigation">
+            <a href="#features" class="ps-nav-link">Features</a>
+            <a href="#how-it-works" class="ps-nav-link">How it works</a>
+            <a href="#benefits" class="ps-nav-link">Benefits</a>
+            <a href="#faq" class="ps-nav-link">FAQ</a>
+          </nav>
 
-      <div class="landing-anatomy__spread">
-        <article class="slip-card slip-card--porcelain landing-specimen" data-tilt>
-          <header class="landing-specimen__head">
-            <h3>Multi-currency accounts &amp; self-transfers</h3>
-            <span class="status-pill">PKR &middot; USD &middot; EUR &middot; GBP &middot; AED &middot; SAR</span>
-          </header>
-          <p class="landing-specimen__copy">
-            Keep checking, savings, credit card, cash and investment balances in their native currency while viewing your combined net worth in your chosen base currency. Moving money between your own accounts records linked outgoing and incoming entries without inflating income or expense totals.
-          </p>
-          <dl class="landing-specimen__ledger">
-            <div><dt>Checking &amp; Wallets</dt><dd class="num">PKR 412,000.00</dd></div>
-            <div><dt>Foreign Currency Reserve</dt><dd class="num">USD 1,850.00</dd></div>
-            <div><dt>Internal Transfer</dt><dd class="num amount-neutral">Excluded from spending</dd></div>
-          </dl>
-        </article>
-
-        <article class="slip-card landing-specimen" data-tilt>
-          <header class="landing-specimen__head">
-            <h3>Category budgets, splits &amp; recurring bills</h3>
-            <span class="status-pill status-pill--brass">Rollover ready</span>
-          </header>
-          <p class="landing-specimen__copy">
-            Divide a single grocery or utility receipt across multiple sub-categories. Set monthly category limits with optional unused-budget rollover, and let scheduled recurring templates post due bills automatically when you open your dashboard.
-          </p>
-          <dl class="landing-specimen__ledger">
-            <div><dt>Groceries &amp; Household (rollover on)</dt><dd class="num">PKR 42,000 / 60,000</dd></div>
-            <div><dt>Electricity &amp; Fibre (next 14 days)</dt><dd class="num amount-negative">Due on the 18th</dd></div>
-            <div><dt>Split receipt allocation</dt><dd class="num amount-positive">100% balanced</dd></div>
-          </dl>
-        </article>
-
-        <article class="slip-card landing-specimen" data-tilt>
-          <header class="landing-specimen__head">
-            <h3>Savings goals, personal debts &amp; CSV control</h3>
-            <span class="status-pill status-pill--positive">Full export</span>
-          </header>
-          <p class="landing-specimen__copy">
-            Tie savings goals to real accounts with target dates, track money lent to or borrowed from family and friends with partial repayments, and import bank CSV statements with reusable column mappings and duplicate detection.
-          </p>
-          <dl class="landing-specimen__ledger">
-            <div><dt>Emergency Fund target</dt><dd class="num amount-positive">82% complete</dd></div>
-            <div><dt>Lent &amp; borrowed ledger</dt><dd class="num">Linked or standalone</dd></div>
-            <div><dt>CSV import &amp; export</dt><dd class="num">Saved bank mappings</dd></div>
-          </dl>
-        </article>
-      </div>
-    </section>
-
-    <section class="landing-specs" id="features" aria-labelledby="specsHeading">
-      <div class="landing-specs__panel slip-card">
-        <div class="landing-specs__copy">
-          <h2 id="specsHeading">Built for daily entry on a phone or laptop</h2>
-          <p>Switch between Light, Dark and Night themes, view the interface in English or Urdu, and export your entire transaction history to CSV whenever you want.</p>
-          <div class="button-row">
+          <div class="ps-nav-actions">
             <% if (locals.currentUser) { %>
-              <a class="button button--primary" href="/dashboard">Go to Dashboard</a>
-              <a class="button button--ghost" href="/reports">View Reports</a>
+              <a href="/dashboard" data-route="dashboard" class="ps-btn-primary">Dashboard</a>
             <% } else { %>
-              <a class="button button--primary" href="/auth/signup">Create your private account</a>
-              <a class="button button--ghost" href="/auth/login">Log in</a>
+              <a href="/auth/login" data-route="login" class="ps-nav-login">Log in</a>
+              <a href="/auth/signup" data-route="register" class="ps-btn-primary">Get started</a>
+            <% } %>
+          </div>
+
+          <button
+            type="button"
+            class="ps-mobile-toggle"
+            id="ps-mobile-menu-btn"
+            aria-label="Toggle navigation menu"
+            aria-expanded="false"
+            aria-controls="ps-mobile-drawer"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="4" y1="7" x2="20" y2="7" />
+              <line x1="4" y1="12" x2="20" y2="12" />
+              <line x1="4" y1="17" x2="20" y2="17" />
+            </svg>
+          </button>
+        </header>
+
+        <div class="ps-mobile-drawer" id="ps-mobile-drawer" data-open="false">
+          <nav class="ps-mobile-drawer-links" aria-label="Mobile Navigation">
+            <a href="#features" class="ps-nav-link">Features</a>
+            <a href="#how-it-works" class="ps-nav-link">How it works</a>
+            <a href="#benefits" class="ps-nav-link">Benefits</a>
+            <a href="#faq" class="ps-nav-link">FAQ</a>
+          </nav>
+          <div class="ps-mobile-drawer-actions">
+            <% if (locals.currentUser) { %>
+              <a href="/dashboard" data-route="dashboard" class="ps-btn-primary">Dashboard</a>
+            <% } else { %>
+              <a href="/auth/login" data-route="login" class="ps-nav-login">Log in</a>
+              <a href="/auth/signup" data-route="register" class="ps-btn-primary">Get started</a>
             <% } %>
           </div>
         </div>
-        <dl class="landing-specs__table">
-          <div>
-            <dt>Themes</dt>
-            <dd>Light porcelain, Dark navy leather, and low-glare Night mode</dd>
-          </div>
-          <div>
-            <dt>Languages</dt>
-            <dd>English &amp; Urdu (`اردو`) with instant preference switching</dd>
-          </div>
-          <div>
-            <dt>Security</dt>
-            <dd>Session-based authentication with 15-minute idle lock &amp; masked CNIC</dd>
-          </div>
-          <div>
-            <dt>Data portability</dt>
-            <dd>Bank CSV import with duplicate checks &amp; filtered CSV export</dd>
-          </div>
-        </dl>
       </div>
-    </section>
-  </main>
-  <%- include('partials/footer') %>
-  <script type="module" src="/js/landing-3d.js?v=3"></script>
-</body>
+
+      <!-- ====================================================================
+           MAIN FOREGROUND CONTENT
+           ==================================================================== -->
+      <main class="ps-page-content" id="top">
+        <!-- ==================================================================
+             B. HERO SECTION
+             ================================================================== -->
+        <section class="ps-hero" aria-labelledby="ps-hero-heading">
+          <div class="ps-container">
+            <div class="ps-hero-grid">
+              <div class="ps-hero-copy">
+                <p class="ps-descriptor">
+                  <span>Your personal financial command center.</span>
+                  <span class="ps-descriptor-sep" aria-hidden="true">·</span>
+                  <span>Multi-Currency &amp; Bilingual</span>
+                </p>
+
+                <h1 class="ps-hero-title" id="ps-hero-heading">
+                  Your money deserves a <em>clearer picture.</em>
+                </h1>
+
+                <p class="ps-hero-subtitle">
+                  Track your spending, manage your budgets, monitor your savings and understand
+                  your entire financial picture — all in one place.
+                </p>
+
+                <div class="ps-hero-ctas">
+                  <a href="/auth/signup" data-route="register" class="ps-btn-primary ps-btn-lg">
+                    Get Started
+                  </a>
+                  <a href="#showcase" class="ps-btn-secondary ps-btn-lg">
+                    Explore Purslip
+                  </a>
+                </div>
+
+                <div class="ps-hero-meta">
+                  <span><strong>8 Core Modules</strong></span>
+                  <span aria-hidden="true">·</span>
+                  <span>Accounts, Budgets, Goals &amp; Lending</span>
+                  <span aria-hidden="true">·</span>
+                  <span>CSV Import</span>
+                  <span aria-hidden="true">·</span>
+                  <span>English &amp; اردو</span>
+                </div>
+              </div>
+
+              <!-- Right-hand Architectural Telemetry Card over the 3D Stage -->
+              <aside class="ps-hero-stage-card" aria-label="Consolidated Household Position">
+                <div class="ps-stage-card-header">
+                  <span class="ps-stage-card-title">Consolidated Net Worth</span>
+                  <span class="ps-stage-card-currency">PKR · Primary Ledger</span>
+                </div>
+
+                <div class="ps-stage-networth">
+                  <div class="ps-stage-networth-label">Total Verified Position</div>
+                  <div class="ps-stage-networth-value ps-tabular">PKR 4,820,500</div>
+                  <div class="ps-stage-networth-delta ps-tabular">
+                    <span>+PKR 186,550 net monthly surplus</span>
+                  </div>
+                </div>
+
+                <div class="ps-stage-accounts">
+                  <div class="ps-stage-account-row">
+                    <span class="ps-stage-account-name">Meezan Bank Current</span>
+                    <span class="ps-stage-account-val ps-tabular">PKR 802,000</span>
+                  </div>
+                  <div class="ps-stage-account-row">
+                    <span class="ps-stage-account-name">HBL Freedom Account</span>
+                    <span class="ps-stage-account-val ps-tabular">PKR 401,200</span>
+                  </div>
+                  <div class="ps-stage-account-row">
+                    <span class="ps-stage-account-name">National Savings &amp; Goal Pots</span>
+                    <span class="ps-stage-account-val ps-tabular">PKR 3,150,300</span>
+                  </div>
+                  <div class="ps-stage-account-row">
+                    <span class="ps-stage-account-name">SadaPay &amp; Net Receivables</span>
+                    <span class="ps-stage-account-val ps-tabular">PKR 467,000</span>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             C. REALISTIC PRODUCT SHOWCASE
+             ================================================================== -->
+        <section class="ps-section" id="showcase" aria-labelledby="ps-showcase-heading">
+          <div class="ps-container">
+            <div class="ps-section-header-split">
+              <div>
+                <p class="ps-kicker">Interactive Product Walkthrough</p>
+                <h2 class="ps-section-title" id="ps-showcase-heading">
+                  Built for real household ledgers, <em>not decorative charts.</em>
+                </h2>
+                <p class="ps-section-desc">
+                  Explore how Purslip organizes balances, monthly budgets, CSV statement imports,
+                  and personal lending records across currencies, languages, and themes.
+                </p>
+              </div>
+            </div>
+
+            <!-- Interactive Workspace Controls -->
+            <div class="ps-showcase-toolbar">
+              <div class="ps-segmented-group" role="tablist" aria-label="Purslip Workspace Views">
+                <button
+                  type="button"
+                  role="tab"
+                  class="ps-seg-btn"
+                  data-dash-view="overview"
+                  aria-selected="true"
+                >
+                  Overview
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  class="ps-seg-btn"
+                  data-dash-view="transactions"
+                  aria-selected="false"
+                >
+                  Transactions &amp; CSV
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  class="ps-seg-btn"
+                  data-dash-view="budgets"
+                  aria-selected="false"
+                >
+                  Budgets &amp; Goals
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  class="ps-seg-btn"
+                  data-dash-view="lending"
+                  aria-selected="false"
+                >
+                  Lent &amp; Borrowed
+                </button>
+              </div>
+
+              <div class="ps-showcase-controls-right">
+                <div class="ps-segmented-group" aria-label="Preview Currency">
+                  <button type="button" class="ps-seg-btn" data-dash-currency="PKR" aria-pressed="true">
+                    PKR
+                  </button>
+                  <button type="button" class="ps-seg-btn" data-dash-currency="USD" aria-pressed="false">
+                    USD
+                  </button>
+                  <button type="button" class="ps-seg-btn" data-dash-currency="GBP" aria-pressed="false">
+                    GBP
+                  </button>
+                </div>
+
+                <div class="ps-segmented-group" aria-label="Preview Language">
+                  <button type="button" class="ps-seg-btn" data-dash-lang="en" aria-pressed="true">
+                    English
+                  </button>
+                  <button type="button" class="ps-seg-btn" data-dash-lang="ur" aria-pressed="false">
+                    اردو
+                  </button>
+                </div>
+
+                <div class="ps-segmented-group" aria-label="Preview Theme">
+                  <button type="button" class="ps-seg-btn" data-dash-theme="dark" aria-pressed="true">
+                    Dark
+                  </button>
+                  <button type="button" class="ps-seg-btn" data-dash-theme="night" aria-pressed="false">
+                    Night
+                  </button>
+                  <button type="button" class="ps-seg-btn" data-dash-theme="light" aria-pressed="false">
+                    Light
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Realistic Purslip Application Window -->
+            <div
+              class="ps-dashboard-frame"
+              id="ps-dashboard-frame"
+              data-preview-theme="dark"
+              data-preview-currency="PKR"
+              data-preview-lang="en"
+            >
+              <div class="ps-dash-topbar">
+                <div class="ps-dash-workspace">
+                  <span id="ps-dash-view-title">Consolidated Financial Command</span>
+                  <span aria-hidden="true">·</span>
+                  <span class="ps-dash-period">November 2026</span>
+                </div>
+                <div class="ps-dash-account-pills">
+                  <span>Meezan Current</span>
+                  <span aria-hidden="true">·</span>
+                  <span>HBL Freedom</span>
+                  <span aria-hidden="true">·</span>
+                  <span>SadaPay</span>
+                  <span aria-hidden="true">·</span>
+                  <span>National Savings</span>
+                </div>
+              </div>
+
+              <!-- 4 Core Financial Metrics -->
+              <div class="ps-dash-kpi-strip" id="ps-dash-kpi-strip">
+                <!-- Populated deterministically by purslip-landing.js -->
+              </div>
+
+              <!-- Middle Row: Cash Flow SVG Chart + Monthly Budget Progress -->
+              <div class="ps-dash-body">
+                <div class="ps-dash-panel ps-dash-panel-left">
+                  <div class="ps-panel-header">
+                    <h3 class="ps-panel-heading" id="ps-dash-chart-heading">
+                      Six-Month Cash Flow (Income vs. Expenses)
+                    </h3>
+                    <div class="ps-panel-legend">
+                      <span>
+                        <span class="ps-legend-swatch" style="background: #3D9A6B;"></span>Inflow
+                      </span>
+                      <span>
+                        <span class="ps-legend-swatch" style="background: #C58F71;"></span>Outflow
+                      </span>
+                    </div>
+                  </div>
+                  <div class="ps-chart-svg-wrap">
+                    <svg
+                      id="ps-dash-chart-svg"
+                      class="ps-chart-svg"
+                      viewBox="0 0 640 200"
+                      preserveAspectRatio="none"
+                      role="img"
+                      aria-label="Six-month financial cash flow chart"
+                    ></svg>
+                  </div>
+                </div>
+
+                <div class="ps-dash-panel">
+                  <div class="ps-panel-header">
+                    <h3 class="ps-panel-heading">Monthly Budgets &amp; Limits</h3>
+                    <span class="ps-tx-meta">Nov 2026</span>
+                  </div>
+                  <div class="ps-budget-list" id="ps-dash-budget-list">
+                    <!-- Populated deterministically by purslip-landing.js -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bottom Row: Recent Transactions + Category / Account Breakdown -->
+              <div class="ps-dash-bottom">
+                <div class="ps-dash-panel ps-dash-panel-left">
+                  <div class="ps-panel-header">
+                    <h3 class="ps-panel-heading">Recent Ledger Activity</h3>
+                    <span class="ps-tx-meta">Verified Entries &amp; CSV Imports</span>
+                  </div>
+                  <div class="ps-tx-table" id="ps-dash-tx-list">
+                    <!-- Populated deterministically by purslip-landing.js -->
+                  </div>
+                </div>
+
+                <div class="ps-dash-panel">
+                  <div class="ps-panel-header">
+                    <h3 class="ps-panel-heading">Distribution Breakdown</h3>
+                    <span class="ps-tx-meta">Share of Total</span>
+                  </div>
+                  <div class="ps-breakdown-list" id="ps-dash-breakdown-list">
+                    <!-- Populated deterministically by purslip-landing.js -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             D. FINANCIAL FEATURES (8 CAPABILITIES IN VARIED EDITORIAL LAYOUT)
+             ================================================================== -->
+        <section class="ps-section ps-section-alt" id="features" aria-labelledby="ps-features-heading">
+          <div class="ps-container">
+            <div class="ps-section-header">
+              <p class="ps-kicker">Eight Integrated Capabilities</p>
+              <h2 class="ps-section-title" id="ps-features-heading">
+                Every dimension of your personal finances, <em>structured with clarity.</em>
+              </h2>
+              <p class="ps-section-desc">
+                From daily grocery receipts and CSV bank statements to multi-currency accounts and
+                personal lending records, Purslip keeps your financial life organized in one place.
+              </p>
+            </div>
+
+            <!-- Editorial Row 1: Asymmetric 7:5 Split (Features 01 & 02) -->
+            <div class="ps-editorial-row-1">
+              <!-- 01. Complete Financial Overview -->
+              <article class="ps-feature-block">
+                <div>
+                  <span class="ps-feature-index">01. Complete Financial Overview</span>
+                  <h3 class="ps-feature-title">Know your exact net worth and liquid balance at a glance</h3>
+                  <p class="ps-feature-copy">
+                    Bring together current accounts, savings certificates, digital wallets, and cash
+                    in hand across multiple currencies so you always see your true net position.
+                  </p>
+                </div>
+                <div class="ps-demo-surface">
+                  <div class="ps-demo-row">
+                    <span>Total Liquid &amp; Savings Assets</span>
+                    <span class="ps-tabular" style="color: var(--ps-ivory);">PKR 4,635,500</span>
+                  </div>
+                  <div class="ps-demo-row">
+                    <span>Net Lending Receivables (Lent - Borrowed)</span>
+                    <span class="ps-tabular" style="color: var(--ps-positive);">+PKR 185,000</span>
+                  </div>
+                  <div class="ps-demo-row">
+                    <span><strong>Consolidated Net Worth</strong></span>
+                    <span class="ps-tabular" style="color: var(--ps-copper); font-weight: 600;">
+                      PKR 4,820,500
+                    </span>
+                  </div>
+                </div>
+              </article>
+
+              <!-- 02. Smart Transaction Management -->
+              <article class="ps-feature-block">
+                <div>
+                  <span class="ps-feature-index">02. Smart Transaction Management</span>
+                  <h3 class="ps-feature-title">Log daily activity or import bank CSV statements in seconds</h3>
+                  <p class="ps-feature-copy">
+                    Record income and expenses with clean categories, search historical entries
+                    instantly, or upload monthly CSV statements without manual re-entry.
+                  </p>
+                </div>
+                <div class="ps-demo-surface">
+                  <div class="ps-demo-row">
+                    <span>Meezan_Statement_Nov.csv</span>
+                    <span class="ps-tabular" style="color: var(--ps-positive);">48 Rows Imported</span>
+                  </div>
+                  <div class="ps-demo-row">
+                    <span>Category Rules Applied</span>
+                    <span class="ps-tabular">Utilities · Groceries · Payroll</span>
+                  </div>
+                  <div class="ps-demo-row">
+                    <span>Duplicate Entry Detection</span>
+                    <span class="ps-tabular">0 Collisions</span>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <!-- Editorial Row 2: 3-Column Architectural Ledger Strip (Features 03, 04, 05) -->
+            <div class="ps-editorial-row-2">
+              <!-- 03. Monthly Budgets and Spending Limits -->
+              <article class="ps-editorial-col-cell">
+                <div>
+                  <span class="ps-feature-index">03. Monthly Budgets &amp; Limits</span>
+                  <h3 class="ps-feature-title">Set realistic category ceilings</h3>
+                  <p class="ps-feature-copy">
+                    Define monthly spending limits for groceries, utilities, fuel, and dining, and
+                    see how much room remains before the month closes.
+                  </p>
+                </div>
+                <div class="ps-demo-surface">
+                  <div class="ps-budget-row" style="margin-bottom: 8px;">
+                    <span>Household &amp; Utilities</span>
+                    <span class="ps-tabular">80% used</span>
+                  </div>
+                  <div class="ps-progress-track">
+                    <div class="ps-progress-fill" style="width: 80%;"></div>
+                  </div>
+                </div>
+              </article>
+
+              <!-- 04. Savings Goals -->
+              <article class="ps-editorial-col-cell">
+                <div>
+                  <span class="ps-feature-index">04. Savings Goals</span>
+                  <h3 class="ps-feature-title">Fund specific milestones deliberately</h3>
+                  <p class="ps-feature-copy">
+                    Create dedicated targets for emergency reserves, household upgrades, or annual
+                    obligations and track every contribution toward completion.
+                  </p>
+                </div>
+                <div class="ps-demo-surface">
+                  <div class="ps-budget-row" style="margin-bottom: 8px;">
+                    <span>Emergency Fund (PKR 1.08M / 1.2M)</span>
+                    <span class="ps-tabular" style="color: var(--ps-positive);">90%</span>
+                  </div>
+                  <div class="ps-progress-track">
+                    <div class="ps-progress-fill" data-status="healthy" style="width: 90%;"></div>
+                  </div>
+                </div>
+              </article>
+
+              <!-- 05. Cash Flow and Spending Analytics -->
+              <article class="ps-editorial-col-cell">
+                <div>
+                  <span class="ps-feature-index">05. Cash Flow &amp; Analytics</span>
+                  <h3 class="ps-feature-title">Measure your net monthly surplus</h3>
+                  <p class="ps-feature-copy">
+                    Compare total inflows against outflows across months and inspect detailed
+                    spending reports to uncover where your money actually goes.
+                  </p>
+                </div>
+                <div class="ps-demo-surface">
+                  <div class="ps-demo-row">
+                    <span>Nov Inflow vs. Outflow</span>
+                    <span class="ps-tabular" style="color: var(--ps-positive);">+40.1% Surplus</span>
+                  </div>
+                  <div class="ps-demo-row">
+                    <span>Net Retained Cash</span>
+                    <span class="ps-tabular">PKR 186,550</span>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+            <!-- Editorial Row 3: 3 Detailed Operational Blocks (Features 06, 07, 08) -->
+            <div class="ps-editorial-row-3">
+              <!-- 06. Accounts and Transfers -->
+              <article class="ps-feature-block">
+                <div>
+                  <span class="ps-feature-index">06. Accounts &amp; Transfers</span>
+                  <h3 class="ps-feature-title">Move money between accounts without distorting expenses</h3>
+                  <p class="ps-feature-copy">
+                    Record transfers between bank accounts, wallets, and cash balances cleanly so
+                    internal movements never inflate your spending reports.
+                  </p>
+                </div>
+                <div class="ps-demo-surface">
+                  <div class="ps-demo-row">
+                    <span>Meezan Current &rarr; National Savings</span>
+                    <span class="ps-tabular">PKR 150,000</span>
+                  </div>
+                  <div class="ps-demo-row">
+                    <span>SadaPay USD &rarr; HBL PKR</span>
+                    <span class="ps-tabular">$287.00 &rarr; PKR 80,000</span>
+                  </div>
+                </div>
+              </article>
+
+              <!-- 07. Recurring Bills -->
+              <article class="ps-feature-block">
+                <div>
+                  <span class="ps-feature-index">07. Recurring Bills &amp; Payments</span>
+                  <h3 class="ps-feature-title">Stay ahead of fixed monthly obligations</h3>
+                  <p class="ps-feature-copy">
+                    Keep rent, electricity, fiber internet, school fees, and subscriptions organized
+                    on a clear schedule so no payment catches you off guard.
+                  </p>
+                </div>
+                <div class="ps-demo-surface">
+                  <div class="ps-demo-row">
+                    <span>House Rent · Due 01 Dec</span>
+                    <span class="ps-tabular">PKR 55,000</span>
+                  </div>
+                  <div class="ps-demo-row">
+                    <span>Nayatel Fiber · Due 03 Dec</span>
+                    <span class="ps-tabular">PKR 6,850</span>
+                  </div>
+                </div>
+              </article>
+
+              <!-- 08. Lending and Borrowing Management -->
+              <article class="ps-feature-block">
+                <div>
+                  <span class="ps-feature-index">08. Money Lent &amp; Borrowed</span>
+                  <h3 class="ps-feature-title">Track personal loans and family repayments with respect</h3>
+                  <p class="ps-feature-copy">
+                    Maintain a clear record of money lent to friends or borrowed for milestones,
+                    complete with partial settlements and due dates.
+                  </p>
+                </div>
+                <div class="ps-demo-surface">
+                  <div class="ps-demo-row">
+                    <span>Bilal Ahmed (Receivable)</span>
+                    <span class="ps-tabular" style="color: var(--ps-positive);">+PKR 140,000</span>
+                  </div>
+                  <div class="ps-demo-row">
+                    <span>Family Car Installment (Payable)</span>
+                    <span class="ps-tabular" style="color: var(--ps-copper);">-PKR 60,000</span>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             E. HOW IT WORKS (3 HONEST STEPS)
+             ================================================================== -->
+        <section class="ps-section" id="how-it-works" aria-labelledby="ps-how-heading">
+          <div class="ps-container">
+            <div class="ps-section-header">
+              <p class="ps-kicker">How Purslip Works</p>
+              <h2 class="ps-section-title" id="ps-how-heading">
+                Three deliberate steps to <em>complete financial order.</em>
+              </h2>
+              <p class="ps-section-desc">
+                You stay in full control of your records—no third-party bank credentials required.
+              </p>
+            </div>
+
+            <div class="ps-steps-grid">
+              <article class="ps-step-card">
+                <span class="ps-step-num">01 — Connect and organize your accounts.</span>
+                <h3 class="ps-step-heading">Set up your bank accounts, wallets, and savings</h3>
+                <p class="ps-step-text">
+                  Add your checking accounts, digital wallets, cash balances, and savings pots in
+                  PKR or foreign currencies, or import existing transaction history directly via CSV
+                  files.
+                </p>
+                <p class="ps-step-detail">
+                  Supports multiple accounts · Multi-currency · CSV statement import
+                </p>
+              </article>
+
+              <article class="ps-step-card">
+                <span class="ps-step-num">02 — Track income, expenses and financial activity.</span>
+                <h3 class="ps-step-heading">Log transactions, transfers, bills, and lending</h3>
+                <p class="ps-step-text">
+                  Categorize inflows and outflows, record internal account transfers, schedule
+                  recurring monthly bills, and keep accurate records of money lent or borrowed.
+                </p>
+                <p class="ps-step-detail">
+                  Income &amp; expenses · Account transfers · Recurring bills · Lending ledger
+                </p>
+              </article>
+
+              <article class="ps-step-card">
+                <span class="ps-step-num">03 — Understand your spending and make better decisions.</span>
+                <h3 class="ps-step-heading">Review cash flow, budget progress, and net worth</h3>
+                <p class="ps-step-text">
+                  Analyze monthly spending reports, monitor category limits, track savings goal
+                  completion, and watch your net worth grow over time in English or Urdu.
+                </p>
+                <p class="ps-step-detail">
+                  Cash flow analytics · Budget limits · Net worth history · Dark, Night &amp; Light themes
+                </p>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             F. FINANCIAL INSIGHTS SECTION
+             ================================================================== -->
+        <section class="ps-section ps-section-alt" id="benefits" aria-labelledby="ps-insights-heading">
+          <div class="ps-container">
+            <div class="ps-section-header">
+              <p class="ps-kicker">Financial Insights &amp; Analytics</p>
+              <h2 class="ps-section-title" id="ps-insights-heading">
+                Turn raw transaction history into <em>actionable perspective.</em>
+              </h2>
+              <p class="ps-section-desc">
+                Select any analytical lens below to inspect how Purslip visualizes spending trends,
+                income versus expenses, category concentration, savings progress, and net worth
+                history.
+              </p>
+            </div>
+
+            <div class="ps-insights-layout">
+              <div class="ps-insights-nav" role="tablist" aria-label="Financial Insight Examples">
+                <button
+                  type="button"
+                  role="tab"
+                  class="ps-insight-tab"
+                  data-insight-tab="trends"
+                  aria-selected="true"
+                >
+                  <div class="ps-insight-tab-title">
+                    <span>Monthly spending trends</span>
+                    <span class="ps-tabular">01</span>
+                  </div>
+                  <div class="ps-insight-tab-desc">
+                    Track month-over-month expenditure against your target baseline.
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  role="tab"
+                  class="ps-insight-tab"
+                  data-insight-tab="income_vs_expense"
+                  aria-selected="false"
+                >
+                  <div class="ps-insight-tab-title">
+                    <span>Income versus expenses</span>
+                    <span class="ps-tabular">02</span>
+                  </div>
+                  <div class="ps-insight-tab-desc">
+                    Compare total verified inflows and outflows to measure net surplus.
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  role="tab"
+                  class="ps-insight-tab"
+                  data-insight-tab="categories"
+                  aria-selected="false"
+                >
+                  <div class="ps-insight-tab-title">
+                    <span>Category breakdown</span>
+                    <span class="ps-tabular">03</span>
+                  </div>
+                  <div class="ps-insight-tab-desc">
+                    See exact proportions across housing, groceries, fuel, and dining.
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  role="tab"
+                  class="ps-insight-tab"
+                  data-insight-tab="savings"
+                  aria-selected="false"
+                >
+                  <div class="ps-insight-tab-title">
+                    <span>Savings progress</span>
+                    <span class="ps-tabular">04</span>
+                  </div>
+                  <div class="ps-insight-tab-desc">
+                    Monitor cumulative milestone deposits and emergency runway.
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  role="tab"
+                  class="ps-insight-tab"
+                  data-insight-tab="networth"
+                  aria-selected="false"
+                >
+                  <div class="ps-insight-tab-title">
+                    <span>Net worth history</span>
+                    <span class="ps-tabular">05</span>
+                  </div>
+                  <div class="ps-insight-tab-desc">
+                    Follow combined account balances, savings pots, and net lending over time.
+                  </div>
+                </button>
+              </div>
+
+              <!-- Dynamic Insights Visualization Stage -->
+              <div class="ps-insight-stage" id="ps-insight-stage">
+                <div>
+                  <div class="ps-panel-header">
+                    <div>
+                      <h3 class="ps-panel-heading" id="ps-insight-stage-heading">
+                        Monthly Spending Trends
+                      </h3>
+                      <p class="ps-tx-meta" id="ps-insight-stage-subtitle" style="margin-top: 4px;">
+                        Spot seasonal spikes across utilities, groceries, and fuel before they erode
+                        your monthly surplus.
+                      </p>
+                    </div>
+                    <div class="ps-panel-legend">
+                      <span>
+                        <span class="ps-legend-swatch" style="background: #C58F71;"></span>
+                        <span id="ps-insight-leg-primary">Actual Monthly Spend</span>
+                      </span>
+                      <span>
+                        <span class="ps-legend-swatch" style="background: #6D5A50;"></span>
+                        <span id="ps-insight-leg-secondary">Target Spending Ceiling</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="ps-insight-metrics-row" id="ps-insight-kpi-row">
+                    <!-- Populated deterministically by purslip-landing.js -->
+                  </div>
+
+                  <div class="ps-chart-svg-wrap" style="height: 195px;">
+                    <svg
+                      id="ps-insight-svg"
+                      class="ps-chart-svg"
+                      viewBox="0 0 640 190"
+                      preserveAspectRatio="none"
+                      role="img"
+                      aria-label="Financial insights analytical chart"
+                    ></svg>
+                  </div>
+                </div>
+
+                <div class="ps-demo-surface" id="ps-insight-rows">
+                  <!-- Populated deterministically by purslip-landing.js -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             G. PRIVACY AND TRUST + FAQ SECTION
+             ================================================================== -->
+        <section class="ps-section" id="trust" aria-labelledby="ps-trust-heading">
+          <div class="ps-container">
+            <div class="ps-trust-box">
+              <div>
+                <p class="ps-kicker">Clarity &amp; Intentional Design</p>
+                <h2 class="ps-section-title" id="ps-trust-heading">
+                  Designed to give you a clear, organized view of <em>your finances.</em>
+                </h2>
+                <p class="ps-section-desc">
+                  Purslip focuses on what matters most in personal finance: accurate records,
+                  transparent calculations, and a calm workspace free from clutter or distractions.
+                </p>
+              </div>
+
+              <div class="ps-trust-pillars">
+                <div class="ps-trust-pillar">
+                  <h3>Direct Ledger Control</h3>
+                  <p>
+                    You decide which accounts to track, how transactions are categorized, and when
+                    CSV statements are imported—keeping your financial records structured on your
+                    own terms.
+                  </p>
+                </div>
+                <div class="ps-trust-pillar">
+                  <h3>Adaptable to How You Work</h3>
+                  <p>
+                    Switch seamlessly between English and Urdu (اردو), manage accounts across
+                    multiple currencies, and choose between Dark, Night, and Light themes.
+                  </p>
+                </div>
+                <div class="ps-trust-pillar">
+                  <h3>Focused on Financial Organization</h3>
+                  <p>
+                    No noisy trading tickers, unsolicited product pitches, or confusing jargon—just
+                    your accounts, budgets, savings goals, bills, and reports in one coherent view.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ Accordion -->
+            <div style="margin-top: 96px;" id="faq">
+              <div class="ps-section-header">
+                <p class="ps-kicker">Frequently Asked Questions</p>
+                <h2 class="ps-section-title">
+                  Common questions about <em>using Purslip.</em>
+                </h2>
+              </div>
+
+              <div class="ps-faq-list">
+                <div class="ps-faq-item">
+                  <button
+                    type="button"
+                    class="ps-faq-trigger"
+                    data-faq-trigger
+                    aria-expanded="true"
+                    aria-controls="ps-faq-ans-1"
+                  >
+                    <span>How do I add my accounts and transactions into Purslip?</span>
+                    <span class="ps-faq-icon" aria-hidden="true">+</span>
+                  </button>
+                  <div class="ps-faq-panel" id="ps-faq-ans-1">
+                    You can create multiple financial accounts (such as bank accounts, digital
+                    wallets, savings pots, or cash balances) directly inside Purslip. Transactions
+                    can be logged individually as they happen or imported in bulk using standard CSV
+                    account statements.
+                  </div>
+                </div>
+
+                <div class="ps-faq-item">
+                  <button
+                    type="button"
+                    class="ps-faq-trigger"
+                    data-faq-trigger
+                    aria-expanded="false"
+                    aria-controls="ps-faq-ans-2"
+                  >
+                    <span>Does Purslip support multiple currencies and internal account transfers?</span>
+                    <span class="ps-faq-icon" aria-hidden="true">+</span>
+                  </button>
+                  <div class="ps-faq-panel" id="ps-faq-ans-2" hidden>
+                    Yes. You can maintain accounts in different currencies (such as PKR, USD, or
+                    GBP) and record transfers between your accounts so that moving money from a
+                    checking account to a savings pot never distorts your monthly spending totals.
+                  </div>
+                </div>
+
+                <div class="ps-faq-item">
+                  <button
+                    type="button"
+                    class="ps-faq-trigger"
+                    data-faq-trigger
+                    aria-expanded="false"
+                    aria-controls="ps-faq-ans-3"
+                  >
+                    <span>How does Purslip handle money lent and borrowed?</span>
+                    <span class="ps-faq-icon" aria-hidden="true">+</span>
+                  </button>
+                  <div class="ps-faq-panel" id="ps-faq-ans-3" hidden>
+                    Purslip includes a dedicated module for money lent and borrowed. You can record
+                    who owes you or whom you owe, log partial or full repayments over time, and see
+                    your net receivable or payable balance reflected clearly in your overall
+                    financial picture.
+                  </div>
+                </div>
+
+                <div class="ps-faq-item">
+                  <button
+                    type="button"
+                    class="ps-faq-trigger"
+                    data-faq-trigger
+                    aria-expanded="false"
+                    aria-controls="ps-faq-ans-4"
+                  >
+                    <span>Can I use Purslip in Urdu and switch visual themes?</span>
+                    <span class="ps-faq-icon" aria-hidden="true">+</span>
+                  </button>
+                  <div class="ps-faq-panel" id="ps-faq-ans-4" hidden>
+                    Yes. Purslip supports both English and Urdu languages, and includes Dark, Light,
+                    and Night visual themes so you can customize the interface to your preference.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             H. FINAL CTA
+             ================================================================== -->
+        <section class="ps-final-cta" aria-labelledby="ps-final-cta-heading">
+          <div class="ps-container">
+            <div class="ps-final-cta-inner">
+              <p class="ps-kicker">Your Personal Financial Command Center</p>
+              <h2 class="ps-section-title" id="ps-final-cta-heading" style="margin-bottom: 16px;">
+                Make every <em>rupee count.</em>
+              </h2>
+              <p class="ps-section-desc" style="margin: 0 auto 32px;">
+                Bring your financial life together and start making more informed decisions.
+              </p>
+              <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
+                <a href="/auth/signup" data-route="register" class="ps-btn-primary ps-btn-lg">
+                  Get Started
+                </a>
+                <a href="/auth/login" data-route="login" class="ps-btn-secondary ps-btn-lg">
+                  Log in to Purslip
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- ====================================================================
+           I. FOOTER
+           ==================================================================== -->
+      <footer class="ps-footer" id="contact">
+        <div class="ps-container">
+          <div class="ps-footer-grid">
+            <div>
+              <a href="#top" class="ps-brand" style="margin-bottom: 14px;">
+                <%- include('partials/logo-mark') %>
+                <span>Purslip</span>
+              </a>
+              <p style="max-width: 34ch; color: var(--ps-beige); font-size: 0.85rem; margin-bottom: 16px;">
+                Your personal financial command center. Understand, manage, and organize your
+                accounts, budgets, savings, and cash flow in one place.
+              </p>
+              <button
+                type="button"
+                class="ps-btn-secondary"
+                data-open-sequence-guide
+                style="font-size: 0.78rem; padding: 7px 13px;"
+              >
+                3D Frame Sequence &amp; EJS Guide
+              </button>
+            </div>
+
+            <div>
+              <h3 class="ps-footer-col-title">Navigation</h3>
+              <ul class="ps-footer-links">
+                <li><a href="#showcase">Product Showcase</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#how-it-works">How it works</a></li>
+                <li><a href="#benefits">Financial Insights</a></li>
+                <li><a href="#faq">FAQ</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="ps-footer-col-title">Capabilities</h3>
+              <ul class="ps-footer-links">
+                <li><a href="#features">Multi-Account Ledger</a></li>
+                <li><a href="#features">CSV Statement Imports</a></li>
+                <li><a href="#features">Monthly Budgets &amp; Goals</a></li>
+                <li><a href="#features">Money Lent &amp; Borrowed</a></li>
+                <li><a href="#benefits">Cash Flow &amp; Net Worth</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="ps-footer-col-title">Account &amp; Support</h3>
+              <ul class="ps-footer-links">
+                <li><a href="/auth/login" data-route="login">Log in</a></li>
+                <li><a href="/auth/signup" data-route="register">Get started</a></li>
+                <li><a href="/dashboard" data-route="dashboard">Dashboard</a></li>
+                <li><a href="tel:+923130479527">+923130479527</a></li>
+                <li><a href="mailto:muhammadarham979@gmail.com">muhammadarham979@gmail.com</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="ps-footer-bottom">
+            <span>&copy; 2026 Purslip. All rights reserved.</span>
+            <span>English &amp; اردو · Dark, Light &amp; Night Themes · Multi-Currency</span>
+          </div>
+        </div>
+      </footer>
+
+      <!-- ====================================================================
+           CONFIGURABLE ROUTE PREVIEW & GOOGLE FLOW 3D SEQUENCE GUIDE MODAL
+           ==================================================================== -->
+      <div
+        class="ps-modal-backdrop"
+        id="ps-integration-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ps-modal-title"
+        hidden
+      >
+        <div class="ps-modal">
+          <div class="ps-modal-header">
+            <div>
+              <p class="ps-kicker" style="margin-bottom: 4px;">Purslip Express / EJS Integration</p>
+              <h3 id="ps-modal-title" style="font-size: 1.2rem; font-weight: 600;">
+                Configured Route &amp; Frame Sequence Architecture
+              </h3>
+            </div>
+            <button
+              type="button"
+              id="ps-modal-close"
+              class="ps-btn-secondary"
+              aria-label="Close modal"
+              style="padding: 6px 12px;"
+            >
+              Close
+            </button>
+          </div>
+
+          <p style="font-size: 0.875rem; color: var(--ps-beige); margin-bottom: 10px;">
+            This landing page is built with pure HTML, scoped CSS (<code>.ps-landing</code>), and
+            vanilla JavaScript so it drops directly into your existing Express + EJS Purslip
+            application without touching authentication or PostgreSQL models.
+          </p>
+
+          <div class="ps-code-block" id="ps-modal-route-target">
+            Target Route: /auth/signup
+          </div>
+
+          <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 8px;">
+            1. Configuring Routes in One Place (<code>/public/js/purslip-landing.js</code>)
+          </h4>
+          <pre class="ps-code-block">window.PURSLIP_CONFIG = {
+  routes: {
+    login: '/auth/login',
+    register: '/auth/signup',
+    dashboard: '/dashboard'
+  },
+  interceptPlaceholderRoutes: false
+};</pre>
+
+          <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 8px;">
+            2. Replacing the 300–500 Google Flow Image-Sequence Frames
+          </h4>
+          <p style="font-size: 0.85rem; color: var(--ps-beige);">
+            Export your Google Flow video as numbered sequential frames (e.g.
+            <code>frame_0001.webp</code> through <code>frame_0360.webp</code>) into
+            <code>/public/assets/frames/sequence/</code> and enable
+            <code>sequenceFilesInstalled: true</code> in <code>/public/js/scroll-sequence.js</code>:
+          </p>
+          <pre class="ps-code-block">window.PURSLIP_SEQUENCE_CONFIG = {
+  frameDirectory: '/purslip-frames',
+  filePrefix: 'frame_',
+  fileExtension: 'webp',
+  padLength: 4,
+  startIndex: 0,
+  totalFrames: 153,
+  fallbackPoster: '/purslip-frames/frame_0000.webp?v=city153',
+  sequenceFilesInstalled: true
+};</pre>
+
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+            <button type="button" id="ps-modal-jump-showcase" class="ps-btn-primary">
+              Explore Dashboard Showcase
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dedicated Scroll-Controlled 3D Image Sequence Module -->
+    <script src="/js/scroll-sequence.js?v=city153" defer></script>
+    <!-- Vanilla JS Landing Page Controller -->
+    <script src="/js/purslip-landing.js?v=city153" defer></script>
+  </body>
 </html>

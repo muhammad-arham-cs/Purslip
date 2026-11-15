@@ -750,37 +750,7 @@
       if (targetHref) {
         link.setAttribute('href', targetHref);
       }
-
-      link.addEventListener('click', function (e) {
-        if (!PURSLIP_CONFIG.interceptPlaceholderRoutes) return;
-        e.preventDefault();
-        openRouteOrSequenceModal(key, targetHref || '/' + key);
-      });
     });
-  }
-
-  function openRouteOrSequenceModal(routeKey, targetPath) {
-    var backdrop = document.getElementById('ps-integration-modal');
-    var titleEl = document.getElementById('ps-modal-title');
-    var routeBadge = document.getElementById('ps-modal-route-target');
-    if (!backdrop) return;
-
-    if (routeKey === 'sequence-guide') {
-      if (titleEl) titleEl.textContent = 'Google Flow 3D Image-Sequence & EJS Integration Guide';
-      if (routeBadge) routeBadge.textContent = '/public/purslip-frames/frame_0000.webp — frame_0152.webp (153 frames)';
-    } else {
-      var labelMap = {
-        login: 'Log in Route Triggered',
-        register: 'Get Started (Registration) Route Triggered',
-        dashboard: 'Authenticated Dashboard Route Triggered',
-        privacy: 'Privacy Policy Placeholder Route',
-        terms: 'Terms of Use Placeholder Route'
-      };
-      if (titleEl) titleEl.textContent = labelMap[routeKey] || 'Configured Application Route';
-      if (routeBadge) routeBadge.textContent = 'Target Express Route: ' + targetPath;
-    }
-
-    backdrop.hidden = false;
   }
 
   function initNavigationAndScrollTelemetry() {
@@ -892,38 +862,6 @@
         }
       });
     });
-
-    // 7. Sequence Guide Modal Triggers & Close
-    document.querySelectorAll('[data-open-sequence-guide]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        openRouteOrSequenceModal('sequence-guide', '/assets/frames/sequence/');
-      });
-    });
-
-    var closeModalBtn = document.getElementById('ps-modal-close');
-    var modalBackdrop = document.getElementById('ps-integration-modal');
-    var jumpShowcaseBtn = document.getElementById('ps-modal-jump-showcase');
-
-    if (closeModalBtn && modalBackdrop) {
-      closeModalBtn.addEventListener('click', function () {
-        modalBackdrop.hidden = true;
-      });
-      modalBackdrop.addEventListener('click', function (e) {
-        if (e.target === modalBackdrop) {
-          modalBackdrop.hidden = true;
-        }
-      });
-    }
-
-    if (jumpShowcaseBtn && modalBackdrop) {
-      jumpShowcaseBtn.addEventListener('click', function () {
-        modalBackdrop.hidden = true;
-        var showcase = document.getElementById('showcase');
-        if (showcase && showcase.scrollIntoView) {
-          showcase.scrollIntoView({ behavior: 'smooth' });
-        }
-      });
-    }
   }
 
   function init() {

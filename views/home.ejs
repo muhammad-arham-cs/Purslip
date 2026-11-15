@@ -21,7 +21,7 @@
     <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preload" as="image" href="/purslip-frames/frame_0000.webp?v=city153" type="image/webp" />
-    <link rel="stylesheet" href="/css/purslip-landing.css?v=city153-v3" />
+    <link rel="stylesheet" href="/css/purslip-landing.css?v=city153-v4" />
   </head>
   <body style="margin: 0; background-color: #050403;">
     <div class="ps-landing" id="purslip-landing">
@@ -955,18 +955,10 @@
                 <%- include('partials/logo-mark') %>
                 <span>Purslip</span>
               </a>
-              <p style="max-width: 34ch; color: var(--ps-beige); font-size: 0.85rem; margin-bottom: 16px;">
+              <p style="max-width: 34ch; color: var(--ps-beige); font-size: 0.85rem; margin-bottom: 0;">
                 Your personal financial command center. Understand, manage, and organize your
                 accounts, budgets, savings, and cash flow in one place.
               </p>
-              <button
-                type="button"
-                class="ps-btn-secondary"
-                data-open-sequence-guide
-                style="font-size: 0.78rem; padding: 7px 13px;"
-              >
-                3D Frame Sequence &amp; EJS Guide
-              </button>
             </div>
 
             <div>
@@ -1009,91 +1001,11 @@
           </div>
         </div>
       </footer>
-
-      <!-- ====================================================================
-           CONFIGURABLE ROUTE PREVIEW & GOOGLE FLOW 3D SEQUENCE GUIDE MODAL
-           ==================================================================== -->
-      <div
-        class="ps-modal-backdrop"
-        id="ps-integration-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="ps-modal-title"
-        hidden
-      >
-        <div class="ps-modal">
-          <div class="ps-modal-header">
-            <div>
-              <p class="ps-kicker" style="margin-bottom: 4px;">Purslip Express / EJS Integration</p>
-              <h3 id="ps-modal-title" style="font-size: 1.2rem; font-weight: 600;">
-                Configured Route &amp; Frame Sequence Architecture
-              </h3>
-            </div>
-            <button
-              type="button"
-              id="ps-modal-close"
-              class="ps-btn-secondary"
-              aria-label="Close modal"
-              style="padding: 6px 12px;"
-            >
-              Close
-            </button>
-          </div>
-
-          <p style="font-size: 0.875rem; color: var(--ps-beige); margin-bottom: 10px;">
-            This landing page is built with pure HTML, scoped CSS (<code>.ps-landing</code>), and
-            vanilla JavaScript so it drops directly into your existing Express + EJS Purslip
-            application without touching authentication or PostgreSQL models.
-          </p>
-
-          <div class="ps-code-block" id="ps-modal-route-target">
-            Target Route: /auth/signup
-          </div>
-
-          <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 8px;">
-            1. Configuring Routes in One Place (<code>/public/js/purslip-landing.js</code>)
-          </h4>
-          <pre class="ps-code-block">window.PURSLIP_CONFIG = {
-  routes: {
-    login: '/auth/login',
-    register: '/auth/signup',
-    dashboard: '/dashboard'
-  },
-  interceptPlaceholderRoutes: false
-};</pre>
-
-          <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 8px;">
-            2. Replacing the 300–500 Google Flow Image-Sequence Frames
-          </h4>
-          <p style="font-size: 0.85rem; color: var(--ps-beige);">
-            Export your Google Flow video as numbered sequential frames (e.g.
-            <code>frame_0001.webp</code> through <code>frame_0360.webp</code>) into
-            <code>/public/assets/frames/sequence/</code> and enable
-            <code>sequenceFilesInstalled: true</code> in <code>/public/js/scroll-sequence.js</code>:
-          </p>
-          <pre class="ps-code-block">window.PURSLIP_SEQUENCE_CONFIG = {
-  frameDirectory: '/purslip-frames',
-  filePrefix: 'frame_',
-  fileExtension: 'webp',
-  padLength: 4,
-  startIndex: 0,
-  totalFrames: 153,
-  fallbackPoster: '/purslip-frames/frame_0000.webp?v=city153',
-  sequenceFilesInstalled: true
-};</pre>
-
-          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
-            <button type="button" id="ps-modal-jump-showcase" class="ps-btn-primary">
-              Explore Dashboard Showcase
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- Dedicated Scroll-Controlled 3D Image Sequence Module -->
     <script src="/js/scroll-sequence.js?v=city153" defer></script>
     <!-- Vanilla JS Landing Page Controller -->
-    <script src="/js/purslip-landing.js?v=city153" defer></script>
+    <script src="/js/purslip-landing.js?v=city153-v4" defer></script>
   </body>
 </html>

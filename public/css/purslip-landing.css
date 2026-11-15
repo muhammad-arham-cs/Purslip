@@ -1423,62 +1423,7 @@
 }
 
 /* ==========================================================================
-   11. ROUTE & FRAME REPLACEMENT GUIDE MODAL
-   ========================================================================== */
-
-.ps-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  background: rgba(5, 4, 3, 0.82);
-  backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
-.ps-modal-backdrop[hidden] {
-  display: none;
-}
-
-.ps-modal {
-  width: 100%;
-  max-width: 680px;
-  max-height: 86vh;
-  overflow-y: auto;
-  border-radius: var(--ps-radius-lg);
-  background: #11100F;
-  border: 1px solid var(--ps-border-strong);
-  padding: 32px;
-  color: var(--ps-ivory);
-}
-
-.ps-modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding-bottom: 16px;
-  margin-bottom: 20px;
-  border-bottom: 1px solid var(--ps-border);
-}
-
-.ps-code-block {
-  font-family: var(--ps-font-mono);
-  font-size: 0.78rem;
-  background: #050403;
-  border: 1px solid var(--ps-border);
-  border-radius: var(--ps-radius-sm);
-  padding: 14px 16px;
-  color: var(--ps-copper);
-  overflow-x: auto;
-  margin: 12px 0 18px;
-  line-height: 1.55;
-}
-
-/* ==========================================================================
-   12. RESPONSIVE BREAKPOINTS (TABLET & MOBILE)
+   11. RESPONSIVE BREAKPOINTS (TABLET & MOBILE)
    ========================================================================== */
 
 @media (max-width: 1200px) {

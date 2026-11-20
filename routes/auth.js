@@ -23,6 +23,14 @@ router.get('/signup', redirectIfAuthenticated, (req, res) => {
 router.post(
   '/signup',
   redirectIfAuthenticated,
+  (req, res, next) => {
+    if (req.body) {
+      if (!req.body.phoneNumber && req.body.phone) req.body.phoneNumber = req.body.phone;
+      if (!req.body.displayCurrency && req.body.baseCurrency) req.body.displayCurrency = req.body.baseCurrency;
+      if (!req.body.passwordConfirm && req.body.confirmPassword) req.body.passwordConfirm = req.body.confirmPassword;
+    }
+    next();
+  },
   [
     body('fullName').optional({ checkFalsy: true }).trim().isLength({ max: 100 }).withMessage('Name is too long.'),
     body('country').optional({ checkFalsy: true }).trim().isLength({ max: 80 }).withMessage('Country is too long.'),
@@ -199,6 +207,10 @@ router.post(
   }
 );
 
+router.get('/reset-password', redirectIfAuthenticated, (req, res) => {
+  res.render('auth/reset-password', { title: 'Reset password', errors: [], token: '' });
+});
+
 router.get('/reset-password/:token', redirectIfAuthenticated, async (req, res, next) => {
   try {
     const user = await users.findByResetToken(req.params.token);
@@ -215,6 +227,12 @@ router.get('/reset-password/:token', redirectIfAuthenticated, async (req, res, n
 router.post(
   '/reset-password/:token',
   redirectIfAuthenticated,
+  (req, res, next) => {
+    if (req.body && !req.body.passwordConfirm && req.body.confirmPassword) {
+      req.body.passwordConfirm = req.body.confirmPassword;
+    }
+    next();
+  },
   [
     body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters.'),
     body('passwordConfirm').custom((value, { req }) => value === req.body.password)

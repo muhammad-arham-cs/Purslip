@@ -1,0 +1,1578 @@
+/**
+ * PURSLIP — Authentication & System Error Pages Stylesheet
+ * Strictly scoped under `.ps-auth-shell` to avoid global CSS collisions.
+ * Bridges the Purslip Landing Page and the Purslip Financial Dashboard.
+ *
+ * Responsively engineered for:
+ * - Full Desktop: 1920 × 1080
+ * - Standard & Compact Laptops: 1536 × 864, 1440 × 900, 1366 × 768, 1280 × 720
+ * - Landscape & Portrait Tablets: 1024 × 768, 768 × 1024
+ * - Mobile Devices: 390 × 844
+ *
+ * Supports Dark, Night, and Light themes + English (LTR) and Urdu (RTL).
+ * Zero inline styles required (strictly CSP-compliant).
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+.ps-view-hidden {
+  display: none !important;
+}
+
+/* Shared Purslip Purse & Coins Brand Mark */
+.ps-brand-wallet-svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+  flex-shrink: 0;
+  --mark-body: #C58F71;
+  --mark-slip-1: #FAF9F8;
+  --mark-slip-2: #BDA697;
+  --mark-cut: #050403;
+}
+
+.ps-auth-shell {
+  /* Default Theme: Dark (Matches Purslip Landing Page & Dashboard Showcase) */
+  --ps-auth-bg: #050403;
+  --ps-auth-bg-secondary: #11100F;
+  --ps-auth-surface: rgba(17, 16, 15, 0.90);
+  --ps-auth-surface-elevated: rgba(24, 21, 19, 0.95);
+  --ps-auth-input-bg: rgba(5, 4, 3, 0.74);
+  --ps-auth-text: #FAF9F8;
+  --ps-auth-muted: #BDA697;
+  --ps-auth-subtle: #6D5A50;
+  --ps-auth-copper: #C58F71;
+  --ps-auth-copper-hover: #D29E81;
+  --ps-auth-btn-text: #050403;
+  --ps-auth-brown-deep: #4C3328;
+  --ps-auth-terracotta: #C14C32;
+  --ps-auth-terracotta-bg: rgba(193, 76, 50, 0.12);
+  --ps-auth-positive: #3D9A6B;
+  --ps-auth-positive-bg: rgba(61, 154, 107, 0.12);
+  --ps-auth-border: rgba(189, 166, 151, 0.16);
+  --ps-auth-border-strong: rgba(197, 143, 113, 0.36);
+  --ps-auth-shadow: 0 24px 60px rgba(0, 0, 0, 0.58);
+  --ps-auth-grid-line: rgba(197, 143, 113, 0.045);
+
+  --ps-font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --ps-font-serif: 'Cormorant Garamond', Georgia, serif;
+  --ps-font-mono: 'JetBrains Mono', monospace;
+  --ps-radius-sm: 8px;
+  --ps-radius-md: 12px;
+  --ps-radius-lg: 18px;
+  --ps-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  background-color: var(--ps-auth-bg);
+  background-image:
+    radial-gradient(circle at 16% 18%, rgba(197, 143, 113, 0.09) 0%, transparent 45%),
+    radial-gradient(circle at 84% 82%, rgba(76, 51, 40, 0.22) 0%, transparent 50%),
+    linear-gradient(to right, var(--ps-auth-grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--ps-auth-grid-line) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 64px 64px, 64px 64px;
+  color: var(--ps-auth-text);
+  font-family: var(--ps-font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  overflow-x: clip;
+  transition: background-color 200ms var(--ps-ease), color 200ms var(--ps-ease);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Night Theme */
+.ps-auth-shell[data-theme="night"] {
+  --ps-auth-bg: #06080D;
+  --ps-auth-bg-secondary: #0D1119;
+  --ps-auth-surface: rgba(13, 17, 25, 0.90);
+  --ps-auth-surface-elevated: rgba(18, 23, 34, 0.96);
+  --ps-auth-input-bg: rgba(6, 8, 13, 0.78);
+  --ps-auth-text: #F5F7FA;
+  --ps-auth-muted: #A3AEBF;
+  --ps-auth-subtle: #647084;
+  --ps-auth-copper: #C58F71;
+  --ps-auth-copper-hover: #D4A184;
+  --ps-auth-btn-text: #06080D;
+  --ps-auth-brown-deep: #2B262B;
+  --ps-auth-terracotta: #D45B42;
+  --ps-auth-terracotta-bg: rgba(212, 91, 66, 0.14);
+  --ps-auth-positive: #42A675;
+  --ps-auth-positive-bg: rgba(66, 166, 117, 0.14);
+  --ps-auth-border: rgba(163, 174, 191, 0.16);
+  --ps-auth-border-strong: rgba(197, 143, 113, 0.38);
+  --ps-auth-shadow: 0 24px 60px rgba(0, 0, 0, 0.68);
+  --ps-auth-grid-line: rgba(163, 174, 191, 0.04);
+}
+
+/* Light Theme */
+.ps-auth-shell[data-theme="light"] {
+  --ps-auth-bg: #F6F3EF;
+  --ps-auth-bg-secondary: #ECE6DF;
+  --ps-auth-surface: #FFFFFF;
+  --ps-auth-surface-elevated: #FAF8F5;
+  --ps-auth-input-bg: #FAF8F5;
+  --ps-auth-text: #181310;
+  --ps-auth-muted: #5C4C43;
+  --ps-auth-subtle: #8A766B;
+  --ps-auth-copper: #9E6344;
+  --ps-auth-copper-hover: #875135;
+  --ps-auth-btn-text: #FAF9F8;
+  --ps-auth-brown-deep: #E5DCD3;
+  --ps-auth-terracotta: #B33A22;
+  --ps-auth-terracotta-bg: rgba(179, 58, 34, 0.09);
+  --ps-auth-positive: #267A4E;
+  --ps-auth-positive-bg: rgba(38, 122, 78, 0.10);
+  --ps-auth-border: rgba(76, 51, 40, 0.15);
+  --ps-auth-border-strong: rgba(158, 99, 68, 0.38);
+  --ps-auth-shadow: 0 18px 44px rgba(24, 19, 16, 0.08);
+  --ps-auth-grid-line: rgba(76, 51, 40, 0.045);
+}
+
+.ps-auth-shell *,
+.ps-auth-shell *::before,
+.ps-auth-shell *::after {
+  box-sizing: border-box;
+}
+
+.ps-auth-shell h1,
+.ps-auth-shell h2,
+.ps-auth-shell h3,
+.ps-auth-shell p,
+.ps-auth-shell ul {
+  margin: 0;
+  padding: 0;
+}
+
+.ps-auth-shell a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 150ms var(--ps-ease), opacity 150ms var(--ps-ease);
+}
+
+.ps-auth-shell button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.ps-auth-tabular {
+  font-family: var(--ps-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subtle Ambient Financial Ecosystem SVG Backdrop */
+.ps-auth-ambient-backdrop {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  opacity: 0.42;
+}
+
+.ps-auth-ambient-svg {
+  position: absolute;
+  bottom: -4%;
+  right: -6%;
+  width: 68vw;
+  max-width: 980px;
+  height: auto;
+  opacity: 0.35;
+}
+
+/* ==========================================================================
+   1. TOP NAVIGATION & SYSTEM PAGE / THEME / LANGUAGE BAR
+   ========================================================================== */
+
+.ps-auth-topbar {
+  width: 100%;
+  border-bottom: 1px solid var(--ps-auth-border);
+  background: var(--ps-auth-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  flex-shrink: 0;
+}
+
+.ps-auth-topbar-inner {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 11px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.ps-auth-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ps-auth-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+  color: var(--ps-auth-text);
+  white-space: nowrap;
+}
+
+.ps-auth-logo-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, rgba(197, 143, 113, 0.22) 0%, rgba(76, 51, 40, 0.55) 100%);
+  border: 1px solid rgba(197, 143, 113, 0.42);
+}
+
+.ps-auth-back-link {
+  font-size: 0.8125rem;
+  color: var(--ps-auth-muted);
+  padding-left: 16px;
+  border-left: 1px solid var(--ps-auth-border);
+  white-space: nowrap;
+}
+
+.ps-auth-shell[dir="rtl"] .ps-auth-back-link {
+  padding-left: 0;
+  padding-right: 16px;
+  border-left: none;
+  border-right: 1px solid var(--ps-auth-border);
+}
+
+.ps-auth-back-link:hover {
+  color: var(--ps-auth-copper);
+}
+
+.ps-auth-page-switcher {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  border-radius: var(--ps-radius-sm);
+  background: var(--ps-auth-input-bg);
+  border: 1px solid var(--ps-auth-border);
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.ps-auth-switch-btn {
+  padding: 5px 11px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ps-auth-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background-color 140ms var(--ps-ease), color 140ms var(--ps-ease);
+}
+
+.ps-auth-switch-btn:hover {
+  color: var(--ps-auth-text);
+}
+
+.ps-auth-switch-btn[aria-current="page"],
+.ps-auth-switch-btn[aria-pressed="true"] {
+  background: var(--ps-auth-brown-deep);
+  color: var(--ps-auth-text);
+  border-color: var(--ps-auth-border-strong);
+}
+
+.ps-auth-env-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   2. SPLIT AUTHENTICATION LAYOUT & DASHBOARD ECOSYSTEM VISUAL PANEL
+   Cohesive centering prevents vertical over-stretching or hollow middle gaps
+   ========================================================================== */
+
+.ps-auth-main {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.ps-auth-split {
+  width: 100%;
+  max-width: 1340px;
+  margin: 0 auto;
+  padding: 28px 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.96fr) minmax(0, 1.04fr);
+  gap: 40px;
+  /* Center align both columns so the left panel never stretches with an empty middle gap */
+  align-items: center;
+}
+
+/* Left Side: Purslip Product & Dashboard Visual Showcase */
+.ps-auth-visual-panel {
+  position: relative;
+  border-radius: var(--ps-radius-lg);
+  overflow: hidden;
+  border: 1px solid rgba(197, 143, 113, 0.36);
+  background-color: #080605;
+  color: #FAF9F8;
+  display: flex;
+  flex-direction: column;
+  /* Cohesive stack instead of space-between so top copy and bottom preview stay connected */
+  justify-content: center;
+  gap: 24px;
+  padding: 32px;
+  box-shadow: 0 28px 68px rgba(0, 0, 0, 0.52);
+}
+
+.ps-auth-visual-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.52;
+  pointer-events: none;
+  transform: scale(1.02);
+}
+
+.ps-auth-visual-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(5, 4, 3, 0.86) 0%, rgba(5, 4, 3, 0.52) 40%, rgba(5, 4, 3, 0.95) 100%),
+    radial-gradient(circle at 25% 18%, rgba(197, 143, 113, 0.20) 0%, transparent 62%);
+  pointer-events: none;
+}
+
+.ps-auth-visual-top,
+.ps-auth-visual-bottom {
+  position: relative;
+  z-index: 2;
+}
+
+.ps-auth-visual-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #C58F71;
+  letter-spacing: 0.03em;
+  margin-bottom: 8px;
+}
+
+.ps-auth-visual-kicker::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #C58F71;
+  box-shadow: 0 0 8px rgba(197, 143, 113, 0.8);
+}
+
+.ps-auth-visual-title {
+  font-size: clamp(1.5rem, 2.1vw, 2.05rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: #FAF9F8;
+  text-wrap: balance;
+  margin-bottom: 8px;
+}
+
+.ps-auth-visual-title em {
+  font-family: var(--ps-font-serif);
+  font-style: italic;
+  font-weight: 600;
+  color: #C58F71;
+}
+
+.ps-auth-visual-sub {
+  font-size: 0.865rem;
+  color: #BDA697;
+  max-width: 48ch;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   2B. AUTHENTIC PURSLIP DASHBOARD PREVIEW MODULES (INSIDE VISUAL PANEL)
+   ========================================================================== */
+
+.ps-dash-mini-window {
+  border-radius: var(--ps-radius-md);
+  background: rgba(14, 12, 11, 0.86);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(197, 143, 113, 0.30);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+}
+
+.ps-dash-mini-topbar {
+  padding: 9px 15px;
+  border-bottom: 1px solid rgba(189, 166, 151, 0.14);
+  background: rgba(5, 4, 3, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.72rem;
+}
+
+.ps-dash-mini-title {
+  font-weight: 600;
+  color: #FAF9F8;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ps-dash-mini-title-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3D9A6B;
+}
+
+.ps-dash-mini-accounts {
+  color: #BDA697;
+  font-size: 0.68rem;
+}
+
+.ps-dash-mini-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 2-Column Balance KPI Cards */
+.ps-dash-mini-kpis {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.ps-dash-mini-kpi {
+  padding: 10px 12px;
+  border-radius: var(--ps-radius-sm);
+  background: rgba(5, 4, 3, 0.62);
+  border: 1px solid rgba(189, 166, 151, 0.14);
+}
+
+.ps-dash-mini-kpi-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.69rem;
+  color: #BDA697;
+  margin-bottom: 3px;
+}
+
+.ps-dash-mini-kpi-val {
+  font-family: var(--ps-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: #FAF9F8;
+  line-height: 1.2;
+}
+
+.ps-dash-mini-kpi-sub {
+  font-family: var(--ps-font-mono);
+  font-size: 0.67rem;
+  color: #BDA697;
+  margin-top: 3px;
+}
+
+.ps-dash-mini-kpi-sub-pos {
+  color: #3D9A6B;
+}
+
+.ps-dash-mini-kpi-sub-copper {
+  color: #C58F71;
+}
+
+/* Mini Six-Month Cash Flow Chart Box */
+.ps-dash-mini-chart-box {
+  padding: 10px 13px 8px;
+  border-radius: var(--ps-radius-sm);
+  background: rgba(5, 4, 3, 0.56);
+  border: 1px solid rgba(189, 166, 151, 0.13);
+}
+
+.ps-dash-mini-chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 0.71rem;
+}
+
+.ps-dash-mini-chart-title {
+  font-weight: 600;
+  color: #FAF9F8;
+}
+
+.ps-dash-mini-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.67rem;
+  color: #BDA697;
+}
+
+.ps-dash-mini-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ps-dash-mini-swatch-inflow {
+  width: 8px;
+  height: 2.5px;
+  background: #3D9A6B;
+  display: inline-block;
+}
+
+.ps-dash-mini-swatch-outflow {
+  width: 8px;
+  height: 2.5px;
+  background: #C58F71;
+  display: inline-block;
+}
+
+.ps-dash-mini-svg {
+  width: 100%;
+  height: 62px;
+  display: block;
+}
+
+.ps-dash-mini-months {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 3px;
+  font-family: var(--ps-font-mono);
+  font-size: 0.63rem;
+  color: #6D5A50;
+}
+
+/* Monthly Budget Progress Bars inside Auth Visual Panel */
+.ps-dash-mini-budgets {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 11px 13px;
+  border-radius: var(--ps-radius-sm);
+  background: rgba(5, 4, 3, 0.56);
+  border: 1px solid rgba(189, 166, 151, 0.13);
+}
+
+.ps-dash-mini-budget-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ps-dash-mini-budget-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.71rem;
+}
+
+.ps-dash-mini-budget-name {
+  color: #FAF9F8;
+  font-weight: 500;
+}
+
+.ps-dash-mini-budget-figure {
+  font-family: var(--ps-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.68rem;
+  color: #BDA697;
+}
+
+.ps-dash-mini-track {
+  width: 100%;
+  height: 5px;
+  border-radius: 99px;
+  background: rgba(189, 166, 151, 0.14);
+  overflow: hidden;
+}
+
+.ps-dash-mini-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: #C58F71;
+}
+
+.ps-dash-mini-fill[data-tone="healthy"] {
+  background: #3D9A6B;
+}
+
+.ps-dash-mini-fill[data-tone="warning"] {
+  background: #C14C32;
+}
+
+.ps-dash-mini-fill[data-tone="80"] {
+  width: 80%;
+}
+
+.ps-dash-mini-fill[data-tone-width="90"] {
+  width: 90%;
+}
+
+.ps-dash-mini-fill[data-tone-width="74"] {
+  width: 74%;
+}
+
+/* Account & Transaction Rows inside Visual Panel */
+.ps-auth-ledger-preview {
+  padding: 12px 14px;
+  border-radius: var(--ps-radius-sm);
+  background: rgba(5, 4, 3, 0.62);
+  border: 1px solid rgba(189, 166, 151, 0.15);
+}
+
+.ps-auth-ledger-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(189, 166, 151, 0.11);
+  font-size: 0.75rem;
+}
+
+.ps-auth-ledger-row:first-child {
+  padding-top: 0;
+}
+
+.ps-auth-ledger-row:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.ps-auth-ledger-label {
+  color: #BDA697;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ps-auth-ledger-subtag {
+  font-size: 0.66rem;
+  color: #6D5A50;
+}
+
+.ps-auth-ledger-val {
+  color: #FAF9F8;
+  font-weight: 500;
+}
+
+.ps-auth-ledger-pos {
+  color: #3D9A6B;
+}
+
+.ps-auth-ledger-copper {
+  color: #C58F71;
+}
+
+/* Right Side: Authentication Form Container */
+.ps-auth-form-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+}
+
+.ps-auth-card {
+  width: 100%;
+  max-width: 540px;
+  margin: 0 auto;
+  padding: 34px 34px;
+  border-radius: var(--ps-radius-lg);
+  background: var(--ps-auth-surface);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--ps-auth-border-strong);
+  box-shadow: var(--ps-auth-shadow);
+}
+
+.ps-auth-card-wide {
+  max-width: 610px;
+}
+
+.ps-auth-card-header {
+  margin-bottom: 20px;
+}
+
+.ps-auth-kicker {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--ps-auth-copper);
+  margin-bottom: 6px;
+}
+
+.ps-auth-heading {
+  font-size: clamp(1.65rem, 2.3vw, 2.15rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  color: var(--ps-auth-text);
+  margin-bottom: 6px;
+}
+
+.ps-auth-heading em {
+  font-family: var(--ps-font-serif);
+  font-style: italic;
+  font-weight: 600;
+  color: var(--ps-auth-copper);
+}
+
+.ps-auth-supporting {
+  font-size: 0.9rem;
+  color: var(--ps-auth-muted);
+}
+
+/* ==========================================================================
+   3. FORM FIELDS, GROUPINGS, INPUTS & PASSWORD TOGGLES
+   ========================================================================== */
+
+.ps-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ps-field-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.ps-field-grid-country-phone {
+  display: grid;
+  grid-template-columns: 0.92fr 1.08fr;
+  gap: 14px;
+}
+
+.ps-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.ps-field-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ps-field-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ps-auth-text);
+}
+
+.ps-field-hint {
+  font-size: 0.71rem;
+  color: var(--ps-auth-subtle);
+}
+
+.ps-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ps-input,
+.ps-select {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 13px;
+  border-radius: var(--ps-radius-sm);
+  background: var(--ps-auth-input-bg);
+  border: 1px solid var(--ps-auth-border);
+  color: var(--ps-auth-text);
+  font-family: var(--ps-font-sans);
+  font-size: 0.885rem;
+  transition: border-color 150ms var(--ps-ease), box-shadow 150ms var(--ps-ease);
+}
+
+.ps-input::placeholder {
+  color: var(--ps-auth-subtle);
+}
+
+.ps-input:focus,
+.ps-select:focus {
+  outline: none;
+  border-color: var(--ps-auth-copper);
+  box-shadow: 0 0 0 3px rgba(197, 143, 113, 0.18);
+}
+
+.ps-input[aria-invalid="true"],
+.ps-select[aria-invalid="true"] {
+  border-color: var(--ps-auth-terracotta);
+}
+
+.ps-input-has-toggle {
+  padding-right: 68px;
+}
+
+.ps-auth-shell[dir="rtl"] .ps-input-has-toggle {
+  padding-right: 13px;
+  padding-left: 68px;
+}
+
+.ps-pwd-toggle {
+  position: absolute;
+  right: 7px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 4px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--ps-auth-border);
+  background: var(--ps-auth-surface-elevated);
+  color: var(--ps-auth-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.ps-auth-shell[dir="rtl"] .ps-pwd-toggle {
+  right: auto;
+  left: 7px;
+}
+
+.ps-pwd-toggle:hover {
+  color: var(--ps-auth-text);
+  border-color: var(--ps-auth-copper);
+}
+
+/* Remember Me & Forgot Password Row */
+.ps-auth-utility-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 0.825rem;
+}
+
+.ps-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ps-auth-muted);
+  cursor: pointer;
+}
+
+.ps-checkbox {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--ps-auth-copper);
+}
+
+.ps-auth-link {
+  color: var(--ps-auth-copper);
+  font-weight: 600;
+}
+
+.ps-auth-link:hover {
+  text-decoration: underline;
+}
+
+/* Password Requirements Checklist */
+.ps-pwd-rules {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5px 12px;
+  padding: 9px 13px;
+  border-radius: var(--ps-radius-sm);
+  background: var(--ps-auth-input-bg);
+  border: 1px solid var(--ps-auth-border);
+  font-size: 0.73rem;
+  color: var(--ps-auth-muted);
+}
+
+.ps-pwd-rule {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ps-pwd-rule[data-met="true"] {
+  color: var(--ps-auth-positive);
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   4. BUTTONS, ALERTS & VALIDATION MESSAGES
+   ========================================================================== */
+
+.ps-auth-btn-primary {
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 20px;
+  border-radius: var(--ps-radius-sm);
+  border: 1px solid rgba(250, 249, 248, 0.22);
+  background: linear-gradient(135deg, var(--ps-auth-copper) 0%, #B37A5C 100%);
+  color: var(--ps-auth-btn-text);
+  font-size: 0.92rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: transform 150ms var(--ps-ease), filter 150ms var(--ps-ease);
+}
+
+.ps-auth-btn-primary:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+.ps-auth-btn-primary[disabled] {
+  opacity: 0.65;
+  cursor: wait;
+  transform: none;
+}
+
+.ps-auth-btn-secondary {
+  min-height: 42px;
+  padding: 9px 18px;
+  border-radius: var(--ps-radius-sm);
+  border: 1px solid var(--ps-auth-border-strong);
+  background: var(--ps-auth-input-bg);
+  color: var(--ps-auth-text);
+  font-size: 0.86rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: border-color 150ms var(--ps-ease), background-color 150ms var(--ps-ease);
+}
+
+.ps-auth-btn-secondary:hover {
+  border-color: var(--ps-auth-copper);
+}
+
+.ps-alert {
+  padding: 10px 14px;
+  border-radius: var(--ps-radius-sm);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  margin-bottom: 14px;
+  border: 1px solid transparent;
+}
+
+.ps-alert[hidden] {
+  display: none;
+}
+
+.ps-alert-error {
+  background: var(--ps-auth-terracotta-bg);
+  border-color: var(--ps-auth-terracotta);
+  color: var(--ps-auth-text);
+}
+
+.ps-alert-success {
+  background: var(--ps-auth-positive-bg);
+  border-color: var(--ps-auth-positive);
+  color: var(--ps-auth-text);
+}
+
+.ps-field-error {
+  font-size: 0.73rem;
+  color: var(--ps-auth-terracotta);
+  min-height: 0;
+}
+
+.ps-field-error[hidden] {
+  display: none;
+}
+
+.ps-auth-footer-Switch {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--ps-auth-border);
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--ps-auth-muted);
+}
+
+/* ==========================================================================
+   5. CUSTOM ERROR PAGES (404, 500, 403 / EXPIRED) WITH LEDGER TELEMETRY
+   ========================================================================== */
+
+.ps-error-stage {
+  width: 100%;
+  max-width: 700px;
+  margin: auto;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.ps-error-card {
+  position: relative;
+  padding: 40px 36px 30px;
+  border-radius: var(--ps-radius-lg);
+  background: var(--ps-auth-surface);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--ps-auth-border-strong);
+  box-shadow: var(--ps-auth-shadow);
+  overflow: hidden;
+}
+
+.ps-error-illustration {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(197, 143, 113, 0.18) 0%, transparent 72%);
+  border: 1px solid var(--ps-auth-border-strong);
+}
+
+.ps-error-code {
+  font-family: var(--ps-font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ps-auth-copper);
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.ps-error-actions {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.ps-error-actions .ps-auth-btn-primary {
+  width: auto;
+  min-width: 180px;
+}
+
+/* Subtle Purslip Dashboard Continuity Strip on Error Pages */
+.ps-error-ledger-strip {
+  margin-top: 26px;
+  padding-top: 16px;
+  border-top: 1px solid var(--ps-auth-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 0.74rem;
+  color: var(--ps-auth-muted);
+}
+
+.ps-error-ledger-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--ps-font-mono);
+}
+
+.ps-error-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ps-auth-positive);
+}
+
+/* ==========================================================================
+   6. FULL DESKTOP ENHANCEMENT (1920 × 1080 and large monitors)
+   Preserves generous breathing room on large high-resolution monitors
+   ========================================================================== */
+
+@media (min-width: 1600px) and (min-height: 940px) {
+  .ps-auth-split {
+    max-width: 1380px;
+    padding: 40px 28px;
+    gap: 48px;
+  }
+
+  .ps-auth-visual-panel {
+    padding: 38px;
+    gap: 28px;
+  }
+
+  .ps-auth-card {
+    padding: 38px 36px;
+  }
+
+  .ps-auth-form {
+    gap: 16px;
+  }
+
+  .ps-input,
+  .ps-select {
+    min-height: 44px;
+    padding: 10px 14px;
+  }
+}
+
+/* ==========================================================================
+   7. LAPTOP HEIGHT & WIDTH OPTIMIZATION
+   Targets: 1536 × 864, 1440 × 900, 1366 × 768, 1280 × 720, 1024 × 768
+   Eliminates vertical over-stretching, hollow gaps, and unnecessary scrolling
+   ========================================================================== */
+
+@media (max-height: 910px) and (min-width: 901px) {
+  .ps-auth-topbar-inner {
+    padding: 8px 20px;
+  }
+
+  .ps-auth-split {
+    max-width: 1260px;
+    padding: 16px 22px;
+    gap: 28px;
+    align-items: center;
+  }
+
+  .ps-auth-visual-panel {
+    padding: 24px 26px;
+    gap: 16px;
+  }
+
+  .ps-auth-visual-kicker {
+    margin-bottom: 5px;
+    font-size: 0.72rem;
+  }
+
+  .ps-auth-visual-title {
+    font-size: clamp(1.35rem, 1.85vw, 1.72rem);
+    margin-bottom: 6px;
+  }
+
+  .ps-auth-visual-sub {
+    font-size: 0.81rem;
+    line-height: 1.42;
+  }
+
+  .ps-dash-mini-topbar {
+    padding: 7px 13px;
+  }
+
+  .ps-dash-mini-body {
+    padding: 11px 13px;
+    gap: 9px;
+  }
+
+  .ps-dash-mini-kpi {
+    padding: 8px 11px;
+  }
+
+  .ps-dash-mini-kpi-val {
+    font-size: 0.9rem;
+  }
+
+  .ps-dash-mini-svg {
+    height: 50px;
+  }
+
+  .ps-dash-mini-budgets {
+    padding: 9px 12px;
+    gap: 6px;
+  }
+
+  .ps-auth-ledger-preview {
+    padding: 9px 12px;
+  }
+
+  .ps-auth-ledger-row {
+    padding: 5px 0;
+    font-size: 0.72rem;
+  }
+
+  .ps-auth-card {
+    padding: 22px 26px;
+  }
+
+  .ps-auth-card-header {
+    margin-bottom: 14px;
+  }
+
+  .ps-auth-kicker {
+    margin-bottom: 3px;
+    font-size: 0.72rem;
+  }
+
+  .ps-auth-heading {
+    font-size: clamp(1.42rem, 1.9vw, 1.75rem);
+    margin-bottom: 4px;
+  }
+
+  .ps-auth-supporting {
+    font-size: 0.83rem;
+  }
+
+  .ps-auth-form {
+    gap: 10px;
+  }
+
+  .ps-field-grid-2,
+  .ps-field-grid-country-phone {
+    gap: 11px;
+  }
+
+  .ps-field-group {
+    gap: 4px;
+  }
+
+  .ps-field-label {
+    font-size: 0.76rem;
+  }
+
+  .ps-field-hint {
+    font-size: 0.68rem;
+  }
+
+  .ps-input,
+  .ps-select {
+    min-height: 37px;
+    padding: 6px 11px;
+    font-size: 0.84rem;
+  }
+
+  .ps-input-has-toggle {
+    padding-right: 62px;
+  }
+
+  .ps-pwd-rules {
+    padding: 7px 11px;
+    gap: 3px 10px;
+    font-size: 0.69rem;
+  }
+
+  .ps-auth-btn-primary {
+    min-height: 39px;
+    padding: 8px 18px;
+    font-size: 0.86rem;
+  }
+
+  .ps-auth-footer-Switch {
+    margin-top: 12px;
+    padding-top: 10px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Ultra-Compact Laptop Height (1366 × 768 and 1280 × 720) */
+@media (max-height: 780px) and (min-width: 901px) {
+  .ps-auth-topbar-inner {
+    padding: 6px 18px;
+  }
+
+  .ps-auth-split {
+    max-width: 1220px;
+    padding: 10px 20px;
+    gap: 22px;
+  }
+
+  .ps-auth-visual-panel {
+    padding: 20px 22px;
+    gap: 12px;
+  }
+
+  .ps-auth-visual-title {
+    font-size: 1.32rem;
+    margin-bottom: 4px;
+  }
+
+  .ps-auth-visual-sub {
+    font-size: 0.78rem;
+    line-height: 1.38;
+  }
+
+  .ps-dash-mini-body {
+    padding: 9px 11px;
+    gap: 8px;
+  }
+
+  .ps-dash-mini-svg {
+    height: 44px;
+  }
+
+  .ps-auth-card {
+    padding: 18px 22px;
+  }
+
+  .ps-auth-card-header {
+    margin-bottom: 10px;
+  }
+
+  .ps-auth-heading {
+    font-size: 1.35rem;
+    margin-bottom: 2px;
+  }
+
+  .ps-auth-supporting {
+    font-size: 0.79rem;
+  }
+
+  .ps-auth-form {
+    gap: 8px;
+  }
+
+  .ps-field-grid-2,
+  .ps-field-grid-country-phone {
+    gap: 10px;
+  }
+
+  .ps-field-group {
+    gap: 3px;
+  }
+
+  .ps-input,
+  .ps-select {
+    min-height: 34px;
+    padding: 5px 10px;
+    font-size: 0.82rem;
+  }
+
+  .ps-pwd-rules {
+    padding: 6px 10px;
+    gap: 2px 10px;
+    font-size: 0.68rem;
+  }
+
+  .ps-auth-btn-primary {
+    min-height: 36px;
+    padding: 7px 16px;
+    font-size: 0.84rem;
+  }
+
+  .ps-auth-footer-Switch {
+    margin-top: 9px;
+    padding-top: 8px;
+    font-size: 0.78rem;
+  }
+}
+
+/* Compact 2-Column Width Adaptation (1024 × 768 through 1280 × 720) */
+@media (max-width: 1180px) and (min-width: 901px) {
+  .ps-auth-topbar-inner {
+    padding: 6px 14px;
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+
+  .ps-auth-brand-group {
+    gap: 10px;
+  }
+
+  .ps-auth-back-link {
+    padding-left: 10px;
+    font-size: 0.76rem;
+  }
+
+  .ps-auth-switch-btn {
+    padding: 4px 8px;
+    font-size: 0.71rem;
+  }
+
+  .ps-auth-split {
+    grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+    gap: 20px;
+    padding: 12px 16px;
+  }
+
+  .ps-auth-visual-panel {
+    padding: 18px 20px;
+  }
+
+  .ps-dash-mini-accounts,
+  .ps-auth-ledger-subtag {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   8. PORTRAIT TABLET BREAKPOINT (768 × 1024 and <= 900px width)
+   Transitions gracefully to a compact single-column composition with a
+   streamlined brand header banner so the form stays primary and un-split
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .ps-auth-topbar-inner {
+    padding: 8px 16px;
+    gap: 8px;
+  }
+
+  .ps-auth-switch-btn {
+    padding: 4px 8px;
+    font-size: 0.72rem;
+  }
+
+  .ps-auth-main {
+    align-items: center;
+  }
+
+  .ps-auth-split {
+    grid-template-columns: 1fr;
+    max-width: 580px;
+    padding: 14px 18px 20px;
+    gap: 12px;
+  }
+
+  /* Compact horizontal brand & ledger status banner on tablet portrait */
+  .ps-auth-visual-panel {
+    padding: 14px 18px;
+    gap: 10px;
+  }
+
+  .ps-auth-visual-kicker {
+    margin-bottom: 4px;
+    font-size: 0.7rem;
+  }
+
+  .ps-auth-visual-title {
+    font-size: 1.25rem;
+    margin-bottom: 3px;
+  }
+
+  .ps-auth-visual-sub {
+    font-size: 0.79rem;
+    line-height: 1.4;
+  }
+
+  /* Keep only the sleek status topbar of the dashboard preview window on portrait tablet */
+  .ps-dash-mini-body {
+    display: none;
+  }
+
+  .ps-dash-mini-topbar {
+    border-bottom: none;
+    padding: 7px 12px;
+  }
+
+  .ps-auth-card,
+  .ps-auth-card-wide {
+    max-width: 100%;
+    padding: 20px 22px;
+  }
+
+  .ps-auth-card-header {
+    margin-bottom: 12px;
+  }
+
+  .ps-auth-heading {
+    font-size: 1.45rem;
+  }
+
+  .ps-auth-form {
+    gap: 10px;
+  }
+
+  .ps-input,
+  .ps-select {
+    min-height: 38px;
+    padding: 7px 11px;
+  }
+
+  .ps-auth-btn-primary {
+    min-height: 40px;
+  }
+
+  .ps-auth-footer-Switch {
+    margin-top: 12px;
+    padding-top: 10px;
+  }
+}
+
+/* ==========================================================================
+   9. MOBILE BREAKPOINT (390 × 844 and <= 640px width)
+   Single-column layout with form as primary focus and zero horizontal scroll
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  .ps-auth-topbar-inner {
+    padding: 9px 14px;
+    gap: 8px;
+  }
+
+  .ps-auth-split {
+    padding: 16px 14px 24px;
+    gap: 14px;
+  }
+
+  /* On mobile phones, keep the form as the immediate primary focus */
+  .ps-auth-visual-panel {
+    display: none;
+  }
+
+  .ps-auth-card,
+  .ps-auth-card-wide,
+  .ps-error-card {
+    padding: 22px 18px;
+  }
+
+  .ps-auth-card-header {
+    margin-bottom: 16px;
+  }
+
+  .ps-auth-heading {
+    font-size: 1.55rem;
+  }
+
+  .ps-field-grid-2,
+  .ps-field-grid-country-phone,
+  .ps-pwd-rules {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .ps-pwd-rules {
+    gap: 4px;
+  }
+
+  .ps-error-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ps-error-actions .ps-auth-btn-primary,
+  .ps-error-actions .ps-auth-btn-secondary {
+    width: 100%;
+  }
+
+  .ps-error-ledger-strip {
+    flex-direction: column;
+    text-align: center;
+  }
+}

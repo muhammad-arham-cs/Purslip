@@ -1,0 +1,1250 @@
+<!doctype html>
+<html lang="<%= typeof locale !== 'undefined' ? locale : 'en' %>" dir="<%= typeof locale !== 'undefined' && locale === 'ur' ? 'rtl' : 'ltr' %>">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= typeof title !== 'undefined' ? title + ' · Purslip' : 'Purslip — Personal Financial Command Center' %></title>
+    <meta name="description" content="Personal Financial Command Center — multi-currency tracking, budgets, goals, and private household ledgers." />
+    <link rel="icon" href="/images/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/images/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="stylesheet" href="/css/purslip-auth.css" />
+  </head>
+  <body style="margin: 0; background-color: #050403;">
+    <div id="purslip-auth-shell" class="ps-auth-shell" data-theme="<%= typeof theme !== 'undefined' ? theme : 'dark' %>" dir="<%= typeof locale !== 'undefined' && locale === 'ur' ? 'rtl' : 'ltr' %>" lang="<%= typeof locale !== 'undefined' ? locale : 'en' %>">
+      <!-- Ambient Financial Backdrop -->
+      <div class="ps-auth-ambient-backdrop" aria-hidden="true">
+        <svg class="ps-auth-ambient-svg" viewBox="0 0 960 420" fill="none">
+          <defs>
+            <linearGradient id="ps-ambient-area" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#C58F71" stop-opacity="0.24" />
+              <stop offset="100%" stop-color="#C58F71" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          <g fill="#C58F71" fill-opacity="0.06">
+            <rect x="80" y="290" width="36" height="130" rx="4" />
+            <rect x="160" y="260" width="36" height="160" rx="4" />
+            <rect x="240" y="275" width="36" height="145" rx="4" />
+            <rect x="320" y="220" width="36" height="200" rx="4" />
+            <rect x="400" y="235" width="36" height="185" rx="4" />
+            <rect x="480" y="185" width="36" height="235" rx="4" />
+            <rect x="560" y="198" width="36" height="222" rx="4" />
+            <rect x="640" y="140" width="36" height="280" rx="4" />
+            <rect x="720" y="155" width="36" height="265" rx="4" />
+            <rect x="800" y="95" width="36" height="325" rx="4" />
+            <rect x="880" y="65" width="36" height="355" rx="4" />
+          </g>
+          <path d="M40 340 L178 278 L258 292 L338 232 L418 246 L498 192 L578 206 L658 148 L738 162 L818 102 L898 68 L940 52 L940 420 L40 420 Z" fill="url(#ps-ambient-area)" />
+          <path d="M40 340 L178 278 L258 292 L338 232 L418 246 L498 192 L578 206 L658 148 L738 162 L818 102 L898 68 L940 52" stroke="#C58F71" stroke-opacity="0.38" stroke-width="2" />
+        </svg>
+      </div>
+
+      <!-- Header Topbar with Purslip Brand & Controls -->
+      <header class="ps-auth-topbar">
+        <div class="ps-auth-topbar-inner">
+          <div class="ps-auth-brand-group">
+            <a href="/" class="ps-auth-logo" aria-label="Purslip Home">
+              <span class="ps-auth-logo-mark" aria-hidden="true">
+                <svg class="ps-brand-wallet-svg" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+                  <path fill="var(--mark-slip-2)" d="M18 21 44.6 8.4a2.6 2.6 0 0 1 3.4 1.3L52 19Z"></path>
+                  <path fill="var(--mark-slip-1)" d="M23 21 50 12.6a2.6 2.6 0 0 1 3.2 1.7L55.4 21Z"></path>
+                  <path fill="var(--mark-body)" d="M9 26a7 7 0 0 1 7-7h30a10 10 0 0 1 10 10v8a11 11 0 0 1-11 11H24v11L9 50Z"></path>
+                  <path d="M19.5 27v27" stroke="var(--mark-cut)" stroke-width="2.4" stroke-linecap="round" fill="none"></path>
+                  <rect x="44" y="27" width="15" height="10" rx="5" fill="var(--mark-body)" stroke="var(--mark-cut)" stroke-width="2.2"></rect>
+                  <circle cx="49.5" cy="32" r="2.1" fill="var(--mark-cut)"></circle>
+                  <g fill="var(--mark-cut)">
+                    <ellipse cx="33" cy="26.6" rx="8" ry="3.1"></ellipse>
+                    <path d="M25 29.6a8 3.1 0 0 0 16 0v3.2a8 3.1 0 0 1-16 0Z"></path>
+                    <path d="M25 34.3a8 3.1 0 0 0 16 0v3.2a8 3.1 0 0 1-16 0Z"></path>
+                    <path d="M25 39a8 3.1 0 0 0 16 0v3.2a8 3.1 0 0 1-16 0Z"></path>
+                  </g>
+                </svg>
+              </span>
+              <span>Purslip</span>
+            </a>
+            <a href="/" class="ps-auth-back-link" data-i18n-text="backToLanding">
+              Back to Purslip
+            </a>
+          </div>
+
+          <!-- System Page Switcher -->
+          <nav class="ps-auth-page-switcher" aria-label="Authentication and System Pages">
+            <button type="button" class="ps-auth-switch-btn" data-switch-view="login" <%- activePage === 'login' ? 'aria-current="page"' : '' %>>
+              Login
+            </button>
+            <button type="button" class="ps-auth-switch-btn" data-switch-view="register" <%- activePage === 'register' ? 'aria-current="page"' : '' %>>
+              Signup
+            </button>
+            <button type="button" class="ps-auth-switch-btn" data-switch-view="forgot" <%- activePage === 'forgot' ? 'aria-current="page"' : '' %>>
+              Forgot Password
+            </button>
+            <button type="button" class="ps-auth-switch-btn" data-switch-view="reset" <%- activePage === 'reset' ? 'aria-current="page"' : '' %>>
+              Reset Password
+            </button>
+            <button type="button" class="ps-auth-switch-btn" data-switch-view="404" <%- activePage === '404' ? 'aria-current="page"' : '' %>>
+              404 Page
+            </button>
+            <button type="button" class="ps-auth-switch-btn" data-switch-view="500" <%- activePage === '500' ? 'aria-current="page"' : '' %>>
+              500 Page
+            </button>
+            <button type="button" class="ps-auth-switch-btn" data-switch-view="403" <%- activePage === '403' ? 'aria-current="page"' : '' %>>
+              403 / Session
+            </button>
+          </nav>
+
+          <!-- Theme & Language Controls -->
+          <div class="ps-auth-env-controls">
+            <div class="ps-auth-page-switcher" role="group" aria-label="Select Theme">
+              <button type="button" class="ps-auth-switch-btn" data-auth-theme="dark" aria-pressed="true">
+                Dark
+              </button>
+              <button type="button" class="ps-auth-switch-btn" data-auth-theme="night" aria-pressed="false">
+                Night
+              </button>
+              <button type="button" class="ps-auth-switch-btn" data-auth-theme="light" aria-pressed="false">
+                Light
+              </button>
+            </div>
+
+            <div class="ps-auth-page-switcher" role="group" aria-label="Select Language">
+              <button type="button" class="ps-auth-switch-btn" data-auth-lang="en" aria-pressed="true">
+                EN
+              </button>
+              <button type="button" class="ps-auth-switch-btn" data-auth-lang="ur" aria-pressed="false">
+                اردو
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+<main class="ps-auth-main <%= activePage === 'login' ? '' : 'ps-view-hidden' %>" data-auth-page="login" id="ps-page-login">
+        <div class="ps-auth-split">
+          <!-- Left Brand & Dashboard Ecosystem Visual Panel -->
+          <aside class="ps-auth-visual-panel" aria-label="Purslip Financial Dashboard Preview">
+            <img
+              src="/assets/frames/fallback/auth-finance-skyline.jpg"
+              alt="Purslip financial skyline and ascending cash flow visualization"
+              class="ps-auth-visual-bg"
+              referrerpolicy="no-referrer"
+            />
+            <div class="ps-auth-visual-scrim"></div>
+
+            <div class="ps-auth-visual-top">
+              <p class="ps-auth-visual-kicker">Your Personal Financial Command Center</p>
+              <h2 class="ps-auth-visual-title">
+                Clarity across every <em>account and rupee.</em>
+              </h2>
+              <p class="ps-auth-visual-sub">
+                Pick up right where you left off with a live daily view of your multi-currency
+                accounts, monthly budgets, savings goals, and recurring bills.
+              </p>
+            </div>
+
+            <!-- Authentic Purslip Dashboard Preview Window (Balance Cards + 6M Cash Flow + Accounts) -->
+            <div class="ps-auth-visual-bottom">
+              <div class="ps-dash-mini-window">
+                <div class="ps-dash-mini-topbar">
+                  <span class="ps-dash-mini-title">
+                    <span class="ps-dash-mini-title-dot" aria-hidden="true"></span>
+                    <span>Consolidated Financial Command</span>
+                  </span>
+                  <span class="ps-dash-mini-accounts">
+                    Meezan Current · HBL Freedom · SadaPay · National Savings
+                  </span>
+                </div>
+
+                <div class="ps-dash-mini-body">
+                  <!-- 2 Balance Cards mirroring the Purslip Dashboard -->
+                  <div class="ps-dash-mini-kpis">
+                    <div class="ps-dash-mini-kpi">
+                      <div class="ps-dash-mini-kpi-head">
+                        <span>Net Worth</span>
+                        <span class="ps-auth-tabular">PKR</span>
+                      </div>
+                      <div class="ps-dash-mini-kpi-val">PKR 4,820,500</div>
+                      <div class="ps-dash-mini-kpi-sub ps-dash-mini-kpi-sub-pos">
+                        +PKR 164,000 (+3.5%) vs Oct
+                      </div>
+                    </div>
+
+                    <div class="ps-dash-mini-kpi">
+                      <div class="ps-dash-mini-kpi-head">
+                        <span>Liquid Account Balance</span>
+                        <span class="ps-auth-tabular">PKR</span>
+                      </div>
+                      <div class="ps-dash-mini-kpi-val">PKR 1,485,200</div>
+                      <div class="ps-dash-mini-kpi-sub">
+                        Across 4 active accounts · +PKR 186,550 surplus
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Six-Month Cash Flow (Income vs. Expenses) Chart mirroring #showcase -->
+                  <div class="ps-dash-mini-chart-box">
+                    <div class="ps-dash-mini-chart-head">
+                      <span class="ps-dash-mini-chart-title">
+                        Six-Month Cash Flow (Income vs. Expenses)
+                      </span>
+                      <div class="ps-dash-mini-legend">
+                        <span class="ps-dash-mini-legend-item">
+                          <span class="ps-dash-mini-swatch-inflow"></span>Inflow
+                        </span>
+                        <span class="ps-dash-mini-legend-item">
+                          <span class="ps-dash-mini-swatch-outflow"></span>Outflow
+                        </span>
+                      </div>
+                    </div>
+                    <svg
+                      class="ps-dash-mini-svg"
+                      viewBox="0 0 440 68"
+                      preserveAspectRatio="none"
+                      aria-label="Six-month inflow versus outflow trend chart"
+                    >
+                      <defs>
+                        <linearGradient id="ps-login-inflow-grad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stop-color="#3D9A6B" stop-opacity="0.28" />
+                          <stop offset="100%" stop-color="#3D9A6B" stop-opacity="0.0" />
+                        </linearGradient>
+                      </defs>
+                      <line x1="0" y1="18" x2="440" y2="18" stroke="rgba(189,166,151,0.1)" stroke-width="1" />
+                      <line x1="0" y1="42" x2="440" y2="42" stroke="rgba(189,166,151,0.1)" stroke-width="1" />
+                      <path
+                        d="M8 30 L92 26 L176 29 L260 11 L344 19 L432 14 L432 66 L8 66 Z"
+                        fill="url(#ps-login-inflow-grad)"
+                      />
+                      <path
+                        d="M8 30 L92 26 L176 29 L260 11 L344 19 L432 14"
+                        fill="none"
+                        stroke="#3D9A6B"
+                        stroke-width="2"
+                      />
+                      <path
+                        d="M8 52 L92 56 L176 46 L260 51 L344 55 L432 50"
+                        fill="none"
+                        stroke="#C58F71"
+                        stroke-width="1.8"
+                        stroke-dasharray="4 4"
+                      />
+                      <circle cx="8" cy="30" r="2.6" fill="#3D9A6B" />
+                      <circle cx="92" cy="26" r="2.6" fill="#3D9A6B" />
+                      <circle cx="176" cy="29" r="2.6" fill="#3D9A6B" />
+                      <circle cx="260" cy="11" r="2.8" fill="#3D9A6B" />
+                      <circle cx="344" cy="19" r="2.6" fill="#3D9A6B" />
+                      <circle cx="432" cy="14" r="3" fill="#3D9A6B" />
+                    </svg>
+                    <div class="ps-dash-mini-months" aria-hidden="true">
+                      <span>Jun</span>
+                      <span>Jul</span>
+                      <span>Aug</span>
+                      <span>Sep</span>
+                      <span>Oct</span>
+                      <span>Nov</span>
+                    </div>
+                  </div>
+
+                  <!-- Active Accounts Snapshot -->
+                  <div class="ps-auth-ledger-preview">
+                    <div class="ps-auth-ledger-row">
+                      <span class="ps-auth-ledger-label">
+                        <span>Meezan Bank Current</span>
+                        <span class="ps-auth-ledger-subtag">· Salary &amp; Bills</span>
+                      </span>
+                      <span class="ps-auth-ledger-val ps-auth-tabular">PKR 802,000</span>
+                    </div>
+                    <div class="ps-auth-ledger-row">
+                      <span class="ps-auth-ledger-label">
+                        <span>National Savings &amp; Goal Pots</span>
+                        <span class="ps-auth-ledger-subtag">· 3 Active Goals</span>
+                      </span>
+                      <span class="ps-auth-ledger-val ps-auth-tabular">PKR 3,150,300</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <!-- Right Authentication Form Column -->
+          <div class="ps-auth-form-col">
+            <div class="ps-auth-card">
+              <div class="ps-auth-card-header">
+                <p class="ps-auth-kicker">Account Access</p>
+                <h1 class="ps-auth-heading" data-i18n-html="loginHeading">
+                  Welcome <em>back.</em>
+                </h1>
+                <p class="ps-auth-supporting" data-i18n-text="loginSub">
+                  Your financial picture is waiting right where you left it.
+                </p>
+              </div>
+
+              <% if (activePage === 'login' && typeof errors !== 'undefined' && errors && errors.length) { %>
+                <div id="login-form-alert" class="ps-alert ps-alert-error" role="alert">
+                  <% errors.forEach(function(e) { %><div><%= e.msg %></div><% }) %>
+                </div>
+              <% } else if (activePage === 'login' && typeof errorMessages !== 'undefined' && errorMessages && errorMessages.length) { %>
+                <div id="login-form-alert" class="ps-alert ps-alert-error" role="alert">
+                  <% errorMessages.forEach(function(e) { %><div><%= e %></div><% }) %>
+                </div>
+              <% } else if (activePage === 'login' && typeof successMessages !== 'undefined' && successMessages && successMessages.length) { %>
+                <div id="login-form-alert" class="ps-alert ps-alert-success" role="alert">
+                  <% successMessages.forEach(function(s) { %><div><%= s %></div><% }) %>
+                </div>
+              <% } else { %>
+                <div id="login-form-alert" class="ps-alert ps-alert-error" role="alert" hidden></div>
+              <% } %>
+              <% if (activePage === 'login' && typeof cooldownSeconds === 'number' && cooldownSeconds > 0) { %>
+                <div class="ps-alert ps-alert-error cooldown-banner" data-cooldown-seconds="<%= cooldownSeconds %>" role="timer" aria-live="polite">
+                  <strong>Cooldown active:</strong> Login unlocks in <span class="num" data-cooldown-counter><%= cooldownSeconds %>s</span>.
+                </div>
+              <% } %>
+
+              <form id="ps-login-form" class="ps-auth-form" action="/auth/login" method="POST" novalidate>
+                <input type="hidden" name="_csrf" value="purslip-csrf-token-session" />
+
+                <div class="ps-field-group">
+                  <div class="ps-field-label-row">
+                    <label for="login-email" class="ps-field-label">Email address</label>
+                  </div>
+                  <input
+                    id="login-email"
+                    name="email"
+                    type="email"
+                    class="ps-input"
+                    placeholder="name@example.com"
+                    autocomplete="email"
+                    required
+                   value="<%= (activePage === 'login' && typeof values !== 'undefined' && values.email) ? values.email : '' %>" />
+                  <p id="login-email-error" class="ps-field-error" hidden></p>
+                </div>
+
+                <div class="ps-field-group">
+                  <div class="ps-field-label-row">
+                    <label for="login-password" class="ps-field-label">Password</label>
+                  </div>
+                  <div class="ps-input-wrap">
+                    <input
+                      id="login-password"
+                      name="password"
+                      type="password"
+                      class="ps-input ps-input-has-toggle"
+                      placeholder="Enter your password"
+                      autocomplete="current-password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      class="ps-pwd-toggle"
+                      data-password-toggle="login-password"
+                      aria-label="Toggle password visibility"
+                      aria-pressed="false"
+                    >
+                      Show
+                    </button>
+                  </div>
+                  <p id="login-password-error" class="ps-field-error" hidden></p>
+                </div>
+
+                <div class="ps-auth-utility-row">
+                  <label class="ps-checkbox-label">
+                    <input
+                      type="checkbox"
+                      name="rememberMe"
+                      id="login-remember"
+                      class="ps-checkbox"
+                      value="1"
+                    />
+                    <span>Remember this device</span>
+                  </label>
+                  <a href="/forgot-password" data-switch-view="forgot" class="ps-auth-link">
+                    Forgot password?
+                  </a>
+                </div>
+
+                <button
+                  type="submit"
+                  id="login-submit-btn" <%= (activePage === 'login' && typeof cooldownSeconds === 'number' && cooldownSeconds > 0) ? 'disabled' : '' %>
+                  class="ps-auth-btn-primary"
+                  data-i18n-text="loginBtn"
+                >
+                  Log in to Purslip
+                </button>
+              </form>
+
+              <div class="ps-auth-footer-Switch">
+                <span>New to Purslip?</span>
+                <a href="/register" data-switch-view="register" class="ps-auth-link">
+                  Create an account
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ====================================================================
+           2. SIGNUP / REGISTRATION PAGE (/register & /auth/signup)
+           Preserves all 8 existing fields:
+           fullName, country, phone, cnic, baseCurrency, email, password, confirmPassword
+           ==================================================================== -->
+
+<main class="ps-auth-main <%= activePage === 'register' ? '' : 'ps-view-hidden' %>" data-auth-page="register" id="ps-page-register">
+        <div class="ps-auth-split">
+          <!-- Left Brand & Dashboard Workspace Preview Panel -->
+          <aside class="ps-auth-visual-panel" aria-label="Purslip Registration Workspace Preview">
+            <img
+              src="/assets/frames/fallback/auth-vault-analytics.jpg"
+              alt="Purslip layered glass financial ledger and copper bar chart visualization"
+              class="ps-auth-visual-bg"
+              referrerpolicy="no-referrer"
+            />
+            <div class="ps-auth-visual-scrim"></div>
+
+            <div class="ps-auth-visual-top">
+              <p class="ps-auth-visual-kicker">Structured Personal Finance</p>
+              <h2 class="ps-auth-visual-title">
+                Every account, budget, and goal <em>in one place.</em>
+              </h2>
+              <p class="ps-auth-visual-sub">
+                Create your private Purslip workspace in under a minute. Organize bank accounts and
+                wallets across PKR, USD, and GBP, set monthly category budgets, and import bank CSV
+                statements seamlessly.
+              </p>
+            </div>
+
+            <!-- Authentic Purslip Dashboard Preview: Monthly Budgets + Recent Ledger Activity -->
+            <div class="ps-auth-visual-bottom">
+              <div class="ps-dash-mini-window">
+                <div class="ps-dash-mini-topbar">
+                  <span class="ps-dash-mini-title">
+                    <span class="ps-dash-mini-title-dot" aria-hidden="true"></span>
+                    <span>Monthly Budgets &amp; Ledger Activity</span>
+                  </span>
+                  <span class="ps-dash-mini-accounts">PKR · USD · GBP · CSV Import</span>
+                </div>
+
+                <div class="ps-dash-mini-body">
+                  <!-- Monthly Budget Limits Progress Bars mirroring the Purslip Dashboard -->
+                  <div class="ps-dash-mini-budgets">
+                    <div class="ps-dash-mini-budget-item">
+                      <div class="ps-dash-mini-budget-row">
+                        <span class="ps-dash-mini-budget-name">Household &amp; Groceries</span>
+                        <span class="ps-dash-mini-budget-figure">PKR 68,400 / 85,000 (80%)</span>
+                      </div>
+                      <div class="ps-dash-mini-track">
+                        <div class="ps-dash-mini-fill" data-tone="80"></div>
+                      </div>
+                    </div>
+
+                    <div class="ps-dash-mini-budget-item">
+                      <div class="ps-dash-mini-budget-row">
+                        <span class="ps-dash-mini-budget-name">Utilities, Fiber &amp; Fuel</span>
+                        <span class="ps-dash-mini-budget-figure">PKR 54,200 / 60,000 (90%)</span>
+                      </div>
+                      <div class="ps-dash-mini-track">
+                        <div class="ps-dash-mini-fill" data-tone="warning" data-tone-width="90"></div>
+                      </div>
+                    </div>
+
+                    <div class="ps-dash-mini-budget-item">
+                      <div class="ps-dash-mini-budget-row">
+                        <span class="ps-dash-mini-budget-name">Emergency Reserve Goal</span>
+                        <span class="ps-dash-mini-budget-figure">PKR 1,080,000 / 1,200,000 (90%)</span>
+                      </div>
+                      <div class="ps-dash-mini-track">
+                        <div class="ps-dash-mini-fill" data-tone="healthy" data-tone-width="90"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Recent Verified Transactions & CSV Import Preview -->
+                  <div class="ps-auth-ledger-preview">
+                    <div class="ps-auth-ledger-row">
+                      <span class="ps-auth-ledger-label">
+                        <span>Systems Ltd — Monthly Payroll</span>
+                        <span class="ps-auth-ledger-subtag">· Meezan Current</span>
+                      </span>
+                      <span class="ps-auth-ledger-val ps-auth-ledger-pos ps-auth-tabular">
+                        +PKR 385,000
+                      </span>
+                    </div>
+                    <div class="ps-auth-ledger-row">
+                      <span class="ps-auth-ledger-label">
+                        <span>Imtiaz Super Market — Clifton</span>
+                        <span class="ps-auth-ledger-subtag">· HBL Freedom</span>
+                      </span>
+                      <span class="ps-auth-ledger-val ps-auth-tabular">-PKR 24,650</span>
+                    </div>
+                    <div class="ps-auth-ledger-row">
+                      <span class="ps-auth-ledger-label">
+                        <span>Bilal Ahmed (Lent Receivable)</span>
+                        <span class="ps-auth-ledger-subtag">· Due 15 Dec</span>
+                      </span>
+                      <span class="ps-auth-ledger-val ps-auth-ledger-copper ps-auth-tabular">
+                        +PKR 140,000
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <!-- Right Structured 8-Field Registration Form -->
+          <div class="ps-auth-form-col">
+            <div class="ps-auth-card ps-auth-card-wide">
+              <div class="ps-auth-card-header">
+                <p class="ps-auth-kicker">Create Your Ledger</p>
+                <h1 class="ps-auth-heading" data-i18n-html="signupHeading">
+                  Start with a <em>clearer picture.</em>
+                </h1>
+                <p class="ps-auth-supporting" data-i18n-text="signupSub">
+                  Create your private Purslip account and bring your financial life together.
+                </p>
+              </div>
+
+              <% if (activePage === 'register' && typeof errors !== 'undefined' && errors && errors.length) { %>
+                <div id="signup-form-alert" class="ps-alert ps-alert-error" role="alert">
+                  <% errors.forEach(function(e) { %><div><%= e.msg %></div><% }) %>
+                </div>
+              <% } else if (activePage === 'register' && typeof errorMessages !== 'undefined' && errorMessages && errorMessages.length) { %>
+                <div id="signup-form-alert" class="ps-alert ps-alert-error" role="alert">
+                  <% errorMessages.forEach(function(e) { %><div><%= e %></div><% }) %>
+                </div>
+              <% } else { %>
+                <div id="signup-form-alert" class="ps-alert ps-alert-error" role="alert" hidden></div>
+              <% } %>
+
+              <form id="ps-signup-form" class="ps-auth-form" action="/auth/signup" method="POST" novalidate>
+                <input type="hidden" name="_csrf" value="purslip-csrf-token-session" />
+
+                <!-- Row 1: Full Name across available width -->
+                <div class="ps-field-group">
+                  <div class="ps-field-label-row">
+                    <label for="signup-fullName" class="ps-field-label">Full name</label>
+                    <span class="ps-field-hint">As shown on your identity records</span>
+                  </div>
+                  <input
+                    id="signup-fullName"
+                    name="fullName"
+                    type="text"
+                    class="ps-input"
+                    placeholder="Enter your full name"
+                    autocomplete="name"
+                    required
+                   value="<%= (activePage === 'register' && typeof values !== 'undefined' && values.fullName) ? values.fullName : '' %>" />
+                  <p id="signup-fullName-error" class="ps-field-error" hidden></p>
+                </div>
+
+                <!-- Row 2: Country and Phone Number arranged intelligently -->
+                <div class="ps-field-grid-country-phone">
+                  <div class="ps-field-group">
+                    <div class="ps-field-label-row">
+                      <label for="signup-country" class="ps-field-label">Country</label>
+                    </div>
+                    <select id="signup-country" name="country" class="ps-select" required>
+                      <option value="PK" selected>Pakistan (+92)</option>
+                      <option value="AE">United Arab Emirates (+971)</option>
+                      <option value="SA">Saudi Arabia (+966)</option>
+                      <option value="GB">United Kingdom (+44)</option>
+                      <option value="US">United States (+1)</option>
+                    </select>
+                    <p id="signup-country-error" class="ps-field-error" hidden></p>
+                  </div>
+
+                  <div class="ps-field-group">
+                    <div class="ps-field-label-row">
+                      <label for="signup-phone" class="ps-field-label">Phone number</label>
+                    </div>
+                    <input
+                      id="signup-phone"
+                      name="phoneNumber"
+                      type="tel"
+                      class="ps-input ps-auth-tabular"
+                      placeholder="+92 300 0000000"
+                      autocomplete="tel"
+                      data-phone-input
+                      required
+                     value="<%= (activePage === 'register' && typeof values !== 'undefined') ? (values.phoneNumber || values.phone || '') : '' %>" />
+                    <p id="signup-phone-error" class="ps-field-error" hidden></p>
+                  </div>
+                </div>
+
+                <!-- Row 3: CNIC and Base Currency grouped logically -->
+                <div class="ps-field-grid-2">
+                  <div class="ps-field-group">
+                    <div class="ps-field-label-row">
+                      <label for="signup-cnic" class="ps-field-label">CNIC</label>
+                      <span class="ps-field-hint ps-auth-tabular">XXXXX-XXXXXXX-X</span>
+                    </div>
+                    <input
+                      id="signup-cnic"
+                      name="cnic"
+                      type="text"
+                      inputmode="numeric"
+                      maxlength="15"
+                      class="ps-input ps-auth-tabular"
+                      placeholder="00000-0000000-0"
+                      data-cnic-input
+                      required
+                     value="<%= (activePage === 'register' && typeof values !== 'undefined' && values.cnic) ? values.cnic : '' %>" />
+                    <p id="signup-cnic-error" class="ps-field-error" hidden></p>
+                  </div>
+
+                  <div class="ps-field-group">
+                    <div class="ps-field-label-row">
+                      <label for="signup-baseCurrency" class="ps-field-label">Base currency</label>
+                      <span class="ps-field-hint">Primary ledger</span>
+                    </div>
+                    <select id="signup-baseCurrency" name="displayCurrency" class="ps-select" required>
+                      <option value="PKR" selected>PKR — Pakistani Rupee (Rs)</option>
+                      <option value="USD">USD — US Dollar ($)</option>
+                      <option value="GBP">GBP — British Pound (£)</option>
+                      <option value="EUR">EUR — Euro (€)</option>
+                      <option value="AED">AED — UAE Dirham (د.إ)</option>
+                      <option value="SAR">SAR — Saudi Riyal (﷼)</option>
+                    </select>
+                    <p id="signup-baseCurrency-error" class="ps-field-error" hidden></p>
+                  </div>
+                </div>
+
+                <!-- Row 4: Email across available width -->
+                <div class="ps-field-group">
+                  <div class="ps-field-label-row">
+                    <label for="signup-email" class="ps-field-label">Email address</label>
+                  </div>
+                  <input
+                    id="signup-email"
+                    name="email"
+                    type="email"
+                    class="ps-input"
+                    placeholder="you@example.com"
+                    autocomplete="email"
+                    required
+                   value="<%= (activePage === 'register' && typeof values !== 'undefined' && values.email) ? values.email : '' %>" />
+                  <p id="signup-email-error" class="ps-field-error" hidden></p>
+                </div>
+
+                <!-- Row 5: Password and Confirmation grouped together -->
+                <div class="ps-field-grid-2">
+                  <div class="ps-field-group">
+                    <div class="ps-field-label-row">
+                      <label for="signup-password" class="ps-field-label">Password</label>
+                    </div>
+                    <div class="ps-input-wrap">
+                      <input
+                        id="signup-password"
+                        name="password"
+                        type="password"
+                        class="ps-input ps-input-has-toggle"
+                        placeholder="Create password"
+                        autocomplete="new-password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        class="ps-pwd-toggle"
+                        data-password-toggle="signup-password"
+                        aria-label="Toggle password visibility"
+                        aria-pressed="false"
+                      >
+                        Show
+                      </button>
+                    </div>
+                    <p id="signup-password-error" class="ps-field-error" hidden></p>
+                  </div>
+
+                  <div class="ps-field-group">
+                    <div class="ps-field-label-row">
+                      <label for="signup-confirmPassword" class="ps-field-label">
+                        Confirm password
+                      </label>
+                    </div>
+                    <div class="ps-input-wrap">
+                      <input id="signup-confirmPassword" name="passwordConfirm"
+                        type="password"
+                        class="ps-input ps-input-has-toggle"
+                        placeholder="Repeat password"
+                        autocomplete="new-password"
+                        required
+                      />
+                      <button
+                        type="button"
+                        class="ps-pwd-toggle"
+                        data-password-toggle="signup-confirmPassword"
+                        aria-label="Toggle confirm password visibility"
+                        aria-pressed="false"
+                      >
+                        Show
+                      </button>
+                    </div>
+                    <p id="signup-confirmPassword-error" class="ps-field-error" hidden></p>
+                  </div>
+                </div>
+
+                <!-- Password Requirements Checklist -->
+                <div class="ps-pwd-rules" id="signup-pwd-rules" aria-live="polite">
+                  <span class="ps-pwd-rule" data-pwd-rule="length" data-met="false">
+                    <span>·</span> 8+ characters minimum
+                  </span>
+                  <span class="ps-pwd-rule" data-pwd-rule="case" data-met="false">
+                    <span>·</span> Upper &amp; lowercase letters
+                  </span>
+                  <span class="ps-pwd-rule" data-pwd-rule="number" data-met="false">
+                    <span>·</span> At least one number
+                  </span>
+                  <span class="ps-pwd-rule" data-pwd-rule="match" data-met="false">
+                    <span>·</span> Passwords match
+                  </span>
+                </div>
+
+                <button
+                  type="submit"
+                  id="signup-submit-btn"
+                  class="ps-auth-btn-primary"
+                  data-i18n-text="signupBtn"
+                >
+                  Create my account
+                </button>
+              </form>
+
+              <div class="ps-auth-footer-Switch">
+                <span>Already have a Purslip account?</span>
+                <a href="/login" data-switch-view="login" class="ps-auth-link">
+                  Log in
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ====================================================================
+           3. FORGOT PASSWORD PAGE (/forgot-password & /auth/forgot-password)
+           Preserves existing recovery process requiring Email + CNIC
+           ==================================================================== -->
+
+<main class="ps-auth-main <%= activePage === 'forgot' ? '' : 'ps-view-hidden' %>" data-auth-page="forgot" id="ps-page-forgot">
+        <div class="ps-auth-split">
+          <aside class="ps-auth-visual-panel" aria-label="Account Recovery Information">
+            <img
+              src="/assets/frames/fallback/auth-vault-analytics.jpg"
+              alt="Purslip protected financial ledger visualization"
+              class="ps-auth-visual-bg"
+              referrerpolicy="no-referrer"
+            />
+            <div class="ps-auth-visual-scrim"></div>
+
+            <div class="ps-auth-visual-top">
+              <p class="ps-auth-visual-kicker">Ledger Identity Verification</p>
+              <h2 class="ps-auth-visual-title">
+                Regain access to your <em>financial records.</em>
+              </h2>
+              <p class="ps-auth-visual-sub">
+                To keep your household accounts, savings goals, and lending records private, Purslip
+                verifies your registered email alongside your 13-digit CNIC before issuing a
+                recovery link.
+              </p>
+            </div>
+
+            <div class="ps-auth-visual-bottom">
+              <div class="ps-dash-mini-window">
+                <div class="ps-dash-mini-topbar">
+                  <span class="ps-dash-mini-title">
+                    <span class="ps-dash-mini-title-dot" aria-hidden="true"></span>
+                    <span>Protected Household Workspace</span>
+                  </span>
+                  <span class="ps-dash-mini-accounts">2-Factor Identity Check</span>
+                </div>
+
+                <div class="ps-dash-mini-body">
+                  <div class="ps-dash-mini-kpis">
+                    <div class="ps-dash-mini-kpi">
+                      <div class="ps-dash-mini-kpi-head">
+                        <span>Protected Balances</span>
+                        <span class="ps-auth-tabular">4 Accounts</span>
+                      </div>
+                      <div class="ps-dash-mini-kpi-val">Meezan · HBL · SadaPay</div>
+                      <div class="ps-dash-mini-kpi-sub ps-dash-mini-kpi-sub-pos">
+                        Ledger records encrypted &amp; intact
+                      </div>
+                    </div>
+
+                    <div class="ps-dash-mini-kpi">
+                      <div class="ps-dash-mini-kpi-head">
+                        <span>Recovery Protocol</span>
+                        <span class="ps-auth-tabular">Email + CNIC</span>
+                      </div>
+                      <div class="ps-dash-mini-kpi-val">XXXXX-XXXXXXX-X</div>
+                      <div class="ps-dash-mini-kpi-sub ps-dash-mini-kpi-sub-copper">
+                        Matched against signup identity
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="ps-auth-ledger-preview">
+                    <div class="ps-auth-ledger-row">
+                      <span class="ps-auth-ledger-label">Verification Factor 01</span>
+                      <span class="ps-auth-ledger-val">Registered Account Email</span>
+                    </div>
+                    <div class="ps-auth-ledger-row">
+                      <span class="ps-auth-ledger-label">Verification Factor 02</span>
+                      <span class="ps-auth-ledger-val ps-auth-tabular">13-Digit CNIC Record</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <div class="ps-auth-form-col">
+            <div class="ps-auth-card">
+              <div class="ps-auth-card-header">
+                <p class="ps-auth-kicker">Password Recovery</p>
+                <h1 class="ps-auth-heading" data-i18n-html="forgotHeading">
+                  Let's get you <em>back in.</em>
+                </h1>
+                <p class="ps-auth-supporting" data-i18n-text="forgotSub">
+                  Verify your account details to recover access to your Purslip ledger.
+                </p>
+              </div>
+
+              <% if (activePage === 'forgot' && typeof errors !== 'undefined' && errors && errors.length) { %>
+                <div id="forgot-form-alert" class="ps-alert ps-alert-error" role="alert">
+                  <% errors.forEach(function(e) { %><div><%= e.msg %></div><% }) %>
+                </div>
+              <% } else if (activePage === 'forgot' && typeof errorMessages !== 'undefined' && errorMessages && errorMessages.length) { %>
+                <div id="forgot-form-alert" class="ps-alert ps-alert-error" role="alert">
+                  <% errorMessages.forEach(function(e) { %><div><%= e %></div><% }) %>
+                </div>
+              <% } else if (activePage === 'forgot' && typeof successMessages !== 'undefined' && successMessages && successMessages.length) { %>
+                <div id="forgot-form-alert" class="ps-alert ps-alert-success" role="alert">
+                  <% successMessages.forEach(function(s) { %><div><%= s %></div><% }) %>
+                </div>
+              <% } else { %>
+                <div id="forgot-form-alert" class="ps-alert ps-alert-error" role="alert" hidden></div>
+              <% } %>
+
+              <form
+                id="ps-forgot-form"
+                class="ps-auth-form"
+                action="/auth/forgot-password"
+                method="POST"
+                novalidate
+              >
+                <input type="hidden" name="_csrf" value="purslip-csrf-token-session" />
+
+                <div class="ps-field-group">
+                  <div class="ps-field-label-row">
+                    <label for="forgot-email" class="ps-field-label">Email address</label>
+                  </div>
+                  <input
+                    id="forgot-email"
+                    name="email"
+                    type="email"
+                    class="ps-input"
+                    placeholder="name@example.com"
+                    autocomplete="email"
+                    required
+                   value="<%= (activePage === 'forgot' && typeof values !== 'undefined' && values.email) ? values.email : '' %>" />
+                  <p id="forgot-email-error" class="ps-field-error" hidden></p>
+                </div>
+
+                <div class="ps-field-group">
+                  <div class="ps-field-label-row">
+                    <label for="forgot-cnic" class="ps-field-label">CNIC</label>
+                    <span class="ps-field-hint ps-auth-tabular">XXXXX-XXXXXXX-X</span>
+                  </div>
+                  <input
+                    id="forgot-cnic"
+                    name="cnic"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="15"
+                    class="ps-input ps-auth-tabular"
+                    placeholder="42101-1234567-1"
+                    data-cnic-input
+                    required
+                   value="<%= (activePage === 'forgot' && typeof values !== 'undefined' && values.cnic) ? values.cnic : '' %>" />
+                  <p id="forgot-cnic-error" class="ps-field-error" hidden></p>
+                </div>
+
+                <button
+                  type="submit"
+                  id="forgot-submit-btn"
+                  class="ps-auth-btn-primary"
+                  data-i18n-text="forgotBtn"
+                >
+                  Send reset link
+                </button>
+              </form>
+
+              <div class="ps-auth-footer-Switch">
+                <span>Remembered your password?</span>
+                <a href="/login" data-switch-view="login" class="ps-auth-link">
+                  Back to login
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ====================================================================
+           4. RESET PASSWORD PAGE (/reset-password & /auth/reset-password)
+           Supports both Active Token State and Expired/Invalid Token State
+           ==================================================================== -->
+
+<main class="ps-auth-main <%= activePage === 'reset' ? '' : 'ps-view-hidden' %>" data-auth-page="reset" id="ps-page-reset">
+        <div class="ps-auth-split">
+          <aside class="ps-auth-visual-panel" aria-label="Password Reset Security">
+            <img
+              src="/assets/frames/fallback/auth-finance-skyline.jpg"
+              alt="Purslip financial command center visualization"
+              class="ps-auth-visual-bg"
+              referrerpolicy="no-referrer"
+            />
+            <div class="ps-auth-visual-scrim"></div>
+
+            <div class="ps-auth-visual-top">
+              <p class="ps-auth-visual-kicker">Credential Update</p>
+              <h2 class="ps-auth-visual-title">
+                Set a fresh key for your <em>financial command center.</em>
+              </h2>
+              <p class="ps-auth-visual-sub">
+                Choose a strong, unique password to restore access to your accounts, monthly
+                budgets, savings goals, and transaction history.
+              </p>
+            </div>
+
+            <div class="ps-auth-visual-bottom">
+              <div class="ps-dash-mini-window">
+                <div class="ps-dash-mini-topbar">
+                  <span class="ps-dash-mini-title">
+                    <span class="ps-dash-mini-title-dot" aria-hidden="true"></span>
+                    <span>Workspace Ready for Restoration</span>
+                  </span>
+                  <span class="ps-dash-mini-accounts">All 8 Modules Intact</span>
+                </div>
+
+                <div class="ps-dash-mini-body">
+                  <div class="ps-auth-ledger-preview">
+                    <div class="ps-auth-ledger-row">
+                      <span class="ps-auth-ledger-label">Accounts &amp; Net Worth</span>
+                      <span class="ps-auth-ledger-val ps-auth-tabular">PKR 4,820,500 · Verified</span>
+                    </div>
+                    <div class="ps-auth-ledger-row">
+                      <span class="ps-auth-ledger-label">Budgets, Bills &amp; Goals</span>
+                      <span class="ps-auth-ledger-val ps-auth-ledger-pos">Synced &amp; Protected</span>
+                    </div>
+                    <div class="ps-auth-ledger-row">
+                      <span class="ps-auth-ledger-label">Preview Token State</span>
+                      <div class="ps-auth-page-switcher">
+                        <button
+                          type="button"
+                          class="ps-auth-switch-btn"
+                          data-reset-state-btn="valid"
+                          aria-pressed="true"
+                        >
+                          Valid Token
+                        </button>
+                        <button
+                          type="button"
+                          class="ps-auth-switch-btn"
+                          data-reset-state-btn="expired"
+                          aria-pressed="false"
+                        >
+                          Expired Link
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <div class="ps-auth-form-col">
+            <!-- State A: Valid Reset Token Form -->
+            <div class="ps-auth-card" id="ps-reset-valid-container">
+              <div class="ps-auth-card-header">
+                <p class="ps-auth-kicker">Reset Password</p>
+                <h1 class="ps-auth-heading" data-i18n-html="resetHeading">
+                  Choose a <em>new password.</em>
+                </h1>
+                <p class="ps-auth-supporting" data-i18n-text="resetSub">
+                  Enter and confirm your new password to restore access to your account.
+                </p>
+              </div>
+
+              <% if (activePage === 'reset' && typeof errors !== 'undefined' && errors && errors.length) { %>
+                <div id="reset-form-alert" class="ps-alert ps-alert-error" role="alert">
+                  <% errors.forEach(function(e) { %><div><%= e.msg %></div><% }) %>
+                </div>
+              <% } else if (activePage === 'reset' && typeof errorMessages !== 'undefined' && errorMessages && errorMessages.length) { %>
+                <div id="reset-form-alert" class="ps-alert ps-alert-error" role="alert">
+                  <% errorMessages.forEach(function(e) { %><div><%= e %></div><% }) %>
+                </div>
+              <% } else { %>
+                <div id="reset-form-alert" class="ps-alert ps-alert-error" role="alert" hidden></div>
+              <% } %>
+
+              <form
+                id="ps-reset-form"
+                class="ps-auth-form"
+                action="/auth/reset-password/<%= typeof token !== 'undefined' ? token : '' %>"
+                method="POST"
+                novalidate
+              >
+                <input type="hidden" name="_csrf" value="purslip-csrf-token-session" />
+                <input type="hidden" name="token" value="<%= typeof token !== 'undefined' ? token : '' %>" />
+
+                <div class="ps-field-group">
+                  <div class="ps-field-label-row">
+                    <label for="reset-password" class="ps-field-label">New password</label>
+                  </div>
+                  <div class="ps-input-wrap">
+                    <input
+                      id="reset-password"
+                      name="password"
+                      type="password"
+                      class="ps-input ps-input-has-toggle"
+                      placeholder="Enter new password"
+                      autocomplete="new-password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      class="ps-pwd-toggle"
+                      data-password-toggle="reset-password"
+                      aria-label="Toggle new password visibility"
+                      aria-pressed="false"
+                    >
+                      Show
+                    </button>
+                  </div>
+                  <p id="reset-password-error" class="ps-field-error" hidden></p>
+                </div>
+
+                <div class="ps-field-group">
+                  <div class="ps-field-label-row">
+                    <label for="reset-confirmPassword" class="ps-field-label">
+                      Confirm new password
+                    </label>
+                  </div>
+                  <div class="ps-input-wrap">
+                    <input id="reset-confirmPassword" name="passwordConfirm"
+                      type="password"
+                      class="ps-input ps-input-has-toggle"
+                      placeholder="Repeat new password"
+                      autocomplete="new-password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      class="ps-pwd-toggle"
+                      data-password-toggle="reset-confirmPassword"
+                      aria-label="Toggle confirm new password visibility"
+                      aria-pressed="false"
+                    >
+                      Show
+                    </button>
+                  </div>
+                  <p id="reset-confirmPassword-error" class="ps-field-error" hidden></p>
+                </div>
+
+                <div class="ps-pwd-rules" id="reset-pwd-rules" aria-live="polite">
+                  <span class="ps-pwd-rule" data-pwd-rule="length" data-met="false">
+                    <span>·</span> 8+ characters minimum
+                  </span>
+                  <span class="ps-pwd-rule" data-pwd-rule="case" data-met="false">
+                    <span>·</span> Upper &amp; lowercase letters
+                  </span>
+                  <span class="ps-pwd-rule" data-pwd-rule="number" data-met="false">
+                    <span>·</span> At least one number
+                  </span>
+                  <span class="ps-pwd-rule" data-pwd-rule="match" data-met="false">
+                    <span>·</span> Passwords match
+                  </span>
+                </div>
+
+                <button
+                  type="submit"
+                  id="reset-submit-btn"
+                  class="ps-auth-btn-primary"
+                  data-i18n-text="resetBtn"
+                >
+                  Reset password
+                </button>
+              </form>
+
+              <div class="ps-auth-footer-Switch">
+                <a href="/login" data-switch-view="login" class="ps-auth-link">
+                  Back to login
+                </a>
+              </div>
+            </div>
+
+            <!-- State B: Expired or Invalid Reset Link State -->
+            <div class="ps-auth-card" id="ps-reset-expired-container" hidden>
+              <div class="ps-auth-card-header">
+                <p class="ps-auth-kicker">Link Expired or Used</p>
+                <h2 class="ps-auth-heading">
+                  This recovery link is <em>no longer active.</em>
+                </h2>
+                <p class="ps-auth-supporting">
+                  Password reset links expire automatically after a limited window or once they have
+                  been used. You can request a fresh recovery link below.
+                </p>
+              </div>
+
+              <div class="ps-error-actions">
+                <a href="/forgot-password" data-switch-view="forgot" class="ps-auth-btn-primary">
+                  Request a new reset link
+                </a>
+                <a href="/login" data-switch-view="login" class="ps-auth-btn-secondary">
+                  Back to login
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ====================================================================
+           5. CUSTOM 404 — PAGE NOT FOUND (/404)
+           ==================================================================== -->
+
+<main class="ps-auth-main <%= activePage === '404' ? '' : 'ps-view-hidden' %>" data-auth-page="404" id="ps-page-404">
+        <div class="ps-error-stage">
+          <div class="ps-error-card">
+            <div class="ps-error-illustration" aria-hidden="true">
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="#C58F71" stroke-width="1.6">
+                <circle cx="32" cy="32" r="24" stroke-opacity="0.35" stroke-dasharray="4 4" />
+                <ellipse cx="32" cy="32" rx="24" ry="10" transform="rotate(-24 32 32)" />
+                <circle cx="32" cy="32" r="4" fill="#C58F71" />
+                <path d="M20 44L44 20" stroke="#C14C32" stroke-width="1.8" />
+              </svg>
+            </div>
+
+            <span class="ps-error-code">ERROR 404 · UNMAPPED LEDGER ROUTE</span>
+            <h1 class="ps-auth-heading" data-i18n-html="err404Heading">
+              This page seems to have <em>wandered off.</em>
+            </h1>
+            <p class="ps-auth-supporting" data-i18n-text="err404Sub">
+              The page you're looking for isn't where it should be.
+            </p>
+
+            <div class="ps-error-actions">
+              <a href="/" data-switch-view="landing" class="ps-auth-btn-primary">
+                Back to Purslip
+              </a>
+              <a href="/dashboard" data-route="dashboard" class="ps-auth-btn-secondary">
+                Go to dashboard
+              </a>
+            </div>
+
+            <div class="ps-error-ledger-strip">
+              <span class="ps-error-ledger-status">
+                <span class="ps-error-status-dot" aria-hidden="true"></span>
+                <span>LEDGER STATUS: OPERATIONAL</span>
+              </span>
+              <span>Accounts, budgets &amp; balances remain untouched</span>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ====================================================================
+           6. CUSTOM 500 — INTERNAL SERVER ERROR (/500)
+           Never exposes stack traces, DB errors, paths, or sensitive tokens
+           ==================================================================== -->
+
+<main class="ps-auth-main <%= activePage === '500' ? '' : 'ps-view-hidden' %>" data-auth-page="500" id="ps-page-500">
+        <div class="ps-error-stage">
+          <div class="ps-error-card">
+            <div class="ps-error-illustration" aria-hidden="true">
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="#C58F71" stroke-width="1.6">
+                <rect x="14" y="14" width="36" height="36" rx="8" stroke-opacity="0.4" />
+                <path d="M22 32h8l4-8 4 16 4-8h8" stroke="#C14C32" stroke-width="2" />
+              </svg>
+            </div>
+
+            <span class="ps-error-code">ERROR 500 · TEMPORARY SERVICE INTERRUPTION</span>
+            <h1 class="ps-auth-heading" data-i18n-html="err500Heading">
+              Something didn't go <em>as planned.</em>
+            </h1>
+            <p class="ps-auth-supporting" data-i18n-text="err500Sub">
+              We couldn't complete your request right now. Please try again.
+            </p>
+
+            <p id="ps-500-retry-status" class="ps-alert ps-alert-success" hidden></p>
+
+            <div class="ps-error-actions">
+              <a href="<%= typeof retryPath !== 'undefined' && retryPath ? retryPath : '/' %>" id="ps-500-retry-btn" class="ps-auth-btn-primary">Try again</a>
+              <a href="/" data-switch-view="landing" class="ps-auth-btn-secondary">
+                Back to Purslip
+              </a>
+            </div>
+
+            <div class="ps-error-ledger-strip">
+              <span class="ps-error-ledger-status">
+                <span class="ps-error-status-dot" aria-hidden="true"></span>
+                <span>DATA INTEGRITY: PRESERVED</span>
+              </span>
+              <span>Your financial records and balances are safe</span>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ====================================================================
+           7. CUSTOM 403 / SESSION OR CSRF VERIFICATION ERROR (/403)
+           ==================================================================== -->
+
+<main class="ps-auth-main <%= activePage === '403' ? '' : 'ps-view-hidden' %>" data-auth-page="403" id="ps-page-403">
+        <div class="ps-error-stage">
+          <div class="ps-error-card">
+            <div class="ps-error-illustration" aria-hidden="true">
+              <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="#C58F71" stroke-width="1.6">
+                <rect x="18" y="28" width="28" height="22" rx="5" />
+                <path d="M24 28v-6a8 8 0 0 1 16 0v6" />
+                <circle cx="32" cy="39" r="2.5" fill="#C58F71" />
+              </svg>
+            </div>
+
+            <span class="ps-error-code">STATUS 403 · SESSION VERIFICATION</span>
+            <h1 class="ps-auth-heading">
+              Your session needs a <em>quick refresh.</em>
+            </h1>
+            <p class="ps-auth-supporting">
+              This request expired or could not be verified. Please return to login or reload the
+              page to continue safely.
+            </p>
+
+            <div class="ps-error-actions">
+              <a href="/login" data-switch-view="login" class="ps-auth-btn-primary">
+                Return to login
+              </a>
+              <a href="/" data-switch-view="landing" class="ps-auth-btn-secondary">
+                Back to Purslip
+              </a>
+            </div>
+
+            <div class="ps-error-ledger-strip">
+              <span class="ps-error-ledger-status">
+                <span class="ps-error-status-dot" aria-hidden="true"></span>
+                <span>CSRF &amp; SESSION SHIELD: ACTIVE</span>
+              </span>
+              <span>Unverified requests are blocked to protect your ledger</span>
+            </div>
+          </div>
+        </div>
+      </main>
+
+
+    </div>
+    <script src="/js/purslip-auth.js" defer></script>
+  </body>
+</html>

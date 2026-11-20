@@ -75,6 +75,8 @@ app.use(
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
         'script-src': ["'self'"],
         'img-src': ["'self'", 'data:'],
+        'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
       },
     },
   })
@@ -190,8 +192,36 @@ app.get('/login', (req: Request, res: Response) => {
   res.redirect(302, '/auth/login');
 });
 
+app.get('/signup', (req: Request, res: Response) => {
+  res.redirect(302, '/auth/signup');
+});
+
 app.get('/register', (req: Request, res: Response) => {
   res.redirect(302, '/auth/signup');
+});
+
+app.get('/forgot-password', (req: Request, res: Response) => {
+  res.redirect(302, '/auth/forgot-password');
+});
+
+app.get('/reset-password', (req: Request, res: Response) => {
+  res.redirect(302, '/auth/reset-password');
+});
+
+app.get('/reset-password/:token', (req: Request, res: Response) => {
+  res.redirect(302, `/auth/reset-password/${req.params.token}`);
+});
+
+app.get('/404', (req: Request, res: Response) => {
+  res.status(404).render('errors/404', { title: 'Not found', currentPath: '/404' });
+});
+
+app.get('/500', (req: Request, res: Response) => {
+  res.status(500).render('errors/500', { title: 'Something went wrong', retryPath: '/' });
+});
+
+app.get('/403', (req: Request, res: Response) => {
+  res.status(403).render('errors/403', { title: 'Session verification' });
 });
 
 app.get('/dashboard', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
